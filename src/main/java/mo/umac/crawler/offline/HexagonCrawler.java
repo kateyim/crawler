@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 
 import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.metadata.AQuery;
-import mo.umac.metadata.DefaultValues;
 import mo.umac.metadata.ResultSet;
 import mo.umac.rtree.MyRTree;
 import mo.umac.spatial.Circle;
@@ -46,52 +46,44 @@ public class HexagonCrawler extends OfflineStrategy {
 	 * java.lang.String, com.vividsolutions.jts.geom.Envelope)
 	 */
 	@Override
-	public void crawl(String state, int category, String query, Envelope envelopeStateECEF) {
+	public void crawl(String state, int category, String query, Envelope envelope) {
 		if (logger.isDebugEnabled()) {
 			logger.info("------------crawling---------");
-			logger.info(envelopeStateECEF.toString());
+			logger.info(envelope.toString());
 		}
 		// finished crawling
-		if (envelopeStateECEF == null) {
+		if (envelope == null) {
 			return;
 		}
 		boolean heuristic = true;
 		while (heuristic) {
 			// issue a query randomly at the envelope
-			Coordinate start = random(envelopeStateECEF);
+			Coordinate start = random(envelope);
 			if (!coveredPoint(CrawlerStrategy.rtreeRectangles, start)) {
 				Queue<Coordinate> queue = new LinkedList<Coordinate>();
 				queue.add(start);
 				beginAClique(state, category, query, queue);
+			} else {
+				continue;
 			}
 			//
 			heuristic = continueHeuristic(CrawlerStrategy.rtreeRectangles);
 		}
-		// TODO fill the gaps with upper bound algorithm
+		// fill the gaps with upper bound algorithm
 		boolean finished = false;
 		while (!finished) {
-			Coordinate start = random(envelopeStateECEF);
+			Coordinate start = random(envelope);
 			if (!coveredPoint(CrawlerStrategy.rtreeRectangles, start)) {
 				Envelope aRectangle = expand(state, category, query, start);
 				// SliceCrawler
 				SliceCrawler sliceCrawler = new SliceCrawler();
 				sliceCrawler.crawl(state, category, query, aRectangle);
+			} else {
+				continue;
 			}
 			//
-			heuristic = covered(CrawlerStrategy.rtreeRectangles, envelopeStateECEF);
+			finished = covered(envelope);
 		}
-	}
-
-	/**
-	 * Judge whether is region is fully covered
-	 * 
-	 * @param rtreeRectangles
-	 * @param envelopeStateECEF
-	 * @return
-	 */
-	private boolean covered(MyRTree rtreeRectangles, Envelope envelope) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	/**
@@ -117,8 +109,7 @@ public class HexagonCrawler extends OfflineStrategy {
 	 * @return
 	 */
 	private boolean coveredPoint(MyRTree rtreeRectangles, Coordinate start) {
-		rtreeRectangles.contains(start);
-		return false;
+		return rtreeRectangles.contains(start);
 	}
 
 	/**
@@ -129,8 +120,15 @@ public class HexagonCrawler extends OfflineStrategy {
 	 * @return
 	 */
 	private boolean continueHeuristic(MyRTree rtreeRectangles) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean continueHeuristic = false;
+		// TODO change to: the covered rectangles have covered half of the x-axis
+
+		int num = rtreeRectangles.size();
+		if (num > 10) {
+			continueHeuristic = true;
+		}
+
+		return continueHeuristic;
 	}
 
 	/**
@@ -140,8 +138,16 @@ public class HexagonCrawler extends OfflineStrategy {
 	 * @return
 	 */
 	private Coordinate random(Envelope envelope) {
-		Coordinate p = null;
-		double height = envelope.getHeight();
+		double xMin = envelope.getMinX();
+		double yMin = envelope.getMinY();
+		double xMax = envelope.getMaxX();
+		double yMax = envelope.getMaxY();
+
+		Random r = new Random();
+		double x = xMin + (xMax - xMin) * r.nextDouble();
+		double y = yMin + (yMax - yMin) * r.nextDouble();
+
+		Coordinate p = new Coordinate(x, y);
 
 		return p;
 	}
@@ -193,7 +199,7 @@ public class HexagonCrawler extends OfflineStrategy {
 	 * @return
 	 */
 	private Envelope computeCoveredRegion(List circleList, Coordinate center) {
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
@@ -223,8 +229,41 @@ public class HexagonCrawler extends OfflineStrategy {
 	 * @param center
 	 * @return
 	 */
-	private List aroundPoints(Coordinate center, double radius) {
+	private List aroundPoints(Coordinate center, double r) {
 		List nextCenters = new ArrayList<Coordinate>();
+
+		double x0 = center.x;
+		double y0 = center.y;
+		//
+		double x1 = x0 - r;
+		double y1 = y0;
+		Coordinate c1 = new Coordinate(x1, y1);
+		nextCenters.add(c1);
+		//
+		double x2 = x0 - r / 2;
+		double y2 = y0 + Math.sqrt(3) / 2 * r;
+		Coordinate c2 = new Coordinate(x2, y2);
+		nextCenters.add(c2);
+		//
+		double x3 = x0 + r / 2;
+		double y3 = y0 + Math.sqrt(3) / 2 * r;
+		Coordinate c3 = new Coordinate(x3, y3);
+		nextCenters.add(c3);
+		//
+		double x4 = x0 - r;
+		double y4 = y0;
+		Coordinate c4 = new Coordinate(x4, y4);
+		nextCenters.add(c4);
+		//
+		double x5 = x0 + r / 2;
+		double y5 = y0 - Math.sqrt(3) / 2 * r;
+		Coordinate c5 = new Coordinate(x5, y5);
+		nextCenters.add(c5);
+		//
+		double x6 = x0 - r / 2;
+		double y6 = y0 - Math.sqrt(3) / 2 * r;
+		Coordinate c6 = new Coordinate(x6, y6);
+		nextCenters.add(c6);
 
 		return nextCenters;
 	}

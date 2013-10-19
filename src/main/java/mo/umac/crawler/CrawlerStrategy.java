@@ -108,5 +108,9 @@ public abstract class CrawlerStrategy {
 		}
 		return listEnvelopeStates;
 	}
+	
+	public boolean covered(Envelope envelopeStateECEF) {
+		return CrawlerStrategy.rtreeRectangles.contains(envelopeStateECEF);
+	}
 
 }

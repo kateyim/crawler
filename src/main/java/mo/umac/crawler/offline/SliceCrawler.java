@@ -342,10 +342,6 @@ public class SliceCrawler extends OfflineStrategy {
 
 	}
 
-	private boolean covered(Envelope envelopeStateECEF) {
-		return CrawlerStrategy.rtreeRectangles.contains(envelopeStateECEF);
-	}
-
 	public class CircleComparable implements Comparator<Circle> {
 		@Override
 		public int compare(Circle circle1, Circle circle2) {
