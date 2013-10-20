@@ -32,6 +32,9 @@ TODO list
 
 
 * implement the heuristic algorithm, how much it exceed the upper bound algorithm?
+- stop issuing duplicate queries
+- small circle: how to cover?
+- should I use a stack instead of a queue? 
 
 
 

@@ -1,4 +1,4 @@
-package delaunay;
+package mo.umac.delunary;
 
 /*
  * Copyright (c) 2005, 2007 by L. Paul Chew.

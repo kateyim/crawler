@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,6 +15,7 @@ import java.util.Random;
 import java.util.Set;
 
 import mo.umac.crawler.CrawlerStrategy;
+import mo.umac.crawler.offline.HexagonCrawler;
 import mo.umac.crawler.offline.OfflineStrategy;
 import mo.umac.crawler.offline.SliceCrawler;
 import mo.umac.db.DBInMemory;
@@ -29,7 +31,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
-public class SlideCrawlerTest extends SliceCrawler {
+public class CrawlerTest extends CrawlerStrategy/* extends SliceCrawler */{
 
 	public static String LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
 
@@ -37,8 +39,8 @@ public class SlideCrawlerTest extends SliceCrawler {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		DOMConfigurator.configure(SlideCrawlerTest.LOG_PROPERTY_PATH);
-		SlideCrawlerTest test = new SlideCrawlerTest();
+		DOMConfigurator.configure(CrawlerTest.LOG_PROPERTY_PATH);
+		CrawlerTest test = new CrawlerTest();
 		PaintShapes.painting = true;
 		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		test.calling();
@@ -49,7 +51,8 @@ public class SlideCrawlerTest extends SliceCrawler {
 		/************************* Change these lines *************************/
 		CrawlerStrategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 		// YahooLocalCrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
-		SliceCrawler sliceCrawler = new SliceCrawler();
+		// SliceCrawler crawler = new SliceCrawler();
+		HexagonCrawler crawler = new HexagonCrawler();
 		String state = "NY";
 		int categoryID = 96926236;
 		String category = "Restaurants";
@@ -58,7 +61,7 @@ public class SlideCrawlerTest extends SliceCrawler {
 		String testSource = "../crawler-data/yahoolocal-h2/test/source";
 		String testTarget = "../crawler-data/yahoolocal-h2/test/target";
 		//
-		int numItems = 50;
+		int numItems = 200;
 		int topK = 10;
 		CrawlerStrategy.MAX_TOTAL_RESULTS_RETURNED = topK;
 		//
@@ -67,8 +70,8 @@ public class SlideCrawlerTest extends SliceCrawler {
 		// source database
 		CrawlerStrategy.dbExternal = new H2DB(testSource, testTarget);
 		// generate dataset
-		List<Coordinate> points = generateSimpleCase(testSource, category, state, numItems);
-		exportToH2(points, testSource, category, state);
+		// List<Coordinate> points = generateSimpleCase(testSource, category, state, numItems);
+		// exportToH2(points, testSource, category, state);
 		//
 		CrawlerStrategy.dbInMemory = new DBInMemory();
 		DBInMemory.pois = readFromGeneratedDB(testSource);
@@ -86,7 +89,7 @@ public class SlideCrawlerTest extends SliceCrawler {
 		// target database
 		CrawlerStrategy.dbExternal.createTables(testTarget);
 
-		sliceCrawler.crawl(state, categoryID, category, envelopeECEF);
+		crawler.crawl(state, categoryID, category, envelopeECEF);
 
 		logger.info("before updating");
 		printExternalDB();
@@ -288,6 +291,12 @@ public class SlideCrawlerTest extends SliceCrawler {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
+	}
+
+	@Override
+	protected void crawlByCategoriesStates(LinkedList<Envelope> listEnvelopeStates, List<String> listCategoryNames, LinkedList<String> listNameStates, HashMap<Integer, String> categoryIDMap) {
+		// TODO Auto-generated method stub
 
 	}
 

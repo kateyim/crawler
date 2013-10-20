@@ -3,6 +3,7 @@
  */
 package mo.umac.crawler.offline;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Random;
 import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSet;
+import mo.umac.paint.PaintShapes;
 import mo.umac.rtree.MyRTree;
 import mo.umac.spatial.Circle;
 
@@ -58,7 +60,9 @@ public class HexagonCrawler extends OfflineStrategy {
 		boolean heuristic = true;
 		while (heuristic) {
 			// issue a query randomly at the envelope
-			Coordinate start = random(envelope);
+			// Coordinate start = random(envelope);
+			Coordinate start = envelope.centre();
+
 			if (!coveredPoint(CrawlerStrategy.rtreeRectangles, start)) {
 				Queue<Coordinate> queue = new LinkedList<Coordinate>();
 				queue.add(start);
@@ -121,8 +125,7 @@ public class HexagonCrawler extends OfflineStrategy {
 	 */
 	private boolean continueHeuristic(MyRTree rtreeRectangles) {
 		boolean continueHeuristic = false;
-		// TODO change to: the covered rectangles have covered half of the x-axis
-
+		// TODO next time: change to: the covered rectangles have covered half of the x-axis
 		int num = rtreeRectangles.size();
 		if (num > 10) {
 			continueHeuristic = true;
@@ -162,6 +165,14 @@ public class HexagonCrawler extends OfflineStrategy {
 		Coordinate center = queue.poll();
 		ResultSet resultSet = oneQueryProcedure(state, category, query, center);
 		Circle aCircle = resultSet.getCircles().get(0);
+
+		if (logger.isDebugEnabled() && PaintShapes.painting) {
+			PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+			PaintShapes.paint.addCircle(aCircle);
+			PaintShapes.paint.myRepaint();
+		}
+		Envelope regionRectangle = computeCoveredRegion(aCircle);
+		CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++, regionRectangle);
 		circleList.add(aCircle);
 		double radius = aCircle.getRadius();
 		double radiusAlpha = radius * alpha;
@@ -170,37 +181,78 @@ public class HexagonCrawler extends OfflineStrategy {
 		// cover the whole smaller hexagon
 		double maxRadius = (Math.sqrt(3) + 1) * radiusAlpha;
 		//
-		List nextCenters = aroundPoints(center, radiusAlpha);
+		List<Coordinate> nextCenters = aroundPoints(center, radiusAlpha);
 		queue.addAll(nextCenters);
+
+		if (logger.isDebugEnabled() && PaintShapes.painting) {
+			PaintShapes.paint.color = Color.RED;
+			for (int i = 0; i < nextCenters.size(); i++) {
+				PaintShapes.paint.addPoint(nextCenters.get(i));
+			}
+			PaintShapes.paint.myRepaint();
+		}
+
 		// deal with other points
 		while (!queue.isEmpty()) {
 			Coordinate coordinate = queue.poll();
 			resultSet = oneQueryProcedure(state, category, query, coordinate);
 			aCircle = resultSet.getCircles().get(0);
+
+			if (logger.isDebugEnabled() && PaintShapes.painting) {
+				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+				PaintShapes.paint.addCircle(aCircle);
+				PaintShapes.paint.myRepaint();
+			}
+
+			regionRectangle = computeCoveredRegion(aCircle);
+
+			// if (logger.isDebugEnabled() && PaintShapes.painting) {
+			// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			// PaintShapes.paint.addRectangle(regionRectangle);
+			// PaintShapes.paint.myRepaint();
+			// }
+
+			CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++, regionRectangle);
 			circleList.add(aCircle);
 			radius = aCircle.getRadius();
 			//
 			if (radius < minRadius && radius > maxRadius) {
-				Envelope regionRectangle = computeCoveredRegion(circleList, center);
-				CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++, regionRectangle);
+				// Envelope regionRectangle = computeCoveredRegion(circleList, center);
+				// CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++, regionRectangle);
 				break;
 			}
 			nextCenters = aroundPoints(coordinate, radiusAlpha);
+
+			if (logger.isDebugEnabled() && PaintShapes.painting) {
+				PaintShapes.paint.color = Color.RED;
+				for (int i = 0; i < nextCenters.size(); i++) {
+					PaintShapes.paint.addPoint(nextCenters.get(i));
+				}
+				PaintShapes.paint.myRepaint();
+			}
+
 			queue.addAll(nextCenters);
 		}
 
 	}
 
 	/**
-	 * Compute the covered rectangle from a set of circles and a center
+	 * Compute the covered rectangle of a circle
 	 * 
-	 * @param circleList
-	 * @param center
+	 * @param aCircle
 	 * @return
 	 */
-	private Envelope computeCoveredRegion(List circleList, Coordinate center) {
+	private Envelope computeCoveredRegion(Circle aCircle) {
+		Coordinate center = aCircle.getCenter();
+		double radius = aCircle.getRadius();
+		double width = radius / Math.sqrt(2);
+		double x1 = center.x - width;
+		double x2 = center.x + width;
+		double y1 = center.y - width;
+		double y2 = center.y + width;
 
-		return null;
+		Envelope coveredEnvelope = new Envelope(x1, x2, y1, y2);
+		return coveredEnvelope;
 	}
 
 	/**
@@ -229,8 +281,8 @@ public class HexagonCrawler extends OfflineStrategy {
 	 * @param center
 	 * @return
 	 */
-	private List aroundPoints(Coordinate center, double r) {
-		List nextCenters = new ArrayList<Coordinate>();
+	private List<Coordinate> sixVertices(Coordinate center, double r) {
+		List<Coordinate> nextCenters = new ArrayList<Coordinate>();
 
 		double x0 = center.x;
 		double y0 = center.y;
@@ -262,6 +314,45 @@ public class HexagonCrawler extends OfflineStrategy {
 		//
 		double x6 = x0 - r / 2;
 		double y6 = y0 - Math.sqrt(3) / 2 * r;
+		Coordinate c6 = new Coordinate(x6, y6);
+		nextCenters.add(c6);
+
+		return nextCenters;
+	}
+
+	private List<Coordinate> aroundPoints(Coordinate center, double r) {
+		List<Coordinate> nextCenters = new ArrayList<Coordinate>();
+
+		double x0 = center.x;
+		double y0 = center.y;
+		//
+		double x1 = x0;
+		double y1 = y0 + Math.sqrt(3) * r;
+		Coordinate c1 = new Coordinate(x1, y1);
+		nextCenters.add(c1);
+		//
+		double x2 = x0 + Math.sqrt(3) * r;
+		double y2 = y0 + r;
+		Coordinate c2 = new Coordinate(x2, y2);
+		nextCenters.add(c2);
+		//
+		double x3 = x0 + Math.sqrt(3) * r;
+		double y3 = y0 - r;
+		Coordinate c3 = new Coordinate(x3, y3);
+		nextCenters.add(c3);
+		//
+		double x4 = x0;
+		double y4 = y0 - Math.sqrt(3) * r;
+		Coordinate c4 = new Coordinate(x4, y4);
+		nextCenters.add(c4);
+		//
+		double x5 = x0 - Math.sqrt(3) * r;
+		double y5 = y0 - r;
+		Coordinate c5 = new Coordinate(x5, y5);
+		nextCenters.add(c5);
+		//
+		double x6 = x0 - Math.sqrt(3) * r;
+		double y6 = y0 + r;
 		Coordinate c6 = new Coordinate(x6, y6);
 		nextCenters.add(c6);
 
