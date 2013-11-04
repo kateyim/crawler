@@ -5,8 +5,8 @@ import java.util.List;
 
 import mo.umac.crawler.offline.SliceCrawler;
 import mo.umac.crawler.online.OnlineStrategy;
+import mo.umac.external.uscensus.UScensusData;
 import mo.umac.paint.PaintShapes;
-import mo.umac.spatial.UScensusData;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;

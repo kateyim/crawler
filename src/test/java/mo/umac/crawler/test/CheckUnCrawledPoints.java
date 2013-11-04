@@ -22,9 +22,9 @@ import java.util.TreeSet;
 
 import mo.umac.crawler.MainCrawler;
 import mo.umac.db.H2DB;
+import mo.umac.external.uscensus.UScensusData;
 import mo.umac.spatial.ECEFLLA;
 import mo.umac.spatial.GeoOperator;
-import mo.umac.spatial.UScensusData;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;

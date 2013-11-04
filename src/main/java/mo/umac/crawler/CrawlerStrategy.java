@@ -9,8 +9,8 @@ import java.util.Set;
 import mo.umac.crawler.offline.BlockCrawler;
 import mo.umac.db.DBExternal;
 import mo.umac.db.DBInMemory;
+import mo.umac.external.uscensus.UScensusData;
 import mo.umac.rtree.MyRTree;
-import mo.umac.spatial.UScensusData;
 import mo.umac.utils.FileOperator;
 
 import org.apache.log4j.Logger;
