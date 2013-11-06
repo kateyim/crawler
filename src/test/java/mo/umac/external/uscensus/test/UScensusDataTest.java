@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -18,23 +19,30 @@ import org.apache.log4j.xml.DOMConfigurator;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
+import org.geotools.data.shapefile.ShpFiles;
 import org.geotools.data.shapefile.dbf.DbaseFileReader;
+import org.geotools.data.shapefile.shp.ShapefileException;
+import org.geotools.data.shapefile.shp.ShapefileReader;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 public class UScensusDataTest {
 
 	public static Logger logger = Logger.getLogger(UScensusDataTest.class.getName());
+
+	public String roadFile = "../data-map/tl_2013_36_prisecroads.zip";
 
 	public static void main(String[] args) {
 		DOMConfigurator.configure(MainCrawler.LOG_PROPERTY_PATH);
 		UScensusDataTest test = new UScensusDataTest();
 		// test.testContaining(UScensusData.STATE_SHP_FILE_NAME,
 		// UScensusData.STATE_DBF_FILE_NAME);
-		test.getEnvelope();
+		// test.getEnvelope();
+		test.readRoad();
 	}
 
 	public void testMBR() {
@@ -44,41 +52,60 @@ public class UScensusDataTest {
 	public void testDBF() {
 		LinkedList<String> nameStates = (LinkedList<String>) UScensusData.stateName(UScensusData.STATE_DBF_FILE_NAME);
 	}
-	
-	public void testPopulation(){
-		
+
+	/**
+	 * Parse .shp files of roads
+	 */
+	public void readRoad() {
+		try {
+			ShpFiles shpFiles = new ShpFiles(roadFile);
+			GeometryFactory gf = new GeometryFactory();
+			ShapefileReader r = new ShapefileReader(shpFiles, true, true, gf);
+			while (r.hasNext()) {
+				Geometry shape = (Geometry) r.nextRecord().shape();
+				shape.
+			}
+			r.close();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (ShapefileException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
-	
-	public void testing(){
+
+	public void testing() {
 		File file = new File("mayshapefile.shp");
 
 		try {
-		  Map connect = new HashMap();
-		  connect.put("url", file.toURL());
+			Map connect = new HashMap();
+			connect.put("url", file.toURL());
 
-		  DataStore dataStore = DataStoreFinder.getDataStore(connect);
-		  String[] typeNames = dataStore.getTypeNames();
-		  String typeName = typeNames[0];
+			DataStore dataStore = DataStoreFinder.getDataStore(connect);
+			String[] typeNames = dataStore.getTypeNames();
+			String typeName = typeNames[0];
 
-		  System.out.println("Reading content " + typeName);
+			System.out.println("Reading content " + typeName);
 
-		  FeatureSource featureSource = dataStore.getFeatureSource(typeName);
-		  FeatureCollection collection = featureSource.getFeatures();
-		  FeatureIterator iterator = collection.features();
+			FeatureSource featureSource = dataStore.getFeatureSource(typeName);
+			FeatureCollection collection = featureSource.getFeatures();
+			FeatureIterator iterator = collection.features();
 
+			try {
+				while (iterator.hasNext()) {
+					// Feature feature = iterator.next();
+					// Geometry sourceGeometry = feature.getDefaultGeometry();
+				}
+			} finally {
+				iterator.close();
+			}
 
-		  try {
-		    while (iterator.hasNext()) {
-		      Feature feature = iterator.next();
-		      Geometry sourceGeometry = feature.getDefaultGeometry();
-		    }
-		  } finally {
-		    iterator.close();
-		  }
-
-		} catch (Throwable e) {}
+		} catch (Throwable e) {
+		}
 	}
-
 
 	public Envelope getEnvelope() {
 		Envelope envelope = null;
@@ -148,6 +175,5 @@ public class UScensusDataTest {
 		}
 		return stateNameList;
 	}
-	
 
 }
