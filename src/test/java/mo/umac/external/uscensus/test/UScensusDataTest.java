@@ -63,7 +63,7 @@ public class UScensusDataTest {
 			ShapefileReader r = new ShapefileReader(shpFiles, true, true, gf);
 			while (r.hasNext()) {
 				Geometry shape = (Geometry) r.nextRecord().shape();
-				shape.
+				// FIXME read the file line by line
 			}
 			r.close();
 		} catch (MalformedURLException e) {

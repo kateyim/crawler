@@ -36,5 +36,6 @@ TODO list
 - small circle: how to cover?
 - should I use a stack instead of a queue? 
 
-
+- read the .shp file line by line in src/test/java/mo.umac.external.uscensus.test.UScensusDataTest.java
+- parse glass website
 
