@@ -14,11 +14,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import mo.umac.crawler.online.OnlineStrategy;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -110,6 +110,17 @@ public class FileOperator {
 		return list;
 	}
 
+	/**
+	 * @param folderPath
+	 * @return
+	 */
+	public static List traverseFolder(String folderPath, String extension) {
+		List<File> list = new ArrayList<File>();
+		File folder = new File(folderPath);
+		recursivelyTraverse(folder, list, extension);
+		return list;
+	}
+
 	private static void recursivelyTraverse(File file, List list) {
 		if (file.isDirectory()) {
 			File[] files = file.listFiles();
@@ -121,6 +132,26 @@ public class FileOperator {
 				list.add(file.getAbsolutePath());
 				// System.out.println(file.getName());
 				// System.out.println(file.getAbsolutePath());
+			}
+		}
+	}
+
+	private static void recursivelyTraverse(File file, List list, String extension) {
+		if (file.isDirectory()) {
+			File[] files = file.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				recursivelyTraverse(files[i], list, extension);
+			}
+		} else {
+			if (!file.getName().contains("~")) {
+				// FIXME extension test
+				String ext = FilenameUtils.getExtension(file.getName());
+				if (ext.equals(extension)) {
+					list.add(file.getAbsolutePath());
+					// System.out.println(file.getName());
+					// System.out.println(file.getAbsolutePath());
+				}
+
 			}
 		}
 	}
@@ -143,6 +174,23 @@ public class FileOperator {
 			logger.error("Error in load " + propertyFile, e);
 		}
 		return appid;
+	}
+
+	public static void printFile(String fileName) {
+		File file = new File(fileName);
+		try {
+			if (file.exists()) {
+				BufferedReader input = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)));
+				String data = null;
+				while ((data = input.readLine()) != null) {
+					System.out.println(data.toString());
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

@@ -13,6 +13,7 @@ import java.util.Map;
 
 import mo.umac.crawler.MainCrawler;
 import mo.umac.external.uscensus.UScensusData;
+import mo.umac.utils.FileOperator;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
@@ -34,7 +35,8 @@ public class UScensusDataTest {
 
 	public static Logger logger = Logger.getLogger(UScensusDataTest.class.getName());
 
-	public String roadFile = "../data-map/tl_2013_36_prisecroads.zip";
+	public String roadFolder = "../data-map/tl_2013_36_prisecroads/";
+	public String roadShpFile = "../data-map/tl_2013_40_prisecroads/tl_2013_40_prisecroads.shp";
 
 	public static void main(String[] args) {
 		DOMConfigurator.configure(MainCrawler.LOG_PROPERTY_PATH);
@@ -42,7 +44,7 @@ public class UScensusDataTest {
 		// test.testContaining(UScensusData.STATE_SHP_FILE_NAME,
 		// UScensusData.STATE_DBF_FILE_NAME);
 		// test.getEnvelope();
-		test.readRoad();
+		test.testRoad();
 	}
 
 	public void testMBR() {
@@ -53,28 +55,8 @@ public class UScensusDataTest {
 		LinkedList<String> nameStates = (LinkedList<String>) UScensusData.stateName(UScensusData.STATE_DBF_FILE_NAME);
 	}
 
-	/**
-	 * Parse .shp files of roads
-	 */
-	public void readRoad() {
-		try {
-			ShpFiles shpFiles = new ShpFiles(roadFile);
-			GeometryFactory gf = new GeometryFactory();
-			ShapefileReader r = new ShapefileReader(shpFiles, true, true, gf);
-			while (r.hasNext()) {
-				Geometry shape = (Geometry) r.nextRecord().shape();
-				// FIXME read the file line by line
-			}
-			r.close();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (ShapefileException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void testRoad() {
+		UScensusData.readRoad();
 	}
 
 	public void testing() {
