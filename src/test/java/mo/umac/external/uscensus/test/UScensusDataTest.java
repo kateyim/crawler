@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,23 +13,18 @@ import java.util.Map;
 
 import mo.umac.crawler.MainCrawler;
 import mo.umac.external.uscensus.UScensusData;
-import mo.umac.utils.FileOperator;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
-import org.geotools.data.shapefile.ShpFiles;
 import org.geotools.data.shapefile.dbf.DbaseFileReader;
-import org.geotools.data.shapefile.shp.ShapefileException;
-import org.geotools.data.shapefile.shp.ShapefileReader;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 public class UScensusDataTest {
 
@@ -44,7 +39,7 @@ public class UScensusDataTest {
 		// test.testContaining(UScensusData.STATE_SHP_FILE_NAME,
 		// UScensusData.STATE_DBF_FILE_NAME);
 		// test.getEnvelope();
-		test.testRoad();
+		test.testDensity();
 	}
 
 	public void testMBR() {
@@ -55,8 +50,51 @@ public class UScensusDataTest {
 		LinkedList<String> nameStates = (LinkedList<String>) UScensusData.stateName(UScensusData.STATE_DBF_FILE_NAME);
 	}
 
-	public void testRoad() {
-		UScensusData.readRoad();
+	public void testRoadDensity() {
+		// TODO
+		UScensusData.readRoad(roadFolder);
+	}
+
+	public void testDensity() {
+		double granularityX = 1;
+		double granularityY = 1;
+		Envelope envelope = new Envelope(4, 9, 7, 11);
+		ArrayList<Coordinate[]> roadList = generateRoadList(envelope);
+		double[][] density = UScensusData.densityList(envelope, granularityX, granularityY, roadList);
+		for (int i = 0; i < density.length; i++) {
+			double[] ds = density[i];
+			for (int j = 0; j < ds.length; j++) {
+				double d = ds[j];
+				logger.debug(d);
+
+			}
+
+		}
+	}
+
+	public ArrayList<Coordinate[]> generateRoadList(Envelope envelope) {
+		ArrayList<Coordinate[]> roadList = new ArrayList<Coordinate[]>();
+		//
+		Coordinate p1 = new Coordinate(6.8, 9.5);
+		Coordinate q11 = new Coordinate(6.2, 9.2);
+		Coordinate[] aRoad1 = { p1, q11 };
+		roadList.add(aRoad1);
+		//
+		Coordinate p2 = new Coordinate(6.5, 10.5);
+		Coordinate q21 = new Coordinate(7.5, 9.5);
+		Coordinate[] aRoad2 = { p2, q21 };
+		roadList.add(aRoad2);
+		//
+		Coordinate p3 = new Coordinate(5.2, 9.5);
+		Coordinate q31 = new Coordinate(5.3, 10.6);
+		Coordinate q32 = new Coordinate(6.3, 10.4);
+		Coordinate q33 = new Coordinate(5.7, 8.8);
+		Coordinate q34 = new Coordinate(7.4, 7.5);
+		Coordinate q35 = new Coordinate(4.5, 8.6);
+		Coordinate q36 = new Coordinate(5.5, 9.2);
+		Coordinate[] aRoad3 = { p3, q31, q32, q33, q34, q35, q36 };
+		roadList.add(aRoad3);
+		return roadList;
 	}
 
 	public void testing() {

@@ -1,0 +1,244 @@
+DEBUG (mo.umac.external.uscensus.UScensusData:199)- ----------a part of road-----------
+DEBUG (mo.umac.external.uscensus.UScensusData:200)- p: (6.8, 9.5, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:201)- pGridX = 3
+DEBUG (mo.umac.external.uscensus.UScensusData:202)- pGridY = 3
+DEBUG (mo.umac.external.uscensus.UScensusData:209)- q: (6.2, 9.2, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:210)- qGridX = 3
+DEBUG (mo.umac.external.uscensus.UScensusData:211)- qGridY = 3
+DEBUG (mo.umac.external.uscensus.UScensusData:221)- case 0: in the same grid
+DEBUG (mo.umac.external.uscensus.UScensusData:222)- p.distance(q) : (6.8, 9.5, NaN),(6.2, 9.2, NaN) = 0.6708203932499369
+DEBUG (mo.umac.external.uscensus.UScensusData:223)- density[3][3]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:199)- ----------a part of road-----------
+DEBUG (mo.umac.external.uscensus.UScensusData:200)- p: (6.5, 10.5, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:201)- pGridX = 3
+DEBUG (mo.umac.external.uscensus.UScensusData:202)- pGridY = 4
+DEBUG (mo.umac.external.uscensus.UScensusData:209)- q: (7.5, 9.5, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:210)- qGridX = 4
+DEBUG (mo.umac.external.uscensus.UScensusData:211)- qGridY = 3
+DEBUG (mo.umac.external.uscensus.UScensusData:234)- slope = -1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:264)- xDirect = 1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:265)- yDirect = -1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:266)- yLine = 10.0
+DEBUG (mo.umac.external.uscensus.UScensusData:267)- xLine = 7.0
+DEBUG (mo.umac.external.uscensus.UScensusData:268)- numCrossGridX = 1
+DEBUG (mo.umac.external.uscensus.UScensusData:269)- numCrossGridY = 1
+DEBUG (mo.umac.external.uscensus.UScensusData:334)- case 3
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (6.5, 10.5, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (7.0, 10.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[3][4]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: false
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (7.0, 10.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (7.0, 10.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[4][4]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: true
+DEBUG (mo.umac.external.uscensus.UScensusData:395)- pointOnLine2: (7.0, 10.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:396)- q = (7.5, 9.5, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:397)- density[4][3]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:199)- ----------a part of road-----------
+DEBUG (mo.umac.external.uscensus.UScensusData:200)- p: (5.2, 9.5, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:201)- pGridX = 2
+DEBUG (mo.umac.external.uscensus.UScensusData:202)- pGridY = 3
+DEBUG (mo.umac.external.uscensus.UScensusData:209)- q: (5.3, 10.6, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:210)- qGridX = 2
+DEBUG (mo.umac.external.uscensus.UScensusData:211)- qGridY = 4
+DEBUG (mo.umac.external.uscensus.UScensusData:234)- slope = 11.000000000000036
+DEBUG (mo.umac.external.uscensus.UScensusData:264)- xDirect = 1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:265)- yDirect = 1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:266)- yLine = 10.0
+DEBUG (mo.umac.external.uscensus.UScensusData:267)- xLine = 6.0
+DEBUG (mo.umac.external.uscensus.UScensusData:268)- numCrossGridX = 0
+DEBUG (mo.umac.external.uscensus.UScensusData:269)- numCrossGridY = 1
+DEBUG (mo.umac.external.uscensus.UScensusData:274)- case 1
+DEBUG (mo.umac.external.uscensus.UScensusData:285)- p: (5.2, 9.5, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:286)- pointOnLine = (5.245454545454545, 10.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:287)- density[2][3]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:298)- p: (5.245454545454545, 10.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:299)- q = (5.3, 10.6, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:300)- density[2][4]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:199)- ----------a part of road-----------
+DEBUG (mo.umac.external.uscensus.UScensusData:200)- p: (5.3, 10.6, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:201)- pGridX = 2
+DEBUG (mo.umac.external.uscensus.UScensusData:202)- pGridY = 4
+DEBUG (mo.umac.external.uscensus.UScensusData:209)- q: (6.3, 10.4, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:210)- qGridX = 3
+DEBUG (mo.umac.external.uscensus.UScensusData:211)- qGridY = 4
+DEBUG (mo.umac.external.uscensus.UScensusData:234)- slope = -0.1999999999999993
+DEBUG (mo.umac.external.uscensus.UScensusData:264)- xDirect = 1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:265)- yDirect = -1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:266)- yLine = 10.0
+DEBUG (mo.umac.external.uscensus.UScensusData:267)- xLine = 6.0
+DEBUG (mo.umac.external.uscensus.UScensusData:268)- numCrossGridX = 1
+DEBUG (mo.umac.external.uscensus.UScensusData:269)- numCrossGridY = 0
+DEBUG (mo.umac.external.uscensus.UScensusData:305)- case 2
+DEBUG (mo.umac.external.uscensus.UScensusData:315)- p: (5.3, 10.6, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:316)- pointOnLine = (6.0, 10.46, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:317)- density[2][4]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:328)- p: (6.0, 10.46, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:329)- q = (6.3, 10.4, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:330)- density[3][4]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:199)- ----------a part of road-----------
+DEBUG (mo.umac.external.uscensus.UScensusData:200)- p: (6.3, 10.4, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:201)- pGridX = 3
+DEBUG (mo.umac.external.uscensus.UScensusData:202)- pGridY = 4
+DEBUG (mo.umac.external.uscensus.UScensusData:209)- q: (5.7, 8.8, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:210)- qGridX = 2
+DEBUG (mo.umac.external.uscensus.UScensusData:211)- qGridY = 2
+DEBUG (mo.umac.external.uscensus.UScensusData:234)- slope = 2.666666666666668
+DEBUG (mo.umac.external.uscensus.UScensusData:264)- xDirect = -1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:265)- yDirect = -1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:266)- yLine = 10.0
+DEBUG (mo.umac.external.uscensus.UScensusData:267)- xLine = 6.0
+DEBUG (mo.umac.external.uscensus.UScensusData:268)- numCrossGridX = 1
+DEBUG (mo.umac.external.uscensus.UScensusData:269)- numCrossGridY = 2
+DEBUG (mo.umac.external.uscensus.UScensusData:334)- case 3
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (6.3, 10.4, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (6.1499999999999995, 10.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[3][4]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: false
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (6.1499999999999995, 10.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (6.0, 9.6, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[2][4]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: true
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (6.0, 9.6, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (6.1499999999999995, 10.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[2][3]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: false
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (6.1499999999999995, 10.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (9.0, 17.600000000000005, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[1][3]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: true
+DEBUG (mo.umac.external.uscensus.UScensusData:395)- pointOnLine2: (7.649999999999999, 14.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:396)- q = (5.7, 8.8, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:397)- density[2][2]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:199)- ----------a part of road-----------
+DEBUG (mo.umac.external.uscensus.UScensusData:200)- p: (5.7, 8.8, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:201)- pGridX = 2
+DEBUG (mo.umac.external.uscensus.UScensusData:202)- pGridY = 2
+DEBUG (mo.umac.external.uscensus.UScensusData:209)- q: (7.4, 7.5, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:210)- qGridX = 4
+DEBUG (mo.umac.external.uscensus.UScensusData:211)- qGridY = 1
+DEBUG (mo.umac.external.uscensus.UScensusData:234)- slope = -0.7647058823529416
+DEBUG (mo.umac.external.uscensus.UScensusData:264)- xDirect = 1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:265)- yDirect = -1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:266)- yLine = 8.0
+DEBUG (mo.umac.external.uscensus.UScensusData:267)- xLine = 6.0
+DEBUG (mo.umac.external.uscensus.UScensusData:268)- numCrossGridX = 2
+DEBUG (mo.umac.external.uscensus.UScensusData:269)- numCrossGridY = 1
+DEBUG (mo.umac.external.uscensus.UScensusData:334)- case 3
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (5.7, 8.8, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (6.0, 8.57058823529412, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[2][2]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: true
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (6.0, 8.57058823529412, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (6.746153846153847, 8.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[2][1]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: false
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (6.746153846153847, 8.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (6.0, 8.57058823529412, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[3][1]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: true
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (6.0, 8.57058823529412, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (4.130769230769233, 10.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[3][0]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: false
+DEBUG (mo.umac.external.uscensus.UScensusData:395)- pointOnLine2: (8.0, 7.041176470588235, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:396)- q = (7.4, 7.5, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:397)- density[4][1]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:199)- ----------a part of road-----------
+DEBUG (mo.umac.external.uscensus.UScensusData:200)- p: (7.4, 7.5, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:201)- pGridX = 4
+DEBUG (mo.umac.external.uscensus.UScensusData:202)- pGridY = 1
+DEBUG (mo.umac.external.uscensus.UScensusData:209)- q: (4.5, 8.6, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:210)- qGridX = 1
+DEBUG (mo.umac.external.uscensus.UScensusData:211)- qGridY = 2
+DEBUG (mo.umac.external.uscensus.UScensusData:234)- slope = -0.379310344827586
+DEBUG (mo.umac.external.uscensus.UScensusData:264)- xDirect = -1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:265)- yDirect = 1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:266)- yLine = 8.0
+DEBUG (mo.umac.external.uscensus.UScensusData:267)- xLine = 7.0
+DEBUG (mo.umac.external.uscensus.UScensusData:268)- numCrossGridX = 3
+DEBUG (mo.umac.external.uscensus.UScensusData:269)- numCrossGridY = 1
+DEBUG (mo.umac.external.uscensus.UScensusData:334)- case 3
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (7.4, 7.5, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (7.0, 7.651724137931034, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[4][1]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: true
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (7.0, 7.651724137931034, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (6.081818181818182, 8.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[4][2]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: false
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (6.081818181818182, 8.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (7.0, 7.651724137931034, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[3][2]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: true
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (7.0, 7.651724137931034, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (3.445454545454544, 9.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[3][3]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: false
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (3.445454545454544, 9.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (11.0, 6.13448275862069, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[2][3]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: true
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (11.0, 6.13448275862069, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (-1.8272727272727316, 11.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[2][4]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: false
+DEBUG (mo.umac.external.uscensus.UScensusData:395)- pointOnLine2: (14.0, 4.996551724137932, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:396)- q = (4.5, 8.6, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:397)- density[1][2]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:199)- ----------a part of road-----------
+DEBUG (mo.umac.external.uscensus.UScensusData:200)- p: (4.5, 8.6, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:201)- pGridX = 1
+DEBUG (mo.umac.external.uscensus.UScensusData:202)- pGridY = 2
+DEBUG (mo.umac.external.uscensus.UScensusData:209)- q: (5.5, 9.2, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:210)- qGridX = 2
+DEBUG (mo.umac.external.uscensus.UScensusData:211)- qGridY = 3
+DEBUG (mo.umac.external.uscensus.UScensusData:234)- slope = 0.5999999999999996
+DEBUG (mo.umac.external.uscensus.UScensusData:264)- xDirect = 1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:265)- yDirect = 1.0
+DEBUG (mo.umac.external.uscensus.UScensusData:266)- yLine = 9.0
+DEBUG (mo.umac.external.uscensus.UScensusData:267)- xLine = 5.0
+DEBUG (mo.umac.external.uscensus.UScensusData:268)- numCrossGridX = 1
+DEBUG (mo.umac.external.uscensus.UScensusData:269)- numCrossGridY = 1
+DEBUG (mo.umac.external.uscensus.UScensusData:334)- case 3
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (4.5, 8.6, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (5.0, 8.899999999999999, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[1][2]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: true
+DEBUG (mo.umac.external.uscensus.UScensusData:363)- pointOnLine1: (5.0, 8.899999999999999, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:364)- pointOnLine2 = (5.166666666666668, 9.0, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:365)- density[1][3]: 
+DEBUG (mo.umac.external.uscensus.UScensusData:366)- nextPointLineY: false
+DEBUG (mo.umac.external.uscensus.UScensusData:395)- pointOnLine2: (5.0, 8.899999999999999, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:396)- q = (5.5, 9.2, NaN)
+DEBUG (mo.umac.external.uscensus.UScensusData:397)- density[2][3]: 
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.16776456739134113
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.12978202029043628
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.014667788410732643
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.092618946571864
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.1497843445468915
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 15.462581716715217
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.036745078183587854
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.014667788410732643
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.015334536854045656
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.06983950759662279
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 1.4402481392679918
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.01847510874684275
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.015334536854045656
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.011041738028179015
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
+DEBUG (mo.umac.external.uscensus.test.UScensusDataTest:68)- 0.0
