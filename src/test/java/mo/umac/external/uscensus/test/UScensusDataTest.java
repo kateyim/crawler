@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import mo.umac.crawler.MainCrawler;
+import mo.umac.external.uscensus.USDensity;
 import mo.umac.external.uscensus.UScensusData;
 
 import org.apache.log4j.Logger;
@@ -52,7 +53,6 @@ public class UScensusDataTest {
 
 	public void testRoadDensity() {
 		// TODO
-		UScensusData.readRoad(roadFolder);
 	}
 
 	public void testDensity() {
@@ -60,7 +60,7 @@ public class UScensusDataTest {
 		double granularityY = 1;
 		Envelope envelope = new Envelope(4, 9, 7, 11);
 		ArrayList<Coordinate[]> roadList = generateRoadList(envelope);
-		double[][] density = UScensusData.densityList(envelope, granularityX, granularityY, roadList);
+		double[][] density = USDensity.densityList(envelope, granularityX, granularityY, roadList);
 		for (int i = 0; i < density.length; i++) {
 			double[] ds = density[i];
 			for (int j = 0; j < ds.length; j++) {
@@ -85,7 +85,7 @@ public class UScensusDataTest {
 		Coordinate[] aRoad2 = { p2, q21 };
 		roadList.add(aRoad2);
 		//
-		Coordinate p3 = new Coordinate(5.2, 9.5);
+		Coordinate p3 = new Coordinate(5.2, 8.5);
 		Coordinate q31 = new Coordinate(5.3, 10.6);
 		Coordinate q32 = new Coordinate(6.3, 10.4);
 		Coordinate q33 = new Coordinate(5.7, 8.8);

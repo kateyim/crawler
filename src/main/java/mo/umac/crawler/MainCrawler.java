@@ -15,7 +15,7 @@ public class MainCrawler {
 
 	public static Logger logger = Logger.getLogger(MainCrawler.class.getName());
 
-	public static String LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
+	public static String LOG_PROPERTY_PATH = "./log4j.xml";
 
 	// used in offline algorithm
 	public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ok-prun";

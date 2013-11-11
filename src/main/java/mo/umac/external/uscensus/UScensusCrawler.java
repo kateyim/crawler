@@ -11,7 +11,7 @@ package mo.umac.external.uscensus;
  */
 public class UScensusCrawler {
 
-	public void crawlRoad() {
+	public static void crawlRoad() {
 		String url = "http://www.census.gov/cgi-bin/geo/shapefiles2013/main";
 		String folder = "../data-map/us-road/new-york/";
 		crawler(url, folder);
@@ -21,7 +21,7 @@ public class UScensusCrawler {
 	 * @param url
 	 * @param folder
 	 */
-	public void crawler(String url, String folder) {
+	public static void crawler(String url, String folder) {
 		// TODO 
 	}
 

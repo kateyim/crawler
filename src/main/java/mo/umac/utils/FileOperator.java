@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Properties;
 
 import mo.umac.crawler.online.OnlineStrategy;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
@@ -144,7 +146,6 @@ public class FileOperator {
 			}
 		} else {
 			if (!file.getName().contains("~")) {
-				// FIXME extension test
 				String ext = FilenameUtils.getExtension(file.getName());
 				if (ext.equals(extension)) {
 					list.add(file.getAbsolutePath());
@@ -153,6 +154,22 @@ public class FileOperator {
 				}
 
 			}
+		}
+	}
+
+	public static void unzip(String source, String destination, String password) {
+		// String source = "some/compressed/file.zip";
+		// String destination = "some/destination/folder";
+		// String password = "password";
+
+		try {
+			ZipFile zipFile = new ZipFile(source);
+			if (zipFile.isEncrypted()) {
+				zipFile.setPassword(password);
+			}
+			zipFile.extractAll(destination);
+		} catch (ZipException e) {
+			e.printStackTrace();
 		}
 	}
 
