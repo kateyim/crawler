@@ -1,9 +1,12 @@
 package mo.umac.external.uscensus;
 
+import java.util.ArrayList;
+
 import mo.umac.crawler.MainCrawler;
 
 import org.apache.log4j.xml.DOMConfigurator;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
 public class MainDensity {
@@ -36,7 +39,12 @@ public class MainDensity {
 		String combinedFile = zipFolderPath + "combinedDensity.txt";
 
 		// TODO add crawler
-//		USDensity.densityMap(envelope, granularityX, granularityY, zipFolderPath, unZipfolderPath, densityFile);
+		
+		// compute the density on the map, run only once for a state folder
+		ArrayList<Coordinate[]> roadList = UScensusData.readRoad(zipFolderPath, unZipfolderPath);
+		double[][] density = USDensity.densityList(envelope, granularityX, granularityY, roadList);
+		USDensity.writeDensityToFile(density, densityFile);
+		//
 		USDensity.combineDensityMap(densityFile, combinedFile);
 	}
 

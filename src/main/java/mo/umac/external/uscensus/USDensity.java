@@ -3,11 +3,14 @@
  */
 package mo.umac.external.uscensus;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
@@ -16,35 +19,25 @@ import org.apache.log4j.Logger;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
-
 /**
  * split the map into a list of blocks with different densities.
  * 
  * @author kate
- *
+ * 
  */
 public class USDensity {
+	
 	protected static Logger logger = Logger.getLogger(USDensity.class.getName());
 
 	/**
 	 * 
 	 */
-	public static void combineDensityMap(String densityFile, String combinedFile) {
+	public static void ClusterDensityMap(String densityFile, String combinedFile) {
 		// TODO combineDensityMap
-		
-		
-		
+
 	}
-	
-	/**
-	 * compute the density on the map, run only once for a state folder
-	 * 
-	 * @param folderPath
-	 * @param densityFile
-	 */
-	public static void densityMap(Envelope envelope, double granularityX, double granularityY, String zipfolderPath, String unZipfolderPath, String densityFile) {
-		ArrayList<Coordinate[]> roadList = UScensusData.readRoad(zipfolderPath, unZipfolderPath);
-		double[][] density = USDensity.densityList(envelope, granularityX, granularityY, roadList);
+
+	public static void writeDensityToFile(double[][] density, String densityFile){
 		logger.info("--------------writing unit density to file");
 		File file = new File(densityFile);
 		try {
@@ -53,9 +46,8 @@ public class USDensity {
 				double[] ds = density[i];
 				for (int j = 0; j < ds.length; j++) {
 					double d = ds[j];
-					bw.write(Double .toString(d));
+					bw.write(Double.toString(d));
 					bw.write(";");
-					
 				}
 				bw.newLine();
 			}
@@ -65,8 +57,31 @@ public class USDensity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	} 
+	
+	public double[][] readDensityFromFile(String densityFile){
+		double[][] density;
+		File file = new File(densityFile);
+		if (!file.exists()) {
+			logger.error("densityFile does not exist");
+		} 
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(densityFile)));
+			String data = null;
+			String[] split;
+			while ((data = br.readLine()) != null) {
+				data = data.trim();
+				split = data.split(";");
+			}
+			br.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return density;
 	}
-
+	
 	/**
 	 * Compute the density in the map
 	 * 
@@ -82,7 +97,7 @@ public class USDensity {
 		double height = envelope.getHeight();
 		double minX = envelope.getMinX();
 		double minY = envelope.getMinY();
-	
+
 		int countX = (int) Math.ceil(width / granularityX);
 		int countY = (int) Math.ceil(height / granularityY);
 		// initial to all 0.0;
@@ -94,12 +109,12 @@ public class USDensity {
 			Coordinate p = aPartRoad[0];
 			int pGridX = (int) Math.ceil(Math.abs(p.x - minX) / granularityX);
 			int pGridY = (int) Math.ceil(Math.abs(p.y - minY) / granularityY);
-	
+
 			for (int j = 1; j < aPartRoad.length; j++) {
 				Coordinate q = aPartRoad[j];
 				int qGridX = (int) Math.ceil(Math.abs(q.x - minX) / granularityX);
 				int qGridY = (int) Math.ceil(Math.abs(q.y - minY) / granularityY);
-	
+
 				if (UScensusData.logger.isDebugEnabled()) {
 					UScensusData.logger.debug("----------a part of road-----------");
 					UScensusData.logger.debug("p: " + p.toString());
@@ -107,7 +122,7 @@ public class USDensity {
 					UScensusData.logger.debug("p: [" + pGridX + "][" + pGridY + "]: ");
 					UScensusData.logger.debug("q: [" + qGridX + "][" + qGridY + "]: ");
 				}
-	
+
 				// This is the easiest case
 				if (pGridX == qGridX && pGridY == qGridY) {
 					// the p and the q point belong to the same small square
@@ -157,7 +172,7 @@ public class USDensity {
 				//
 				int numCrossGridX = Math.abs(qGridX - pGridX);
 				int numCrossGridY = Math.abs(qGridY - pGridY);
-	
+
 				if (UScensusData.logger.isDebugEnabled()) {
 					UScensusData.logger.debug("xDirect = " + xDirect);
 					UScensusData.logger.debug("yDirect = " + yDirect);
@@ -168,7 +183,7 @@ public class USDensity {
 					UScensusData.logger.debug("numCrossGridX = " + numCrossGridX);
 					UScensusData.logger.debug("numCrossGridY = " + numCrossGridY);
 				}
-	
+
 				if (numCrossGridX == 0) {
 					if (UScensusData.logger.isDebugEnabled()) {
 						UScensusData.logger.debug("case 1");
@@ -193,13 +208,13 @@ public class USDensity {
 					double length = p.distance(q);
 					density[qGridX][qGridY] += length;
 					totalLength += length;
-	
+
 					if (UScensusData.logger.isDebugEnabled()) {
 						UScensusData.logger.debug("p: " + p.toString());
 						UScensusData.logger.debug("q = " + q.toString());
 						UScensusData.logger.debug("density[" + qGridX + "][" + qGridY + "]: ");
 					}
-	
+
 				} else if (numCrossGridY == 0) {
 					if (UScensusData.logger.isDebugEnabled()) {
 						UScensusData.logger.debug("case 2");
@@ -217,13 +232,13 @@ public class USDensity {
 							UScensusData.logger.debug("density[" + k1 + "][" + pGridY + "]: ");
 						}
 						p = new Coordinate(pointOnLine);
-	
+
 						xLine += xDirect * granularityX;
 					}
 					double length = p.distance(q);
 					density[qGridX][qGridY] += length;
 					totalLength += length;
-	
+
 					if (UScensusData.logger.isDebugEnabled()) {
 						UScensusData.logger.debug("p: " + p.toString());
 						UScensusData.logger.debug("q = " + q.toString());
@@ -272,7 +287,7 @@ public class USDensity {
 					} else {
 						lastPointOnLine = new Coordinate(lastPointOnLineY);
 					}
-	
+
 					//
 					int k1 = pGridX, k2 = pGridY;
 					while (true) {
@@ -306,12 +321,12 @@ public class USDensity {
 							xLine += xDirect * granularityX;
 							k2 += yDirect;
 						}
-	
+
 					}
 					double length = pointOnLine2.distance(q);
 					density[qGridX][qGridY] += length;
 					totalLength += length;
-	
+
 					if (UScensusData.logger.isDebugEnabled()) {
 						UScensusData.logger.debug("pointOnLine2: " + pointOnLine2.toString());
 						UScensusData.logger.debug("q = " + q.toString());
