@@ -8,4 +8,6 @@ public class DefaultValues {
 
     public static final String INIT_STRING = "";
     
+    public static final double Epsilon = 0.000001;
+    
 }

@@ -146,6 +146,10 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 		addResults(finalResultSet, middleResultSet);
 		return finalResultSet;
 	}
+	
+	private void queryOnePointOneD1(){
+		
+	}
 
 	/**
 	 * Begin at the center of the line

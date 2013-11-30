@@ -9,15 +9,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
 import mo.umac.crawler.CrawlerStrategy;
-import mo.umac.crawler.offline.HexagonCrawler;
+import mo.umac.crawler.MainCrawler;
 import mo.umac.crawler.offline.OfflineStrategy;
-import mo.umac.crawler.offline.SliceCrawler;
+import mo.umac.crawler.offline.SliceCrawlerD2;
 import mo.umac.db.DBInMemory;
 import mo.umac.db.H2DB;
 import mo.umac.metadata.APOI;
@@ -33,17 +32,17 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class CrawlerTest extends CrawlerStrategy/* extends SliceCrawler */{
 
-	public static String LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		DOMConfigurator.configure(CrawlerTest.LOG_PROPERTY_PATH);
+		DOMConfigurator.configure(MainCrawler.LOG_PROPERTY_PATH);
 		CrawlerTest test = new CrawlerTest();
 		PaintShapes.painting = true;
 		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		test.calling();
+		
 
 	}
 
@@ -52,7 +51,8 @@ public class CrawlerTest extends CrawlerStrategy/* extends SliceCrawler */{
 		CrawlerStrategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 		// YahooLocalCrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
 		// SliceCrawler crawler = new SliceCrawler();
-		HexagonCrawler crawler = new HexagonCrawler();
+		// HexagonCrawler crawler = new HexagonCrawler();
+		SliceCrawlerD2 crawler = new SliceCrawlerD2();
 		String state = "NY";
 		int categoryID = 96926236;
 		String category = "Restaurants";
