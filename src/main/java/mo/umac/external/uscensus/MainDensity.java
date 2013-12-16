@@ -36,16 +36,17 @@ public class MainDensity {
 		String densityFile = zipFolderPath + "densityMap.txt";
 		double granularityX = 0.08;
 		double granularityY = 0.04;
-		String combinedFile = zipFolderPath + "combinedDensity.txt";
 
-		// TODO add crawler
-		
 		// compute the density on the map, run only once for a state folder
-		ArrayList<Coordinate[]> roadList = UScensusData.readRoad(zipFolderPath, unZipfolderPath);
-		double[][] density = USDensity.densityList(envelope, granularityX, granularityY, roadList);
-		USDensity.writeDensityToFile(density, densityFile);
+		// ArrayList<Coordinate[]> roadList = UScensusData.readRoad(zipFolderPath, unZipfolderPath);
+		// double[][] density = USDensity.densityList(envelope, granularityX, granularityY, roadList);
+		// USDensity.writeDensityToFile(density, densityFile);
 		//
-		USDensity.combineDensityMap(densityFile, combinedFile);
+		// cluster the regions, and then write to file
+		ArrayList<double[]> density = USDensity.readDensityFromFile(densityFile);
+		String clusterRegionFile = zipFolderPath + "combinedDensity.txt";
+		ArrayList<Envelope> clusteredRegion = USDensity.combineDensityMap(density, granularityX, granularityY, 0.5);
+		USDensity.writePartition(clusterRegionFile, clusteredRegion);
 	}
 
 }

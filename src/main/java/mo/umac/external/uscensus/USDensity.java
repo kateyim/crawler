@@ -26,7 +26,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * 
  */
 public class USDensity {
-	
+
 	protected static Logger logger = Logger.getLogger(USDensity.class.getName());
 
 	/**
@@ -37,7 +37,7 @@ public class USDensity {
 
 	}
 
-	public static void writeDensityToFile(double[][] density, String densityFile){
+	public static void writeDensityToFile(double[][] density, String densityFile) {
 		logger.info("--------------writing unit density to file");
 		File file = new File(densityFile);
 		try {
@@ -57,21 +57,28 @@ public class USDensity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	} 
-	
-	public double[][] readDensityFromFile(String densityFile){
-		double[][] density;
+	}
+
+	public static ArrayList<double[]> readDensityFromFile(String densityFile) {
+		ArrayList<double[]> density = new ArrayList<double[]>();
 		File file = new File(densityFile);
 		if (!file.exists()) {
 			logger.error("densityFile does not exist");
-		} 
+		}
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(densityFile)));
 			String data = null;
-			String[] split;
+			String[] splitArray;
 			while ((data = br.readLine()) != null) {
 				data = data.trim();
-				split = data.split(";");
+				splitArray = data.split(";");
+				double[] densityRow = new double[splitArray.length];
+				for (int j = 0; j < splitArray.length; j++) {
+					String split = splitArray[j];
+					double value = Double.parseDouble(split);
+					densityRow[j] = value;
+				}
+				density.add(densityRow);
 			}
 			br.close();
 		} catch (FileNotFoundException e) {
@@ -81,7 +88,7 @@ public class USDensity {
 		}
 		return density;
 	}
-	
+
 	/**
 	 * Compute the density in the map
 	 * 
@@ -346,4 +353,36 @@ public class USDensity {
 		}
 		return density;
 	}
+
+	/**
+	 * @param density
+	 * @param granularityX
+	 * @param granularityY
+	 * @param alpha
+	 *            similarity measurement
+	 * @return
+	 */
+	public static ArrayList<Envelope> combineDensityMap(ArrayList<double[]> density, double granularityX, double granularityY, double alpha) {
+		ArrayList<Envelope> combinedRegion = new ArrayList<Envelope>();
+		// FIXME combineDensityMap
+		int rowNum = density.size();
+		for (int i = 0; i < rowNum; i++) {
+			double[] aRow = density.get(i);
+			for (int j = 0; j < aRow.length; j++) {
+				double unitDensity = aRow[j];
+
+				for (int k = 0; k < aRow.length; k++) {
+
+				}
+
+			}
+		}
+		return null;
+	}
+
+	public static void writePartition(String clusterRegionFile, ArrayList<Envelope> clusteredRegion) {
+		// FIXME writePartition
+
+	}
+
 }
