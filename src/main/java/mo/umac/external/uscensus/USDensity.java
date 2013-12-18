@@ -442,6 +442,9 @@ public class USDensity {
 			sortedGrid.add(copyRow);
 		}
 		// sorting
+		// sort the value together with the index.
+		
+		
 		for (int i = 0; i < rowNum; i++) {
 			double[] aRow = sortedGrid.get(i);
 			int length = aRow.length;
