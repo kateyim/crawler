@@ -37,16 +37,18 @@ public class MainDensity {
 		double granularityX = 0.08;
 		double granularityY = 0.04;
 
+		USDensity usDensity = new USDensity();
+		
 		// compute the density on the map, run only once for a state folder
-		// ArrayList<Coordinate[]> roadList = UScensusData.readRoad(zipFolderPath, unZipfolderPath);
-		// double[][] density = USDensity.densityList(envelope, granularityX, granularityY, roadList);
-		// USDensity.writeDensityToFile(density, densityFile);
+		// ArrayList<Coordinate[]> roadList = usDensity.readRoad(zipFolderPath, unZipfolderPath);
+		// double[][] density = usDensity.densityList(envelope, granularityX, granularityY, roadList);
+		// usDensity.writeDensityToFile(density, densityFile);
 		//
 		// cluster the regions, and then write to file
-		ArrayList<double[]> density = USDensity.readDensityFromFile(densityFile);
+		ArrayList<double[]> density = usDensity.readDensityFromFile(densityFile);
 		String clusterRegionFile = zipFolderPath + "combinedDensity.txt";
-		ArrayList<Envelope> clusteredRegion = USDensity.combineDensityMap(density, granularityX, granularityY, 0.5);
-		USDensity.writePartition(clusterRegionFile, clusteredRegion);
+		ArrayList<Envelope> clusteredRegion = usDensity.clusterDensityMap(density, granularityX, granularityY, 0.5);
+		usDensity.writePartition(clusterRegionFile, clusteredRegion);
 	}
 
 }

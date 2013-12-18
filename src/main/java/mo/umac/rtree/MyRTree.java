@@ -29,17 +29,6 @@ public class MyRTree extends RTree {
 
 	public static Logger logger = Logger.getLogger(MyRTree.class.getName());
 
-	public int num;
-
-	/**
-	 * add at 2013-12-16
-	 * 
-	 * @param num
-	 */
-	public MyRTree(int num) {
-		this.num = num;
-	}
-
 	/**
 	 * For testing
 	 * 

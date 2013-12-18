@@ -14,6 +14,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
+import mo.umac.rtree.MyRTree;
+
 import org.apache.log4j.Logger;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -29,15 +31,10 @@ public class USDensity {
 
 	protected static Logger logger = Logger.getLogger(USDensity.class.getName());
 
-	/**
-	 * 
-	 */
-	public static void ClusterDensityMap(String densityFile, String combinedFile) {
-		// TODO combineDensityMap
+	public static MyRTree treeTotal = new MyRTree();
+	public static MyRTree treeDense = new MyRTree();
 
-	}
-
-	public static void writeDensityToFile(double[][] density, String densityFile) {
+	public void writeDensityToFile(double[][] density, String densityFile) {
 		logger.info("--------------writing unit density to file");
 		File file = new File(densityFile);
 		try {
@@ -59,7 +56,7 @@ public class USDensity {
 		}
 	}
 
-	public static ArrayList<double[]> readDensityFromFile(String densityFile) {
+	public ArrayList<double[]> readDensityFromFile(String densityFile) {
 		ArrayList<double[]> density = new ArrayList<double[]>();
 		File file = new File(densityFile);
 		if (!file.exists()) {
@@ -98,7 +95,7 @@ public class USDensity {
 	 * @param roadList
 	 * @return
 	 */
-	public static double[][] densityList(Envelope envelope, double granularityX, double granularityY, ArrayList<Coordinate[]> roadList) {
+	public double[][] densityList(Envelope envelope, double granularityX, double granularityY, ArrayList<Coordinate[]> roadList) {
 		logger.info("-------------computing unit density");
 		double width = envelope.getWidth();
 		double height = envelope.getHeight();
@@ -355,6 +352,14 @@ public class USDensity {
 	}
 
 	/**
+	 * combineDensityMap, first find the most dense region, begin to expand;
+	 * </p>
+	 * then find the most dense region in the remained area, begin to expand.
+	 * </p>
+	 * Iterate this process for 3-4 times.
+	 * </p>
+	 * At last partition the rest regions.
+	 * 
 	 * @param density
 	 * @param granularityX
 	 * @param granularityY
@@ -362,9 +367,107 @@ public class USDensity {
 	 *            similarity measurement
 	 * @return
 	 */
-	public static ArrayList<Envelope> combineDensityMap(ArrayList<double[]> density, double granularityX, double granularityY, double alpha) {
-		ArrayList<Envelope> combinedRegion = new ArrayList<Envelope>();
-		// FIXME combineDensityMap
+	public ArrayList<Envelope> clusterDensityMap(ArrayList<double[]> density, double granularityX, double granularityY, double alpha) {
+
+		int numIteration = 3;
+		boolean stop = false;
+		int i = 0;
+		while (!stop) {
+
+			if (i < numIteration) {
+				stop = true;
+			}
+
+			Coordinate denseGrid = findTheDense(density, treeDense);
+			Envelope oneDenseRegion = expand(denseGrid, treeDense, density, alpha);
+
+			treeDense.addRectangle(i, oneDenseRegion);
+			i++;
+		}
+
+		ArrayList<Envelope> clusterRegion = partition(treeDense, density, granularityX, granularityY);
+		return clusterRegion;
+	}
+
+	/**
+	 * Partition the whole map by the dense regions.
+	 * 
+	 * @param treeDense2
+	 * @param density
+	 * @param granularityX
+	 * @param granularityY
+	 * @return
+	 */
+	private ArrayList<Envelope> partition(MyRTree treeDense2, ArrayList<double[]> density, double granularityX, double granularityY) {
+		// TODO
+		return null;
+	}
+
+	/**
+	 * Find the most dense grid, eliminate the dense regions
+	 * 
+	 * @param density
+	 * 
+	 * @return
+	 */
+	private Coordinate findTheDense(ArrayList<double[]> density, MyRTree treeDense2) {
+		// TODO
+		int rowNum = density.size();
+		for (int i = 0; i < rowNum; i++) {
+			double[] aRow = density.get(i);
+			for (int j = 0; j < aRow.length; j++) {
+				double unitDensity = aRow[j];
+
+				for (int k = 0; k < aRow.length; k++) {
+
+				}
+
+			}
+		}
+
+		return null;
+	}
+
+	private ArrayList<double[]> sortGrid(ArrayList<double[]> density) {
+		ArrayList<double[]> sortedGrid = new ArrayList<double[]>();
+		// copy
+		int rowNum = density.size();
+		for (int i = 0; i < rowNum; i++) {
+			double[] aRow = density.get(i);
+			int length = aRow.length;
+			double[] copyRow = new double[length];
+			for (int j = 0; j < length; j++) {
+				copyRow[j] = aRow[j];
+			}
+			sortedGrid.add(copyRow);
+		}
+		// sorting
+		for (int i = 0; i < rowNum; i++) {
+			double[] aRow = sortedGrid.get(i);
+			int length = aRow.length;
+			for (int j = 0; j < length; j++) {
+				double value = aRow[j];
+			}
+			
+		}
+
+		return sortedGrid;
+	}
+
+	/**
+	 * Expand from the dense grid to its neighbors
+	 * </p>
+	 * Do not intersect with the dense regions which are already discovered.
+	 * 
+	 * @param alpha
+	 * @param density
+	 * @param treeDense2
+	 * @param denseGrid
+	 * 
+	 * @return
+	 */
+	private Envelope expand(Coordinate denseGrid, MyRTree treeDense2, ArrayList<double[]> density, double alpha) {
+		// TODO
 		int rowNum = density.size();
 		for (int i = 0; i < rowNum; i++) {
 			double[] aRow = density.get(i);
@@ -380,7 +483,7 @@ public class USDensity {
 		return null;
 	}
 
-	public static void writePartition(String clusterRegionFile, ArrayList<Envelope> clusteredRegion) {
+	public void writePartition(String clusterRegionFile, ArrayList<Envelope> clusteredRegion) {
 		// FIXME writePartition
 
 	}

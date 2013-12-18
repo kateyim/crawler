@@ -56,11 +56,12 @@ public class UScensusDataTest {
 	}
 
 	public void testDensity() {
+		USDensity usDensity = new USDensity();
 		double granularityX = 1;
 		double granularityY = 1;
 		Envelope envelope = new Envelope(4, 9, 7, 11);
 		ArrayList<Coordinate[]> roadList = generateRoadList(envelope);
-		double[][] density = USDensity.densityList(envelope, granularityX, granularityY, roadList);
+		double[][] density = usDensity.densityList(envelope, granularityX, granularityY, roadList);
 		for (int i = 0; i < density.length; i++) {
 			double[] ds = density[i];
 			for (int j = 0; j < ds.length; j++) {
