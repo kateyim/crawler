@@ -27,13 +27,19 @@ public class DensityMap {
 
 	private int numGrid;
 
+	/**
+	 * The longitude and latitude of the total envelope
+	 */
 	private Envelope boardEnvelope;
 
 	private Grid[][] grids;
 
-	private static MyRTree treeTotal = new MyRTree();
-	private static MyRTree treeDense = new MyRTree();
-	private static MyRTree tree0 = new MyRTree();
+	// private MyRTree treeTotal = new MyRTree();
+	// private MyRTree treeDense = new MyRTree();
+	// private MyRTree tree0 = new MyRTree();
+
+	private ArrayList<Envelope> denseRegions = new ArrayList<Envelope>();
+	private ArrayList<Envelope> zeroRegions = new ArrayList<Envelope>();
 
 	public DensityMap(double granularityX, double granularityY, Envelope boardEnvelope) {
 		super();
@@ -76,45 +82,58 @@ public class DensityMap {
 	 */
 	public ArrayList<Envelope> cluster(double alpha, int numIteration) {
 		boolean stop = false;
-		int c = 0;
-
+		int c = 1;
+		// clone this grid map for sorting the order.
 		ArrayList<Grid> sortedMap = clone(grids);
 		sortDensityMap(sortedMap);
 
 		while (!stop) {
 
-			if (c < numIteration) {
+			if (c >= numIteration) {
 				stop = true;
 			}
 
 			Grid seed = findTheDense(sortedMap);
-			Envelope bigGridBoards = expandFromMiddle(seed, alpha);
+			Envelope denseRegion = expandFromMiddle(seed, alpha);
 
-			treeDense.addRectangle(c, bigGridBoards);
+			// treeDense.addRectangle(c, denseRegion);
+			denseRegions.add(denseRegion);
 			c++;
 		}
-		// Dealing with the zero grids, delete zero grids from the 4 corners of the rectangle.
+		// TODO Dealing with the zero grids, delete zero grids from the 4 corners of the rectangle.
 		// Because using a big rectangle to bound the whole region is reasonable but add extra spaces.
-		for (int i = 0; i <= numGridX - 1; i = i + numGridX - 1) {
-			for (int j = 0; j <= numGridY - 1; j = j + numGridY - 1) {
-				Grid seed0 = grids[i][j];
-				Envelope zeroGridBoard = expandFromBoard(seed0);
-				tree0.addRectangle(c, zeroGridBoard);
-
-			}
-		}
+		// for (int i = 0; i <= numGridX - 1; i = i + numGridX - 1) {
+		// for (int j = 0; j <= numGridY - 1; j = j + numGridY - 1) {
+		// Grid seed0 = grids[i][j];
+		// Envelope zeroGridBoard = expandFromBoard(seed0);
+		// tree0.addRectangle(c, zeroGridBoard);
+		//
+		// }
+		// }
 
 		ArrayList<Envelope> clusterRegion = partition();
 		return clusterRegion;
 	}
 
 	/**
-	 * Directly delete tree0
+	 * Partition the whole region into rectangle. Reserve the dense regions, delete the 0 regions.
+	 * </p>
+	 * Use the following data:
+	 * </p>
+	 * tree0
+	 * </p>
+	 * treeDense
+	 * </p>
+	 * grids
+	 * </p>
+	 * boardEnvelope, numGridX, numGridY, granularityX, granularityY
 	 * 
 	 * @return in longitude and latitude
 	 */
 	private ArrayList<Envelope> partition() {
-		// FIXME Auto-generated method stub
+		// FIXME how !!!
+
+		// TODO delete 0 regions
 		return null;
 	}
 
@@ -172,6 +191,8 @@ public class DensityMap {
 	}
 
 	/**
+	 * Find a dense region from the center point
+	 * 
 	 * @param centerGrid
 	 * @param alpha
 	 * @return the broader grids of the envelope
@@ -247,21 +268,6 @@ public class DensityMap {
 		return udlrList;
 	}
 
-	/**
-	 * Partition the whole map by the dense regions.
-	 * 
-	 * @param zeroList
-	 *            TODO
-	 * 
-	 * @return
-	 */
-	private ArrayList<Envelope> partition(ArrayList<Grid> zeroList) {
-		// TODO
-
-		// treeDense
-		return null;
-	}
-
 	private ArrayList<Grid> clone(Grid[][] grids) {
 		int row = grids.length;
 		int col = grids[0].length;
@@ -293,7 +299,7 @@ public class DensityMap {
 	}
 
 	/**
-	 * Find the most dense grid, eliminate the dense regions
+	 * Find the most dense grid, eliminate the dense regions already found by previous steps.
 	 * 
 	 * @param sortedMap
 	 * @param visitedList

@@ -52,7 +52,8 @@ public class MainDensity {
 		// cluster the regions, and then write to file
 		ArrayList<double[]> density = usDensity.readDensityFromFile(densityFile);
 		String clusterRegionFile = zipFolderPath + "combinedDensity.txt";
-		ArrayList<Envelope> clusteredRegion = usDensity.clusterDensityMap(density, granularityX, granularityY, 0.5);
-		usDensity.writePartition(clusterRegionFile, clusteredRegion);
+		// FIXME here
+		// ArrayList<Envelope> clusteredRegion = usDensity.clusterDensityMap(density, granularityX, granularityY, 0.5);
+		// usDensity.writePartition(clusterRegionFile, clusteredRegion);
 	}
 }

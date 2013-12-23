@@ -20,7 +20,8 @@ import com.vividsolutions.jts.geom.LineSegment;
  * 
  */
 public class SliceCrawlerD2 extends OfflineStrategy {
-
+	// TODO
+	
 	public static Logger logger = Logger.getLogger(SliceCrawlerD2.class.getName());
 
 	public SliceCrawlerD2() {
