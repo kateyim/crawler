@@ -37,5 +37,7 @@ TODO list
 - should I use a stack instead of a queue? 
 
 - read the .shp file line by line in src/test/java/mo.umac.external.uscensus.test.UScensusDataTest.java
-- parse glass website
+x -parse glass website
+
+- rtree for n dimensional data
 

@@ -4,7 +4,7 @@ import java.io.File;
 
 import mo.umac.crawler.online.OnlineStrategy;
 import mo.umac.crawler.online.QuadTreeCrawler;
-import mo.umac.metadata.ResultSetYahooOnline;
+import mo.umac.metadata.yahoolocal.ResultSetYahooOnline;
 import mo.umac.parser.StaXParser;
 
 public class OnlineYahooLocalCrawlerStrategyTest {

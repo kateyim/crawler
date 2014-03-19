@@ -13,8 +13,8 @@ import java.util.TreeSet;
 
 import javax.sql.DataSource;
 
-import mo.umac.crawler.MainCrawler;
-import mo.umac.db.H2DB;
+import mo.umac.db.yahoolocal.H2DB;
+import mo.umac.main.MainCrawlerYahooLocal;
 
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.h2.tools.DeleteDbFiles;

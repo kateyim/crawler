@@ -2,7 +2,7 @@ package mo.umac.external.uscensus;
 
 import java.util.ArrayList;
 
-import mo.umac.crawler.MainCrawler;
+import mo.umac.main.MainCrawlerYahooLocal;
 
 import org.apache.log4j.xml.DOMConfigurator;
 
@@ -28,7 +28,7 @@ public class MainDensity {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		DOMConfigurator.configure(MainCrawler.LOG_PROPERTY_PATH);
+		DOMConfigurator.configure(MainCrawlerYahooLocal.LOG_PROPERTY_PATH);
 		// for NY
 		Envelope envelope = new Envelope(NYLongitudeMin, NYLongitudeMax, NYLatitudeMin, NYLatitudeMax);
 		String zipFolderPath = "../data-map/us-road/new-york/";

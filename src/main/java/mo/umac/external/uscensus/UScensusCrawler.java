@@ -5,7 +5,7 @@ package mo.umac.external.uscensus;
 
 import java.util.List;
 
-import mo.umac.crawler.MainCrawler;
+import mo.umac.main.MainCrawlerYahooLocal;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
@@ -32,7 +32,7 @@ public class UScensusCrawler {
 	private static final String ROADS_ = "roads_";
 
 	public static void main(String[] args) {
-		DOMConfigurator.configure(MainCrawler.LOG_PROPERTY_PATH);
+		DOMConfigurator.configure(MainCrawlerYahooLocal.LOG_PROPERTY_PATH);
 		crawlRoad();
 	}
 

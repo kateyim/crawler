@@ -11,7 +11,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import mo.umac.crawler.MainCrawler;
+import mo.umac.main.MainCrawlerYahooLocal;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;

@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import mo.umac.crawler.CrawlerStrategy;
-import mo.umac.metadata.APOI;
+import mo.umac.main.CrawlerStrategy;
+import mo.umac.metadata.yahoolocal.APOI;
 
 import org.apache.log4j.Logger;
 

@@ -11,9 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import mo.umac.crawler.MainCrawler;
 import mo.umac.external.uscensus.USDensity;
 import mo.umac.external.uscensus.UScensusData;
+import mo.umac.main.MainCrawlerYahooLocal;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
@@ -35,7 +35,7 @@ public class UScensusDataTest {
 	public String roadShpFile = "../data-map/tl_2013_40_prisecroads/tl_2013_40_prisecroads.shp";
 
 	public static void main(String[] args) {
-		DOMConfigurator.configure(MainCrawler.LOG_PROPERTY_PATH);
+		DOMConfigurator.configure(MainCrawlerYahooLocal.LOG_PROPERTY_PATH);
 		UScensusDataTest test = new UScensusDataTest();
 		// test.testContaining(UScensusData.STATE_SHP_FILE_NAME,
 		// UScensusData.STATE_DBF_FILE_NAME);

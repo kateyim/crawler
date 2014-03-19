@@ -18,8 +18,8 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import mo.umac.metadata.APOI;
-import mo.umac.metadata.ResultSetYahooOnline;
+import mo.umac.metadata.yahoolocal.APOI;
+import mo.umac.metadata.yahoolocal.ResultSetYahooOnline;
 
 import org.apache.log4j.Logger;
 

@@ -5,9 +5,9 @@ package mo.umac.parser.test;
 
 import org.apache.log4j.xml.DOMConfigurator;
 
-import mo.umac.crawler.MainCrawler;
-import mo.umac.metadata.APOI;
-import mo.umac.metadata.ResultSetYahooOnline;
+import mo.umac.main.MainCrawlerYahooLocal;
+import mo.umac.metadata.yahoolocal.APOI;
+import mo.umac.metadata.yahoolocal.ResultSetYahooOnline;
 import mo.umac.parser.StaXParser;
 
 /**
@@ -17,7 +17,7 @@ import mo.umac.parser.StaXParser;
 public class StaXParserTest {
 
 	public static void main(String args[]) {
-		DOMConfigurator.configure(MainCrawler.LOG_PROPERTY_PATH);
+		DOMConfigurator.configure(MainCrawlerYahooLocal.LOG_PROPERTY_PATH);
 		StaXParserTest test = new StaXParserTest();
 		test.parseErrorPage3();
 	}

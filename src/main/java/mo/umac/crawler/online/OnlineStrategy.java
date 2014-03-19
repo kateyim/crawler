@@ -20,12 +20,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import mo.umac.crawler.CrawlerStrategy;
-import mo.umac.db.DBExternal;
-import mo.umac.db.FileDB;
-import mo.umac.db.H2DB;
-import mo.umac.metadata.ResultSetYahooOnline;
-import mo.umac.metadata.YahooLocalQueryFileDB;
+import mo.umac.db.yahoolocal.DBExternal;
+import mo.umac.db.yahoolocal.FileDB;
+import mo.umac.db.yahoolocal.H2DB;
+import mo.umac.main.CrawlerStrategy;
+import mo.umac.metadata.yahoolocal.ResultSetYahooOnline;
+import mo.umac.metadata.yahoolocal.YahooLocalQueryFileDB;
 import mo.umac.parser.StaXParser;
 import mo.umac.parser.YahooXmlType;
 import mo.umac.spatial.Circle;
