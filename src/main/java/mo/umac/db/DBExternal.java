@@ -6,23 +6,19 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import mo.umac.metadata.APOI;
-import mo.umac.metadata.AQuery;
-import mo.umac.metadata.ResultSet;
-import mo.umac.metadata.ResultSetYahooOnline;
-import mo.umac.metadata.YahooLocalQueryFileDB;
+import mo.umac.crawler.APOI;
+import mo.umac.crawler.AQuery;
+import mo.umac.crawler.ResultSet;
 
 public abstract class DBExternal {
 
 	/**
 	 * A folder stores all crawled .xml file from Yahoo Local.
-	 * 
 	 */
 	public static final String FOLDER_NAME = "../crawler-data/yahoolocal/";
 
 	/**
-	 * A file stores the xml file's name, query condition, and the count
-	 * information of this query.
+	 * A file stores the xml file's name, query condition, and the count information of this query.
 	 */
 	public static final String QUERY_FILE_NAME = "query";
 
@@ -49,14 +45,14 @@ public abstract class DBExternal {
 
 	public abstract void writeToExternalDB(int queryID, AQuery query, ResultSet resultSet);
 
-	public abstract void writeToExternalDBFromOnline(int queryID, int level, int parentID, YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet);
+	// public abstract void writeToExternalDBFromOnline(int queryID, int level, int parentID, YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet);
 
 	public abstract void createTables(String dbNameTarget);
 
 	public abstract int numCrawlerPoints();
 
 	public abstract void removeDuplicate();
-	
+
 	/**
 	 * Update the numCrawled
 	 */

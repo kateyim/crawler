@@ -10,17 +10,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import mo.umac.crawler.CrawlerStrategy;
-import mo.umac.crawler.MainCrawler;
-import mo.umac.metadata.APOI;
-import mo.umac.metadata.AQuery;
-import mo.umac.metadata.DefaultValues;
-import mo.umac.metadata.ResultSet;
-import mo.umac.metadata.ResultSetYahooOnline;
-import mo.umac.metadata.YahooLocalQueryFileDB;
-import mo.umac.rtree.MyRTree;
+import mo.umac.crawler.APOI;
+import mo.umac.crawler.AQuery;
+import mo.umac.crawler.Main;
+import mo.umac.crawler.ResultSet;
+import mo.umac.crawler.Strategy;
+import myrtree.MyRTree;
 
 import org.apache.log4j.Logger;
+
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -42,11 +40,9 @@ public class DBInMemory {
 	public static Set<Integer> poisIDs = new HashSet<Integer>();
 
 	/**
-	 * add at 2013-9-23
-	 * Stores the number of times a points being crawled
+	 * add at 2013-9-23 Stores the number of times a points being crawled
 	 */
 	public static Map<Integer, Integer> poisCrawledTimes;
-	
 
 	// /**
 	// * table 4: the pair of query's id and returned poi's id
@@ -59,12 +55,12 @@ public class DBInMemory {
 	 * @param externalDataSet
 	 */
 	public void readFromExtenalDB(String category, String state) {
-		pois = CrawlerStrategy.dbExternal.readFromExtenalDB(category, state);
+		pois = Strategy.dbExternal.readFromExtenalDB(category, state);
 	}
 
-	public void writeToExternalDB(int queryID, int level, int parentID, YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
-		CrawlerStrategy.dbExternal.writeToExternalDBFromOnline(queryID, level, parentID, qc, resultSet);
-	}
+	// public void writeToExternalDB(int queryID, int level, int parentID, YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
+	// Strategy.dbExternal.writeToExternalDBFromOnline(queryID, level, parentID, qc, resultSet);
+	// }
 
 	/**
 	 * For recording the query results
@@ -75,14 +71,14 @@ public class DBInMemory {
 	 * @param resultSet
 	 */
 	private void writeToExternalDB(int queryID, AQuery query, ResultSet resultSet) {
-		CrawlerStrategy.dbExternal.writeToExternalDB(queryID, query, resultSet);
+		Strategy.dbExternal.writeToExternalDB(queryID, query, resultSet);
 	}
 
 	/**
 	 * Update the numCrawled
 	 */
 	public void updataExternalDB() {
-		CrawlerStrategy.dbExternal.updataExternalDB();
+		Strategy.dbExternal.updataExternalDB();
 	}
 
 	public void index(List<Coordinate> coordinate) {
@@ -116,10 +112,10 @@ public class DBInMemory {
 		poisIDs.addAll(resultsID);
 
 		// FIXME add re-transfer from the break point.
-		int queryID = CrawlerStrategy.countNumQueries;
+		int queryID = Strategy.countNumQueries;
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("countNumQueries = " + CrawlerStrategy.countNumQueries);
+			logger.debug("countNumQueries = " + Strategy.countNumQueries);
 		}
 
 		ResultSet resultSet = queryByID(resultsID);
@@ -156,13 +152,12 @@ public class DBInMemory {
 		// }
 
 		if (queryID % 10 == 0) {
-			logger.info("countNumQueries = " + CrawlerStrategy.countNumQueries);
+			logger.info("countNumQueries = " + Strategy.countNumQueries);
 			logger.info("number of points crawled = " + numCrawlerPoints());
 		}
-		CrawlerStrategy.countNumQueries++;
+		Strategy.countNumQueries++;
 		return resultSet;
 	}
-
 
 	/**
 	 * Only for debugging
@@ -171,7 +166,7 @@ public class DBInMemory {
 	 */
 	public int numOfTuplesInExternalDB(Set set) {
 		H2DB h2db = new H2DB();
-		String dbName = MainCrawler.DB_NAME_TARGET;
+		String dbName = Main.DB_NAME_TARGET;
 		Connection conn = h2db.getConnection(dbName);
 		try {
 			Statement stat = conn.createStatement();

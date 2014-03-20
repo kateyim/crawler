@@ -21,26 +21,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import mo.umac.crawler.APOI;
+import mo.umac.crawler.AQuery;
+import mo.umac.crawler.Category;
+import mo.umac.crawler.Main;
+import mo.umac.crawler.Rating;
+import mo.umac.crawler.ResultSet;
+import mo.umac.crawler.Strategy;
+
 import org.apache.log4j.Logger;
 
-import mo.umac.crawler.CrawlerStrategy;
-import mo.umac.crawler.MainCrawler;
-import mo.umac.crawler.offline.OfflineStrategy;
-import mo.umac.metadata.APOI;
-import mo.umac.metadata.AQuery;
-import mo.umac.metadata.DefaultValues;
-import mo.umac.metadata.ResultSet;
-import mo.umac.metadata.ResultSetYahooOnline;
-import mo.umac.metadata.YahooLocalQueryFileDB;
-import mo.umac.parser.Category;
-import mo.umac.parser.Rating;
-import mo.umac.utils.CommonUtils;
+import utils.CommonUtils;
+import utils.DefaultValues;
 
 /**
  * Operators of the database
  * 
  * @author Kate
- * 
  */
 public class H2DB extends DBExternal {
 
@@ -54,8 +51,8 @@ public class H2DB extends DBExternal {
 
 	public H2DB() {
 		super();
-		super.dbNameSource = MainCrawler.DB_NAME_SOURCE;
-		super.dbNameTarget = MainCrawler.DB_NAME_TARGET;
+		super.dbNameSource = Main.DB_NAME_SOURCE;
+		super.dbNameTarget = Main.DB_NAME_TARGET;
 	}
 
 	public H2DB(String dbNameSource, String dbNameTarget) {
@@ -72,23 +69,23 @@ public class H2DB extends DBExternal {
 
 	/****************************** sqls for creating table ******************************/
 	/**
-	 * level: the divided level radius: the radius of the circle want to covered
-	 * PRIMARY KEY
+	 * level: the divided level radius: the radius of the circle want to covered PRIMARY KEY
 	 */
 	private String sqlCreateQueryTable = "CREATE TABLE IF NOT EXISTS QUERY " + "(QUERYID INT, QUERY VARCHAR(100), ZIP INT, RESULTS INT, START INT, "
-			+ "LATITUDE DOUBLE, LONGITUDE DOUBLE, RADIUS DOUBLE, LEVEL INT, PARENTID INT, " + "TOTALRESULTSAVAILABLE INT, TOTALRESULTSRETURNED INT, FIRSTRESULTPOSITION INT)";
+			+ "LATITUDE DOUBLE, LONGITUDE DOUBLE, RADIUS DOUBLE, LEVEL INT, PARENTID INT, "
+			+ "TOTALRESULTSAVAILABLE INT, TOTALRESULTSRETURNED INT, FIRSTRESULTPOSITION INT)";
 	// revised at 2013-9-26
 	private String sqlCreateItemTable = "CREATE TABLE IF NOT EXISTS ITEM " + "(ITEMID INT, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
 			+ "LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, " + "AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE, NUMCRAWLED INT)";
 
-	private String sqlCreateItemTableKey = "CREATE TABLE IF NOT EXISTS ITEM " + "(ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
-			+ "LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, " + "AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE, NUMCRAWLED INT)";
+	private String sqlCreateItemTableKey = "CREATE TABLE IF NOT EXISTS ITEM "
+			+ "(ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), " + "LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, "
+			+ "AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE, NUMCRAWLED INT)";
 
 	private String sqlCreateCategoryTable = "CREATE TABLE IF NOT EXISTS CATEGORY (ITEMID INT, " + "CATEGORYID INT, CATEGORYNAME VARCHAR(200))";
 
 	/**
-	 * This table records that the item is returned by which query in which
-	 * position.
+	 * This table records that the item is returned by which query in which position.
 	 */
 	private String sqlCreateRelationshipTable = "CREATE TABLE IF NOT EXISTS RELATIONSHIP " + "(ITEMID INT, QEURYID INT, POSITION INT)";
 
@@ -138,46 +135,6 @@ public class H2DB extends DBExternal {
 	private String s4Relationship = "INSERT into Relationship SELECT * FROM holdups";
 
 	@Override
-	public void writeToExternalDBFromOnline(int queryID, int level, int parentID, YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
-		Connection con = qc.getCon();
-		// prepared statement
-		PreparedStatement prepItem;
-		PreparedStatement prepCategory;
-		PreparedStatement prepQuery;
-		PreparedStatement prepRelationship;
-		try {
-			prepItem = con.prepareStatement(sqlPrepInsertItem);
-			prepCategory = con.prepareStatement(sqlPrepInsertCategory);
-			prepQuery = con.prepareStatement(sqlPrepInsertQuery);
-			prepRelationship = con.prepareStatement(sqlPrepInsertRelationship);
-			List<APOI> results = resultSet.getPOIs();
-			for (int i = 0; i < results.size(); i++) {
-				APOI result = results.get(i);
-				// table 1
-				setPrepQuery(queryID, qc, level, parentID, resultSet.getTotalResultsAvailable(), resultSet.getTotalResultsReturned(), resultSet.getFirstResultPosition(), prepQuery);
-				prepQuery.addBatch();
-				// table 2
-				setPrepItem(result, prepItem);
-				prepItem.addBatch();
-				// table 3
-				List<Category> listCategory = result.getCategories();
-				for (int j = 0; j < listCategory.size(); j++) {
-					Category category = listCategory.get(j);
-					setPrepCategory(result.getId(), category, prepCategory);
-					prepCategory.addBatch();
-				}
-				// table 4
-				setPrepRelationship(result.getId(), queryID, i + 1, prepRelationship);
-				prepRelationship.addBatch();
-			}
-
-			con.setAutoCommit(false);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
 	public void writeToExternalDB(int queryID, AQuery aQuery, ResultSet resultSet) {
 		String dbName = dbNameTarget;
 		Connection con = getConnection(dbName);
@@ -223,8 +180,8 @@ public class H2DB extends DBExternal {
 				prepRelationship.addBatch();
 			}
 			// table 1
-			setPrepQuery(queryID, query, DefaultValues.INIT_INT, DefaultValues.INIT_INT, DefaultValues.INIT_INT, latitude, longitude, radius, DefaultValues.INIT_INT, DefaultValues.INIT_INT,
-					totalResultsAvailable, totalResultsReturned, firstResultPosition, prepQuery);
+			setPrepQuery(queryID, query, DefaultValues.INIT_INT, DefaultValues.INIT_INT, DefaultValues.INIT_INT, latitude, longitude, radius,
+					DefaultValues.INIT_INT, DefaultValues.INIT_INT, totalResultsAvailable, totalResultsReturned, firstResultPosition, prepQuery);
 			prepQuery.addBatch();
 
 			prepItem.executeBatch();
@@ -258,7 +215,7 @@ public class H2DB extends DBExternal {
 			con.setAutoCommit(false);
 
 			prepItem = con.prepareStatement(sqlPrepUpdateItem);
-			Iterator it = CrawlerStrategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
+			Iterator it = Strategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
 			int i = 0;
 			while (it.hasNext()) {
 				Entry entry = (Entry) it.next();
@@ -486,16 +443,8 @@ public class H2DB extends DBExternal {
 	}
 
 	/****************************** Insert values ******************************/
-
-	private PreparedStatement setPrepQuery(int queryID, YahooLocalQueryFileDB qc, int level, int parentID, int totalResultsAvailable, int totalResultsReturned, int firstResultPosition,
-			PreparedStatement prepQuery) {
-		setPrepQuery(queryID, qc.getQuery(), qc.getZip(), qc.getResults(), qc.getStart(), qc.getCircle().getCenter().y, qc.getCircle().getCenter().x, qc.getCircle().getRadius(), level, parentID,
-				totalResultsAvailable, totalResultsReturned, firstResultPosition, prepQuery);
-		return prepQuery;
-	}
-
-	private PreparedStatement setPrepQuery(int queryID, String query, int zip, int results, int start, double latitude, double longitude, double radius, int level, int parentID,
-			int totalResultsAvailable, int totalResultsReturned, int firstResultPosition, PreparedStatement prepQuery) {
+	private PreparedStatement setPrepQuery(int queryID, String query, int zip, int results, int start, double latitude, double longitude, double radius,
+			int level, int parentID, int totalResultsAvailable, int totalResultsReturned, int firstResultPosition, PreparedStatement prepQuery) {
 		try {
 			prepQuery.setInt(1, queryID);
 			prepQuery.setString(2, query);
@@ -590,7 +539,8 @@ public class H2DB extends DBExternal {
 		if (connMap.get(dbname) == null) {
 			try {
 				Class.forName("org.h2.Driver");
-				java.sql.Connection conn = DriverManager.getConnection("jdbc:h2:file:" + dbname + ";MVCC=true;LOCK_TIMEOUT=3000000;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE", "sa", "");
+				java.sql.Connection conn = DriverManager.getConnection("jdbc:h2:file:" + dbname
+						+ ";MVCC=true;LOCK_TIMEOUT=3000000;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE", "sa", "");
 				connMap.put(dbname, conn);
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
@@ -603,9 +553,7 @@ public class H2DB extends DBExternal {
 
 	/**
 	 * @param dbname
-	 * @deprecated
-	 * 
-	 *             See DBExternal.distroyConn();
+	 * @deprecated See DBExternal.distroyConn();
 	 */
 	public void closeConnection(String dbname) {
 		try {
@@ -659,7 +607,8 @@ public class H2DB extends DBExternal {
 				int level = -1;
 				int parentID = -1;
 
-				setPrepQuery(queryID, query, zip, results, start, latitude, longitude, radius, level, parentID, totalResultsAvailable, totalResultsReturned, firstResultPosition, prepQuery);
+				setPrepQuery(queryID, query, zip, results, start, latitude, longitude, radius, level, parentID, totalResultsAvailable, totalResultsReturned,
+						firstResultPosition, prepQuery);
 				prepQuery.addBatch();
 
 			}
@@ -779,8 +728,8 @@ public class H2DB extends DBExternal {
 
 	/*
 	 * (non-Javadoc)
-	 * @see mo.umac.db.DBExternal#readFromExtenalDB(java.lang.String,
-	 * java.lang.String)
+	 * 
+	 * @see mo.umac.db.DBExternal#readFromExtenalDB(java.lang.String, java.lang.String)
 	 */
 	@Override
 	public HashMap<Integer, APOI> readFromExtenalDB(String categoryQ, String stateQ) {
@@ -817,7 +766,7 @@ public class H2DB extends DBExternal {
 					int numCrawled = rs.getInt(11);
 					//
 					List<Category> categories = new ArrayList<Category>();
-					Object searchingResult = CommonUtils.getKeyByValue(CrawlerStrategy.categoryIDMap, categoryQ);
+					Object searchingResult = CommonUtils.getKeyByValue(Strategy.categoryIDMap, categoryQ);
 					if (searchingResult != null) {
 						int categoryID = (Integer) searchingResult;
 						new ArrayList<Category>();
@@ -988,8 +937,7 @@ public class H2DB extends DBExternal {
 	}
 
 	/**
-	 * Convert H2DB to a files, only contain id, numCrawl, coordinates from the
-	 * table
+	 * Convert H2DB to a files, only contain id, numCrawl, coordinates from the table
 	 * 
 	 * @param dbName
 	 * @param tableName
