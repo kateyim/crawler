@@ -12,26 +12,137 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 
-import myrtree.MyRTree;
+import mo.umac.crawler.Main;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.xml.DOMConfigurator;
+import org.geotools.data.shapefile.ShpFiles;
+import org.geotools.data.shapefile.shp.ShapefileException;
+import org.geotools.data.shapefile.shp.ShapefileReader;
+
+import utils.FileOperator;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * split the map into a list of blocks with different densities.
  * 
  * @author kate
- * 
  */
 public class USDensity {
 
-	protected static Logger logger = Logger.getLogger(USDensity.class.getName());
+	private static Logger logger = Logger.getLogger(USDensity.class.getName());
 
-	public void writeDensityToFile(double[][] density, String densityFile) {
+	private static boolean log = true;
+
+	// yanhui
+	// NY: Env[-79.76259 : -71.777491, 40.477399 : 45.015865]
+	private static final double NYLatitudeMin = 40.477399;
+	private static final double NYLatitudeMax = 45.015865;
+	private static final double NYLongitudeMin = -79.76259;
+	private static final double NYLongitudeMax = -71.777491;
+
+	// OK: // FIXME change these values
+	private static final double OKLatitudeMin = 40.477399;
+	private static final double OKLatitudeMax = 45.015865;
+	private static final double OKLongitudeMin = -79.76259;
+	private static final double OKLongitudeMax = -71.777491;
+
+	// TODO state OT
+
+	/**
+	 * The name index in the .dbf file
+	 */
+	final static int NAME_INDEX = 5;
+
+	/**
+	 * The road information for the US states. </p> Downloaded from {@link http://www.census.gov/cgi-bin/geo/shapefiles2013/layers.cgi}
+	 */
+	private static String ROAD_SHP_FILE = "../data-map/tl_2013_40_prisecroads/tl_2013_40_prisecroads.shp";
+
+	private static final String ZIP_EXTENSION = "zip";
+
+	private static final String SHP_EXTENSION = "shp";
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
+		// for NY
+		Envelope envelope = new Envelope(NYLongitudeMin, NYLongitudeMax, NYLatitudeMin, NYLatitudeMax);
+		String zipFolderPath = "../data-map/us-road/new-york/";
+		String densityFile = zipFolderPath + "densityMap.txt";
+		double granularityX = 0.08;
+		double granularityY = 0.04;
+
+		USDensity usDensity = new USDensity();
+
+		/** compute the density on the map, run only once for a state folder */
+		// String unZipfolderPath = "../data-map/us-road/new-york-upzip/";
+		// ArrayList<Coordinate[]> roadList = usDensity.readRoad(zipFolderPath, unZipfolderPath);
+		// double[][] density1 = usDensity.densityList(envelope, granularityX, granularityY, roadList);
+		// usDensity.writeDensityToFile(density1, densityFile);
+		/** End */
+
+		/** cluster the regions, and then write to file */
+		ArrayList<double[]> density = usDensity.readDensityFromFile(densityFile);
+		DensityMap map = new DensityMap(granularityX, granularityY, envelope, density);
+		String clusterRegionFile = zipFolderPath + "combinedDensity.txt";
+		double alpha = 0.5;
+		int numIteration = 3;
+		ArrayList<Envelope> clusteredRegion = map.cluster(alpha, numIteration);
+		usDensity.writePartition(clusterRegionFile, clusteredRegion);
+	}
+
+	/**
+	 * Read all roads in the .shp file.
+	 */
+	private ArrayList<Coordinate[]> readRoad(String zipFolderPath, String unzipFolderPath) {
+		logger.info("-----------reading roads in " + zipFolderPath);
+		ArrayList<Coordinate[]> roadList = new ArrayList<Coordinate[]>();
+		//
+		ArrayList<String> zipFileList = (ArrayList<String>) FileOperator.traverseFolder(zipFolderPath, ZIP_EXTENSION);
+		for (int i = 0; i < zipFileList.size(); i++) {
+			String aZipFile = zipFileList.get(i);
+			// unzip it
+			FileOperator.unzip(aZipFile, unzipFolderPath, "");
+		}
+		// traverse again
+		ArrayList<String> shpFileList = (ArrayList<String>) FileOperator.traverseFolder(unzipFolderPath, SHP_EXTENSION);
+
+		for (int i = 0; i < shpFileList.size(); i++) {
+			String shpFile = shpFileList.get(i);
+			try {
+				ShpFiles shpFiles = new ShpFiles(shpFile);
+				GeometryFactory gf = new GeometryFactory();
+				ShapefileReader r = new ShapefileReader(shpFiles, true, true, gf);
+				while (r.hasNext()) {
+					Geometry shape = (Geometry) r.nextRecord().shape();
+					Coordinate[] coordinates = shape.getCoordinates();
+					roadList.add(coordinates);
+				}
+				r.close();
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (ShapefileException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return roadList;
+	}
+
+	private void writeDensityToFile(double[][] density, String densityFile) {
 		logger.info("--------------writing unit density to file");
 		File file = new File(densityFile);
 		try {
@@ -53,7 +164,7 @@ public class USDensity {
 		}
 	}
 
-	public ArrayList<double[]> readDensityFromFile(String densityFile) {
+	private ArrayList<double[]> readDensityFromFile(String densityFile) {
 		ArrayList<double[]> density = new ArrayList<double[]>();
 		File file = new File(densityFile);
 		if (!file.exists()) {
@@ -88,12 +199,15 @@ public class USDensity {
 	 * 
 	 * @param envelope
 	 * @param granularityX
+	 *            : the granularity of the grid in x-axis
 	 * @param granularityY
+	 *            : the granularity of the grid in y-axis
 	 * @param roadList
+	 *            : coordinates of the start points and the end points of each line segment
 	 * @return
 	 */
-	public double[][] densityList(Envelope envelope, double granularityX, double granularityY, ArrayList<Coordinate[]> roadList) {
-		logger.info("-------------computing unit density");
+	private double[][] densityList(Envelope envelope, double granularityX, double granularityY, ArrayList<Coordinate[]> roadList) {
+		logger.info("-------------computing unit density-------------");
 		double width = envelope.getWidth();
 		double height = envelope.getHeight();
 		double minX = envelope.getMinX();
@@ -101,7 +215,7 @@ public class USDensity {
 
 		int countX = (int) Math.ceil(width / granularityX);
 		int countY = (int) Math.ceil(height / granularityY);
-		// initial to all 0.0;
+		// initialize to 0.0;
 		double[][] density = new double[countX + 1][countY + 1];
 		double totalLength = 0.0;
 		//
@@ -116,12 +230,12 @@ public class USDensity {
 				int qGridX = (int) Math.ceil(Math.abs(q.x - minX) / granularityX);
 				int qGridY = (int) Math.ceil(Math.abs(q.y - minY) / granularityY);
 
-				if (UScensusData.logger.isDebugEnabled()) {
-					UScensusData.logger.debug("----------a part of road-----------");
-					UScensusData.logger.debug("p: " + p.toString());
-					UScensusData.logger.debug("q: " + q.toString());
-					UScensusData.logger.debug("p: [" + pGridX + "][" + pGridY + "]: ");
-					UScensusData.logger.debug("q: [" + qGridX + "][" + qGridY + "]: ");
+				if (log) {
+					logger.debug("----------a part of road-----------");
+					logger.debug("p: " + p.toString());
+					logger.debug("q: " + q.toString());
+					logger.debug("p: [" + pGridX + "][" + pGridY + "]: ");
+					logger.debug("q: [" + qGridX + "][" + qGridY + "]: ");
 				}
 
 				// This is the easiest case
@@ -130,9 +244,9 @@ public class USDensity {
 					double length = p.distance(q);
 					density[pGridX][pGridY] += length;
 					totalLength += length;
-					if (UScensusData.logger.isDebugEnabled()) {
-						UScensusData.logger.debug("case 0: in the same grid");
-						UScensusData.logger.debug("p.distance(q) : " + p.toString() + "," + q.toString() + " = " + length);
+					if (log) {
+						logger.debug("case 0: in the same grid");
+						logger.debug("p.distance(q) : " + p.toString() + "," + q.toString() + " = " + length);
 					}
 					p = new Coordinate(q);
 					pGridX = qGridX;
@@ -142,8 +256,8 @@ public class USDensity {
 				// Now we are going to deal with the situation when the p and q point of this road are located on two different grids
 				// slope of the line
 				double slope = (q.y - p.y) / (q.x - p.x);
-				if (UScensusData.logger.isDebugEnabled()) {
-					UScensusData.logger.debug("slope = " + slope);
+				if (log) {
+					logger.debug("slope = " + slope);
 				}
 				// flag
 				double xDirect = 1;
@@ -174,20 +288,20 @@ public class USDensity {
 				int numCrossGridX = Math.abs(qGridX - pGridX);
 				int numCrossGridY = Math.abs(qGridY - pGridY);
 
-				if (UScensusData.logger.isDebugEnabled()) {
-					UScensusData.logger.debug("xDirect = " + xDirect);
-					UScensusData.logger.debug("yDirect = " + yDirect);
-					UScensusData.logger.debug("xLine = " + xLine);
-					UScensusData.logger.debug("yLine = " + yLine);
-					UScensusData.logger.debug("xLineLast = " + xLineLast);
-					UScensusData.logger.debug("yLineLast = " + yLineLast);
-					UScensusData.logger.debug("numCrossGridX = " + numCrossGridX);
-					UScensusData.logger.debug("numCrossGridY = " + numCrossGridY);
+				if (log) {
+					logger.debug("xDirect = " + xDirect);
+					logger.debug("yDirect = " + yDirect);
+					logger.debug("xLine = " + xLine);
+					logger.debug("yLine = " + yLine);
+					logger.debug("xLineLast = " + xLineLast);
+					logger.debug("yLineLast = " + yLineLast);
+					logger.debug("numCrossGridX = " + numCrossGridX);
+					logger.debug("numCrossGridY = " + numCrossGridY);
 				}
 
 				if (numCrossGridX == 0) {
-					if (UScensusData.logger.isDebugEnabled()) {
-						UScensusData.logger.debug("case 1");
+					if (log) {
+						logger.debug("case 1");
 					}
 					// case 1: this road only intersect with different grids on y-axis
 					for (int k2 = pGridY, ki = 0; ki < numCrossGridY; k2 += yDirect, ki++) {
@@ -197,10 +311,10 @@ public class USDensity {
 						double length = p.distance(pointOnLine);
 						density[pGridX][k2] += length;
 						totalLength += length;
-						if (UScensusData.logger.isDebugEnabled()) {
-							UScensusData.logger.debug("p: " + p.toString());
-							UScensusData.logger.debug("pointOnLine = " + pointOnLine.toString());
-							UScensusData.logger.debug("density[" + pGridX + "][" + k2 + "]: ");
+						if (log) {
+							logger.debug("p: " + p.toString());
+							logger.debug("pointOnLine = " + pointOnLine.toString());
+							logger.debug("density[" + pGridX + "][" + k2 + "]: ");
 						}
 						p = new Coordinate(pointOnLine);
 						//
@@ -210,15 +324,15 @@ public class USDensity {
 					density[qGridX][qGridY] += length;
 					totalLength += length;
 
-					if (UScensusData.logger.isDebugEnabled()) {
-						UScensusData.logger.debug("p: " + p.toString());
-						UScensusData.logger.debug("q = " + q.toString());
-						UScensusData.logger.debug("density[" + qGridX + "][" + qGridY + "]: ");
+					if (log) {
+						logger.debug("p: " + p.toString());
+						logger.debug("q = " + q.toString());
+						logger.debug("density[" + qGridX + "][" + qGridY + "]: ");
 					}
 
 				} else if (numCrossGridY == 0) {
-					if (UScensusData.logger.isDebugEnabled()) {
-						UScensusData.logger.debug("case 2");
+					if (log) {
+						logger.debug("case 2");
 					}
 					// case 2: this road only intersect with different grids on x-axis
 					for (int k1 = pGridX, ki = 0; ki < numCrossGridX; k1 += xDirect, ki++) {
@@ -227,10 +341,10 @@ public class USDensity {
 						double length = p.distance(pointOnLine);
 						density[k1][pGridY] += length;
 						totalLength += length;
-						if (UScensusData.logger.isDebugEnabled()) {
-							UScensusData.logger.debug("p: " + p.toString());
-							UScensusData.logger.debug("pointOnLine = " + pointOnLine.toString());
-							UScensusData.logger.debug("density[" + k1 + "][" + pGridY + "]: ");
+						if (log) {
+							logger.debug("p: " + p.toString());
+							logger.debug("pointOnLine = " + pointOnLine.toString());
+							logger.debug("density[" + k1 + "][" + pGridY + "]: ");
 						}
 						p = new Coordinate(pointOnLine);
 
@@ -240,14 +354,14 @@ public class USDensity {
 					density[qGridX][qGridY] += length;
 					totalLength += length;
 
-					if (UScensusData.logger.isDebugEnabled()) {
-						UScensusData.logger.debug("p: " + p.toString());
-						UScensusData.logger.debug("q = " + q.toString());
-						UScensusData.logger.debug("density[" + qGridX + "][" + qGridY + "]: ");
+					if (log) {
+						logger.debug("p: " + p.toString());
+						logger.debug("q = " + q.toString());
+						logger.debug("density[" + qGridX + "][" + qGridY + "]: ");
 					}
 				} else {
-					if (UScensusData.logger.isDebugEnabled()) {
-						UScensusData.logger.debug("case 3");
+					if (log) {
+						logger.debug("case 3");
 					}
 					// case 3
 					// the start point
@@ -296,15 +410,15 @@ public class USDensity {
 						density[k1][k2] += length;
 						totalLength += length;
 						//
-						if (UScensusData.logger.isDebugEnabled()) {
-							UScensusData.logger.debug("pointOnLine1: " + pointOnLine1.toString());
-							UScensusData.logger.debug("pointOnLine2 = " + pointOnLine2.toString());
-							UScensusData.logger.debug("density[" + k1 + "][" + k2 + "]: ");
-							UScensusData.logger.debug("nextPointLineY: " + pointOnLine2IsOnLineY);
+						if (log) {
+							logger.debug("pointOnLine1: " + pointOnLine1.toString());
+							logger.debug("pointOnLine2 = " + pointOnLine2.toString());
+							logger.debug("density[" + k1 + "][" + k2 + "]: ");
+							logger.debug("nextPointLineY: " + pointOnLine2IsOnLineY);
 						}
 						if (pointOnLine2.equals(lastPointOnLine)) {
-							if (UScensusData.logger.isDebugEnabled()) {
-								UScensusData.logger.debug("reach to the near end point.");
+							if (log) {
+								logger.debug("reach to the near end point.");
 							}
 							break;
 						}
@@ -328,10 +442,10 @@ public class USDensity {
 					density[qGridX][qGridY] += length;
 					totalLength += length;
 
-					if (UScensusData.logger.isDebugEnabled()) {
-						UScensusData.logger.debug("pointOnLine2: " + pointOnLine2.toString());
-						UScensusData.logger.debug("q = " + q.toString());
-						UScensusData.logger.debug("density[" + qGridX + "][" + qGridY + "]: ");
+					if (log) {
+						logger.debug("pointOnLine2: " + pointOnLine2.toString());
+						logger.debug("q = " + q.toString());
+						logger.debug("density[" + qGridX + "][" + qGridY + "]: ");
 					}
 				}
 				p = new Coordinate(q);
@@ -348,9 +462,7 @@ public class USDensity {
 		return density;
 	}
 
-
-
-	public void writePartition(String clusterRegionFile, ArrayList<Envelope> clusteredRegion) {
+	private void writePartition(String clusterRegionFile, ArrayList<Envelope> clusteredRegion) {
 		// FIXME writePartition
 
 	}
