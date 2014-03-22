@@ -30,7 +30,7 @@ public class Main {
 		DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
 		/************************* Crawling Algorithm ***************************/
 		// CrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
-		Strategy crawlerStrategy = new SliceCrawler();
+		Strategy crawlerStrategy = new AlgoSlice();
 		// CrawlerStrategy crawlerStrategy = new BlockCrawler();
 		/**********************************************************************/
 		Context crawlerContext = new Context(crawlerStrategy);

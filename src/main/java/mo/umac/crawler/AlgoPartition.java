@@ -16,21 +16,21 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author kate
  * 
  */
-public class BlockCrawler extends OfflineStrategy {
+public class AlgoPartition extends Strategy {
 
-	public static Logger logger = Logger.getLogger(BlockCrawler.class.getName());
+	public static Logger logger = Logger.getLogger(AlgoPartition.class.getName());
 
-	public BlockCrawler() {
+	public AlgoPartition() {
 		super();
 		logger.info("------------BlockCrawler------------");
 	}
 
 	@Override
 	public void crawl(String state, int category, String query, Envelope envelopeState) {
-		ArrayList<Envelope> list = BlockCrawler.getOKEnvelopes();
+		ArrayList<Envelope> list = AlgoPartition.getOKEnvelopes();
 		for (int i = 0; i < list.size(); i++) {
 			Envelope envelope = list.get(i);
-			SliceCrawler sc = new SliceCrawler();
+			AlgoSlice sc = new AlgoSlice();
 			sc.crawl(state, category, query, envelope);
 		}
 

@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import mo.umac.crawler.APOI;
-import mo.umac.crawler.AQuery;
 import mo.umac.crawler.Main;
-import mo.umac.crawler.ResultSet;
 import mo.umac.crawler.Strategy;
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.AQuery;
+import mo.umac.metadata.ResultSetD2;
 import myrtree.MyRTree;
 
 import org.apache.log4j.Logger;
@@ -70,7 +70,7 @@ public class DBInMemory {
 	 * @param query
 	 * @param resultSet
 	 */
-	private void writeToExternalDB(int queryID, AQuery query, ResultSet resultSet) {
+	private void writeToExternalDB(int queryID, AQuery query, ResultSetD2 resultSet) {
 		Strategy.dbExternal.writeToExternalDB(queryID, query, resultSet);
 	}
 
@@ -92,7 +92,7 @@ public class DBInMemory {
 		rtreePoints = new MyRTree(pois);
 	}
 
-	public ResultSet query(AQuery qc) {
+	public ResultSetD2 query(AQuery qc) {
 		Coordinate queryPoint = qc.getPoint();
 		if (logger.isDebugEnabled()) {
 			logger.debug("query point = " + queryPoint.toString());
@@ -118,7 +118,7 @@ public class DBInMemory {
 			logger.debug("countNumQueries = " + Strategy.countNumQueries);
 		}
 
-		ResultSet resultSet = queryByID(resultsID);
+		ResultSetD2 resultSet = queryByID(resultsID);
 		resultSet.setTotalResultsReturned(resultsID.size());
 
 		// if (logger.isDebugEnabled()) {
@@ -186,14 +186,14 @@ public class DBInMemory {
 	 * @param resultsID
 	 * @return
 	 */
-	public ResultSet queryByID(List<Integer> resultsID) {
+	public ResultSetD2 queryByID(List<Integer> resultsID) {
 		List<APOI> points = new ArrayList<APOI>();
 		for (int i = 0; i < resultsID.size(); i++) {
 			int id = resultsID.get(i);
 			APOI point = pois.get(id);
 			points.add(point);
 		}
-		ResultSet resultSet = new ResultSet();
+		ResultSetD2 resultSet = new ResultSetD2();
 		resultSet.setPOIs(points);
 		return resultSet;
 	}

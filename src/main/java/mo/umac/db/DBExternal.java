@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import mo.umac.crawler.APOI;
-import mo.umac.crawler.AQuery;
-import mo.umac.crawler.ResultSet;
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.AQuery;
+import mo.umac.metadata.ResultSetD2;
 
 public abstract class DBExternal {
 
@@ -43,7 +43,7 @@ public abstract class DBExternal {
 	 */
 	public abstract HashMap<Integer, APOI> readFromExtenalDB(String category, String state);
 
-	public abstract void writeToExternalDB(int queryID, AQuery query, ResultSet resultSet);
+	public abstract void writeToExternalDB(int queryID, AQuery query, ResultSetD2 resultSet);
 
 	// public abstract void writeToExternalDBFromOnline(int queryID, int level, int parentID, YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet);
 

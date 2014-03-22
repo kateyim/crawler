@@ -96,7 +96,8 @@ public class USDensity {
 		DensityMap map = new DensityMap(granularityX, granularityY, envelope, density);
 		String clusterRegionFile = zipFolderPath + "combinedDensity.txt";
 		double alpha = 0.5;
-		int numIteration = 3;
+		// only find one density region
+		int numIteration = 1;
 		ArrayList<Envelope> clusteredRegion = map.cluster(alpha, numIteration);
 		usDensity.writePartition(clusterRegionFile, clusteredRegion);
 	}

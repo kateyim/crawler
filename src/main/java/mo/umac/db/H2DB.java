@@ -21,13 +21,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import mo.umac.crawler.APOI;
-import mo.umac.crawler.AQuery;
-import mo.umac.crawler.Category;
 import mo.umac.crawler.Main;
-import mo.umac.crawler.Rating;
-import mo.umac.crawler.ResultSet;
 import mo.umac.crawler.Strategy;
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.AQuery;
+import mo.umac.metadata.Category;
+import mo.umac.metadata.Rating;
+import mo.umac.metadata.ResultSetD2;
 
 import org.apache.log4j.Logger;
 
@@ -135,7 +135,7 @@ public class H2DB extends DBExternal {
 	private String s4Relationship = "INSERT into Relationship SELECT * FROM holdups";
 
 	@Override
-	public void writeToExternalDB(int queryID, AQuery aQuery, ResultSet resultSet) {
+	public void writeToExternalDB(int queryID, AQuery aQuery, ResultSetD2 resultSet) {
 		String dbName = dbNameTarget;
 		Connection con = getConnection(dbName);
 		//

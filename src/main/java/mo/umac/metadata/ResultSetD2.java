@@ -1,4 +1,4 @@
-package mo.umac.crawler;
+package mo.umac.metadata;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import utils.DefaultValues;
 
 import mo.umac.spatial.Circle;
 
-public class ResultSet {
+public class ResultSetD2 {
 	protected List<APOI> pois;
 
 	private int totalResultsAvailable = DefaultValues.INIT_INT;

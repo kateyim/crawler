@@ -1,7 +1,7 @@
 /**
  * 
  */
-package mo.umac.crawler;
+package mo.umac.metadata;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import com.vividsolutions.jts.geom.LineSegment;
 /**
  * @author kate
  */
-public class ResultSetOneDimensional extends ResultSet {
+public class ResultSetD1 extends ResultSetD2 {
 
 	private LineSegment line;
 	private List<APOI> leftPOIs = new ArrayList<APOI>();
