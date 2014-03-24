@@ -18,7 +18,7 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class AlgoPartition extends Strategy {
 
-	public static Logger logger = Logger.getLogger(AlgoPartition.class.getName());
+//	public static Logger logger = Logger.getLogger(AlgoPartition.class.getName());
 
 	public AlgoPartition() {
 		super();

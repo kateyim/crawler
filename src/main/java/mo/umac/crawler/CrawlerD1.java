@@ -28,7 +28,7 @@ import com.vividsolutions.jts.geomgraph.Position;
  */
 public class CrawlerD1 extends Strategy {
 
-	public static Logger logger = Logger.getLogger(CrawlerD1.class.getName());
+//	public static Logger logger = Logger.getLogger(CrawlerD1.class.getName());
 
 	public static ResultSetD1 oneDimCrawl(String state, int category, String query, LineSegment middleLine) {
 		ResultSetD1 finalResultSet = new ResultSetD1();

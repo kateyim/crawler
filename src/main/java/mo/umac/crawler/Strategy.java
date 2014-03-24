@@ -14,6 +14,7 @@ import mo.umac.metadata.ResultSetD2;
 import mo.umac.uscensus.UScensusData;
 import myrtree.MyRTree;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import utils.CommonUtils;

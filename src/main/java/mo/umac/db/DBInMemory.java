@@ -24,7 +24,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 
 public class DBInMemory {
 
-	protected static Logger logger = Logger.getLogger(DBInMemory.class.getName());
+	public static Logger logger = Logger.getLogger(DBInMemory.class.getName());
 
 	/**
 	 * All tuples; Integer is the item's id

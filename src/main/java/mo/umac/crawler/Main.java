@@ -3,6 +3,7 @@ package mo.umac.crawler;
 import java.util.LinkedList;
 import java.util.List;
 
+import mo.umac.db.DBInMemory;
 import mo.umac.uscensus.UScensusData;
 
 import org.apache.log4j.Level;
@@ -18,7 +19,6 @@ public class Main {
 	public static String LOG_PROPERTY_PATH = "./log4j.xml";
 	public static boolean debug = false;
 
-
 	// used in offline algorithm
 	public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ok-prun";
 	public final static String DB_NAME_TARGET = "../crawler-data/yahoolocal-h2/target/ok-prun-c-one";
@@ -26,8 +26,10 @@ public class Main {
 
 	public static void main(String[] args) {
 		/************************* Change these lines *************************/
+		debug = true;
 		initForServer(false);
 		DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
+		shutdownLogs(Main.debug);
 		/************************* Crawling Algorithm ***************************/
 		// CrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
 		Strategy crawlerStrategy = new AlgoSlice();
@@ -72,11 +74,21 @@ public class Main {
 			// for debugging, set the resources folder as
 			// OnlineStrategy.PROPERTY_PATH = "./src/main/resources/crawler.properties";
 			Strategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
-			Main.LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
+			// Main.LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
+			Main.LOG_PROPERTY_PATH = "./log4j.xml";
 			UScensusData.STATE_SHP_FILE_NAME = "./src/main/resources/UScensus/tl_2012_us_state/tl_2012_us_state.shp";
 			UScensusData.STATE_SHP_FILE_NAME = "./src/main/resources/UScensus/tl_2012_us_state/tl_2012_us_state.shp";
 		}
 	}
-	
+
+	public static void shutdownLogs(boolean debug) {
+		if (!debug) {
+			Strategy.logger.setLevel(Level.INFO);
+			DBInMemory.logger.setLevel(Level.INFO);
+		} else {
+			Strategy.logger.setLevel(Level.DEBUG);
+			DBInMemory.logger.setLevel(Level.DEBUG);
+		}
+	}
 
 }

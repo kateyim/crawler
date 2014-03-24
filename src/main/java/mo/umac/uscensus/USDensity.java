@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -85,20 +86,21 @@ public class USDensity {
 		USDensity usDensity = new USDensity();
 
 		/** compute the density on the map, run only once for a state folder */
-		// String unZipfolderPath = "../data-map/us-road/new-york-upzip/";
-		// ArrayList<Coordinate[]> roadList = usDensity.readRoad(zipFolderPath, unZipfolderPath);
-		// double[][] density1 = usDensity.densityList(envelope, granularityX, granularityY, roadList);
-		// usDensity.writeDensityToFile(density1, densityFile);
+//		String unZipfolderPath = "../data-map/us-road/new-york-upzip/";
+//		ArrayList<Coordinate[]> roadList = usDensity.readRoad(zipFolderPath, unZipfolderPath);
+//		double[][] density1 = usDensity.densityList(envelope, granularityX, granularityY, roadList);
+//		usDensity.writeDensityToFile(density1, densityFile);
 		/** End */
 
 		/** cluster the regions, and then write to file */
 		ArrayList<double[]> density = usDensity.readDensityFromFile(densityFile);
 		DensityMap map = new DensityMap(granularityX, granularityY, envelope, density);
 		String clusterRegionFile = zipFolderPath + "combinedDensity.txt";
-		double alpha = 0.5;
+		double alpha1 = 0.1;
+		double alpha2 = 10;
 		// only find one density region
 		int numIteration = 1;
-		ArrayList<Envelope> clusteredRegion = map.cluster(alpha, numIteration);
+		ArrayList<Envelope> clusteredRegion = map.cluster(numIteration, alpha1, alpha2);
 		usDensity.writePartition(clusterRegionFile, clusteredRegion);
 	}
 
@@ -464,8 +466,32 @@ public class USDensity {
 	}
 
 	private void writePartition(String clusterRegionFile, ArrayList<Envelope> clusteredRegion) {
-		// FIXME writePartition
-
+		try {
+			 
+			File file = new File(clusterRegionFile);
+ 
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+ 
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true)));
+			bw.write(clusteredRegion.size());
+			bw.newLine();
+			
+			for (int i = 0; i < clusteredRegion.size(); i++) {
+				Envelope envelope = clusteredRegion.get(i);
+				String s = envelope.getMinX() + ";" + envelope.getMinY() + ";" + envelope.getMaxX() + ";" + envelope.getMaxY();
+				bw.write(s);
+				bw.newLine();
+			}
+			
+			bw.close();
+ 
+ 
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
+	
 
 }

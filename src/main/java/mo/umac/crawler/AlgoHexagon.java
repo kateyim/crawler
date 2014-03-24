@@ -30,7 +30,7 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class AlgoHexagon extends Strategy {
 
-	public static Logger logger = Logger.getLogger(AlgoHexagon.class.getName());
+//	public static Logger logger = Logger.getLogger(AlgoHexagon.class.getName());
 
 	public AlgoHexagon() {
 		super();

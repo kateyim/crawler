@@ -24,7 +24,7 @@ import com.vividsolutions.jts.geom.LineSegment;
  */
 public class AlgoSlice extends Strategy {
 
-	public static Logger logger = Logger.getLogger(AlgoSlice.class.getName());
+//	public static Logger logger = Logger.getLogger(AlgoSlice.class.getName());
 
 	public AlgoSlice() {
 		super();
