@@ -24,8 +24,6 @@ public class DensityMap {
 
 	private int numGridY;
 
-	private int numGrid;
-
 	/**
 	 * The longitude and latitude of the entire envelope
 	 */
@@ -36,19 +34,22 @@ public class DensityMap {
 	 */
 	private Grid[][] grids;
 
-	private ArrayList<Envelope> denseRegions = new ArrayList<Envelope>();
-	private ArrayList<Envelope> zeroRegions = new ArrayList<Envelope>();
+	// private ArrayList<Envelope> denseRegions = new ArrayList<Envelope>();
 
 	public DensityMap(double granularityX, double granularityY, Envelope envelope, ArrayList<double[]> density) {
 		this.granularityX = granularityX;
 		this.granularityY = granularityY;
 		this.boardEnvelope = envelope;
-		// FIXME complemented (Do all field variables are useful?)
-		init();
-	}
-
-	private void init() {
-		// TODO
+		numGridX = (int) Math.ceil(envelope.getWidth() / granularityX);
+		numGridY = (int) Math.ceil(envelope.getHeight() / granularityY);
+		grids = new Grid[numGridX][numGridY];
+		for (int i = 1; i < density.size(); i++) {
+			double[] aRow = density.get(i);
+			for (int j = 1; j < aRow.length; j++) {
+				double d = aRow[j];
+				grids[i-1][j-1] = new Grid(i-1, j-1, d, Grid.Flag.UNVISITED);
+			}
+		}
 	}
 
 	/**
@@ -56,45 +57,72 @@ public class DensityMap {
 	 * </p> then find the most dense region in the remained area, begin to expand.
 	 * </p> Iterate this process for 3-4 times.
 	 * </p> At last partition the rest regions.
+	 * @param numIteration
+	 *            now : only works for numIteration = 1; can be extended later
+	 * @param alpha1 TODO
+	 * @param alpha2 TODO
 	 * 
-	 * @param alpha
-	 *            is the threshold for computing similarity
 	 * @return final results
 	 */
-	public ArrayList<Envelope> cluster(double alpha, int numIteration) {
-		boolean stop = false;
-		int c = 1;
+	public ArrayList<Envelope> cluster(int numIteration, double alpha1, double alpha2) {
+		int i = 1;
 		// clone this grid map for sorting the order.
-		ArrayList<Grid> sortedMap = clone(grids);
+		// ArrayList<Grid> sortedMap = clone(grids);
 		// TODO lack the mapping relationship to the original grids (for tagging unvisited and visited)
-		sortDensityMap(sortedMap);
+		// sortDensityMap(sortedMap);
 
-		while (!stop) {
-
-			if (c >= numIteration) {
-				stop = true;
+		Envelope entireRegion = new Envelope(0, numGridX, 0, numGridY);
+		ArrayList<Envelope> clusterGrids = new ArrayList<Envelope>();
+		Envelope denseRegion = null;
+		while (i <= numIteration) {
+			// Grid seed = findTheDensest(sortedMap);
+			Grid seed = getTheDensest();
+			if (logger.isDebugEnabled()) {
+				logger.debug(seed.toString());
 			}
-
-			Grid seed = findTheDensest(sortedMap);
-			ArrayList<Envelope> denseRegion = expandFromMiddle(seed, alpha);
-
-			// treeDense.addRectangle(c, denseRegion);
-			denseRegions.addAll(denseRegion);
-			c++;
+			denseRegion = expandFromMiddle(seed, alpha1, alpha2);
+			clusterGrids = partition(entireRegion, denseRegion);
+			i++;
 		}
-		// TODO Dealing with the zero grids, delete zero grids from the 4 corners of the rectangle.
-		// Because using a big rectangle to bound the whole region is reasonable but add extra spaces.
-		// for (int i = 0; i <= numGridX - 1; i = i + numGridX - 1) {
-		// for (int j = 0; j <= numGridY - 1; j = j + numGridY - 1) {
-		// Grid seed0 = grids[i][j];
-		// Envelope zeroGridBoard = expandFromBoard(seed0);
-		// tree0.addRectangle(c, zeroGridBoard);
-		//
-		// }
-		// }
+		// coverting
+		ArrayList<Envelope> clusterEnvelopes = new ArrayList<Envelope>();
+		for (int j = 0; j < clusterGrids.size(); j++) {
+			clusterEnvelopes.add(convert(clusterGrids.get(j)));
+		}
+		clusterEnvelopes.add(convert(denseRegion));
+		return clusterEnvelopes;
 
-		ArrayList<Envelope> clusterRegion = partition();
-		return clusterRegion;
+	}
+
+	private Grid getTheDensest() {
+		double max = -1;
+		Grid grid = null;
+		for (int i = 0; i < numGridX; i++) {
+			for (int j = 0; j < numGridY; j++) {
+				if (max < grids[i][j].density) {
+					max = grids[i][j].density;
+					grid = new Grid(grids[i][j]);
+				}
+			}
+		}
+		return grid;
+	}
+
+	/**
+	 * Convert from grid to latitude and longitude
+	 * 
+	 * @param clusterGrids
+	 * @return
+	 */
+	private Envelope convert(Envelope grid) {
+		// TODO need check
+		double minX = boardEnvelope.getMinX();
+		double minY = boardEnvelope.getMinY();
+		double x1 = minX + grid.getMinX() * granularityX;
+		double x2 = x1 + granularityX;
+		double y1 = minY + grid.getMinY() * granularityY;
+		double y2 = y1 + granularityY;
+		return new Envelope(x1, x2, y1, y2);
 	}
 
 	/**
@@ -105,73 +133,33 @@ public class DensityMap {
 	 * </p> grids
 	 * </p> boardEnvelope, numGridX, numGridY, granularityX, granularityY
 	 * 
-	 * @return in longitude and latitude
+	 * @param denseRegion
+	 * @return in grid
 	 */
-	private ArrayList<Envelope> partition() {
-		// FIXME how !!!
-
-		// TODO delete 0 regions
-		return null;
-	}
-
-	private Envelope expandFromBoard(Grid seed) {
-
-		double x1Board = seed.x;
-		double x2Board = seed.x;
-		double y1Board = seed.y;
-		double y2Board = seed.y;
-
-		// right
-		Queue<Grid> q = new LinkedList<Grid>();
-		if (seed.flag == Flag.UNVISITED) {
-			// TODO
-		}
-		while (!q.isEmpty()) {
-			Grid g = q.poll();
-			ArrayList<Grid> udlrList = upDownLeftRight(g);
-			for (int i = 0; i < udlrList.size(); i++) {
-				Grid neighbor = udlrList.get(i);
-				if (neighbor.flag == Flag.UNVISITED) {
-					if (neighbor.density == 0) {
-						neighbor.setFlag(Flag.ZERO);
-						q.add(neighbor);
-
-						switch (i) {
-						case 0: // the left one
-							x1Board--;
-							break;
-						case 1: // the right one
-							x2Board++;
-							break;
-						case 2:
-							// the up one
-							y1Board--;
-							break;
-						case 3:// the down one
-							y2Board++;
-							break;
-						}
-
-					} else {
-						neighbor.setFlag(Flag.BORDER);
-					}
-				}
-			}
-		}
-
-		// FIXME find the maximum rectangle containing all 0 inside [x1Board, x2Board] * [y1Board, y2Board].
-		Envelope envelope = new Envelope();
-		return envelope;
+	private ArrayList<Envelope> partition(Envelope entireRegion, Envelope denseRegion) {
+		ArrayList<Envelope> clusterGrids = new ArrayList<Envelope>();
+		// TODO need check
+		
+		Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), denseRegion.getMinY(), entireRegion.getMaxY());
+		Envelope e2 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(), entireRegion.getMaxY());
+		Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMaxY());
+		Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMinY());
+		clusterGrids.add(e1);
+		clusterGrids.add(e2);
+		clusterGrids.add(e3);
+		clusterGrids.add(e4);
+		return clusterGrids;
 	}
 
 	/**
 	 * Find a dense region from the center point
-	 * 
+	 * @param alpha1 TODO
+	 * @param alpha2 TODO
 	 * @param centerGrid
-	 * @param alpha
+	 * 
 	 * @return a clustered envelope
 	 */
-	private ArrayList<Envelope> expandFromMiddle(Grid seed, double alpha) {
+	private Envelope expandFromMiddle(Grid seed, double alpha1, double alpha2) {
 		// The most widespread boundaries.
 		double xLeft = seed.x;
 		double xRight = seed.x;
@@ -181,7 +169,7 @@ public class DensityMap {
 
 		Queue<Grid> queue = new LinkedList<Grid>();
 		queue.add(seed);
-		while (!queue.isEmpty()) {
+		while (!queue.isEmpty()) { 
 			Grid oneGrid = queue.poll();
 			ArrayList<Grid> udlrList = upDownLeftRight(oneGrid);
 			for (int i = 0; i < udlrList.size(); i++) {
@@ -189,7 +177,7 @@ public class DensityMap {
 				if (neighbor.flag == Flag.UNVISITED) {
 					// simple similarity function
 					double similarity = Math.abs((neighbor.density - seed.density) / seed.density);
-					if (similarity <= alpha) {
+					if (similarity <= alpha2 && similarity >= alpha1) {
 						neighbor.flag = Flag.VISITED;
 						queue.add(neighbor);
 						if (xLeft > neighbor.x) {
@@ -213,12 +201,21 @@ public class DensityMap {
 		}
 		return densityEnvelopes(borderGrid, xLeft, xRight, yLeft, yRight);
 	}
-	
-	private ArrayList<Envelope> densityEnvelopes(ArrayList<Grid> borderGrid, double xLeft, double xRight, double yLeft, double yRight){
-		ArrayList<Envelope> list = new ArrayList<Envelope>();
-		// FIXME yanhui here
-		
-		return list;
+
+	/**
+	 * find rectangles inside the borderGrid
+	 * </p> now simply return the boundary rectangle
+	 * 
+	 * @param borderGrid
+	 * @param xLeft
+	 * @param xRight
+	 * @param yLeft
+	 * @param yRight
+	 * @return
+	 */
+	private Envelope densityEnvelopes(ArrayList<Grid> borderGrid, double xLeft, double xRight, double yLeft, double yRight) {
+		Envelope envelope = new Envelope(xLeft, xRight, yLeft, yRight);
+		return envelope;
 	}
 
 	/**
@@ -314,14 +311,6 @@ public class DensityMap {
 		this.granularityY = granularityY;
 	}
 
-	public int getNumGrid() {
-		return numGrid;
-	}
-
-	public void setNumGrid(int numGrid) {
-		this.numGrid = numGrid;
-	}
-
 	public Envelope getBoardEnvelope() {
 		return boardEnvelope;
 	}
@@ -358,10 +347,29 @@ class Grid {
 
 	}
 
+	public Grid(int x, int y, double density, Flag flag) {
+		super();
+		this.x = x;
+		this.y = y;
+		this.density = density;
+		this.flag = flag;
+	}
+
 	public Grid(Grid anotherGrid) {
 		this.x = anotherGrid.x;
 		this.y = anotherGrid.y;
 		this.density = anotherGrid.density;
+		this.flag = anotherGrid.flag;
+	}
+	
+	@Override
+	public String toString(){
+		StringBuffer sb = new StringBuffer("Grid: ");
+		sb.append("[" + x + " , " + y + "], ");
+		sb.append("density = " + density);
+		sb.append(", " + flag);
+		return sb.toString();
+		
 	}
 
 }

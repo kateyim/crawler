@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 
+import mo.umac.metadata.AQuery;
+import mo.umac.metadata.ResultSetD2;
 import mo.umac.spatial.Circle;
 import myrtree.MyRTree;
 
@@ -26,11 +28,11 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author kate
  * 
  */
-public class HexagonCrawler extends OfflineStrategy {
+public class AlgoHexagon extends Strategy {
 
-	public static Logger logger = Logger.getLogger(HexagonCrawler.class.getName());
+//	public static Logger logger = Logger.getLogger(AlgoHexagon.class.getName());
 
-	public HexagonCrawler() {
+	public AlgoHexagon() {
 		super();
 		logger.info("------------HexagonCrawler------------");
 	}
@@ -78,7 +80,7 @@ public class HexagonCrawler extends OfflineStrategy {
 			if (!coveredPoint(Strategy.rtreeRectangles, start)) {
 				Envelope aRectangle = expand(state, category, query, start);
 				// SliceCrawler
-				SliceCrawler sliceCrawler = new SliceCrawler();
+				AlgoSlice sliceCrawler = new AlgoSlice();
 				sliceCrawler.crawl(state, category, query, aRectangle);
 			} else {
 				continue;
@@ -161,7 +163,7 @@ public class HexagonCrawler extends OfflineStrategy {
 		List circleList = new ArrayList<Circle>();
 		// deal with the first point
 		Coordinate center = queue.poll();
-		ResultSet resultSet = oneQueryProcedure(state, category, query, center);
+		ResultSetD2 resultSet = oneQueryProcedure(state, category, query, center);
 		Circle aCircle = resultSet.getCircles().get(0);
 
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -256,10 +258,10 @@ public class HexagonCrawler extends OfflineStrategy {
 	/**
 	 * The common procedure for a query
 	 */
-	private ResultSet oneQueryProcedure(String state, int category, String query, Coordinate center) {
+	private ResultSetD2 oneQueryProcedure(String state, int category, String query, Coordinate center) {
 		AQuery aQuery = new AQuery(center, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
-		ResultSet resultSet = query(aQuery);
-		Coordinate farthestCoordinate = OneDimensionalCrawler.farthest(resultSet);
+		ResultSetD2 resultSet = query(aQuery);
+		Coordinate farthestCoordinate = CrawlerD1.farthest(resultSet);
 		if (farthestCoordinate == null) {
 			logger.error("farestest point is null");
 		}

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package mo.umac.crawler;
+package mo.umac.metadata;
 
 import java.util.List;
 

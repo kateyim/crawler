@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import mo.umac.crawler.APOI;
 import mo.umac.crawler.Strategy;
+import mo.umac.metadata.APOI;
 
 import org.apache.log4j.Logger;
 

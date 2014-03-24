@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.ResultSetD1;
 import mo.umac.spatial.Circle;
 
 import org.apache.log4j.Logger;
@@ -17,15 +19,14 @@ import com.vividsolutions.jts.geom.LineSegment;
 
 /**
  * Cover the nearest point, or the biggest rectangle of the union of a list of circles.
- *  
+ * 
  * @author kate
- *
  */
-public class SliceCrawler extends OfflineStrategy {
+public class AlgoSlice extends Strategy {
 
-	public static Logger logger = Logger.getLogger(SliceCrawler.class.getName());
+//	public static Logger logger = Logger.getLogger(AlgoSlice.class.getName());
 
-	public SliceCrawler() {
+	public AlgoSlice() {
 		super();
 		logger.info("------------SliceCrawler------------");
 	}
@@ -37,7 +38,7 @@ public class SliceCrawler extends OfflineStrategy {
 	 * int, java.lang.String, com.vividsolutions.jts.geom.Envelope)
 	 * This is the implementation of the upper bound algorithm.
 	 */
-	@Override	
+	@Override
 	public void crawl(String state, int category, String query, Envelope envelope) {
 		if (logger.isDebugEnabled()) {
 			logger.info("------------crawling---------");
@@ -54,7 +55,7 @@ public class SliceCrawler extends OfflineStrategy {
 			logger.debug("leftLine = " + leftLine.toString());
 		}
 		//
-		ResultSetOneDimensional oneDimensionalResultSet = OneDimensionalCrawler.oneDimCrawl(state, category, query, leftLine);
+		ResultSetD1 oneDimensionalResultSet = CrawlerD1.oneDimCrawl(state, category, query, leftLine);
 		oneDimensionalResultSet.setLine(leftLine);
 
 		sortingCircles(oneDimensionalResultSet);
@@ -99,7 +100,7 @@ public class SliceCrawler extends OfflineStrategy {
 			logger.debug("rightLine = " + rightLine.toString());
 		}
 		//
-		oneDimensionalResultSet = OneDimensionalCrawler.oneDimCrawl(state, category, query, rightLine);
+		oneDimensionalResultSet = CrawlerD1.oneDimCrawl(state, category, query, rightLine);
 		oneDimensionalResultSet.setLine(rightLine);
 
 		sortingCircles(oneDimensionalResultSet);
@@ -164,7 +165,7 @@ public class SliceCrawler extends OfflineStrategy {
 			logger.debug("middleLine = " + middleLine.toString());
 		}
 		//
-		ResultSetOneDimensional oneDimensionalResultSet = OneDimensionalCrawler.oneDimCrawl(state, category, query, middleLine);
+		ResultSetD1 oneDimensionalResultSet = CrawlerD1.oneDimCrawl(state, category, query, middleLine);
 		oneDimensionalResultSet.setLine(middleLine);
 
 		sortingCircles(oneDimensionalResultSet);
@@ -328,7 +329,7 @@ public class SliceCrawler extends OfflineStrategy {
 	 * 
 	 * @param oneDimensionalResultSet
 	 */
-	private void sortingCircles(ResultSetOneDimensional oneDimensionalResultSet) {
+	private void sortingCircles(ResultSetD1 oneDimensionalResultSet) {
 		if (logger.isDebugEnabled()) {
 			// print
 			logger.debug("before sorting the circles: ");
@@ -373,7 +374,8 @@ public class SliceCrawler extends OfflineStrategy {
 	 * @param envelopeState
 	 * @param envelope
 	 */
-	private void fillGaps(String state, int category, String query, LineSegment middleLine, LineSegment boardLine, ResultSetOneDimensional oneDimensionalResultSet) {
+	private void fillGaps(String state, int category, String query, LineSegment middleLine, LineSegment boardLine,
+			ResultSetD1 oneDimensionalResultSet) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("...............fillGaps................");
 		}
@@ -401,7 +403,8 @@ public class SliceCrawler extends OfflineStrategy {
 			Circle circle = circles.get(i);
 			List<Coordinate> list = GeoOperator.intersect(circle, boardLine);
 			if (logger.isDebugEnabled()) {
-				logger.debug("intersection of circle: " + circle.getCenter().toString() + ", " + circle.getRadius() + " with line: " + boardLine.toString() + " is: ");
+				logger.debug("intersection of circle: " + circle.getCenter().toString() + ", " + circle.getRadius() + " with line: " + boardLine.toString()
+						+ " is: ");
 				if (list == null) {
 					logger.error("not intersect with a circle");
 				} else {
@@ -557,7 +560,7 @@ public class SliceCrawler extends OfflineStrategy {
 	 * @param oneDimensionalResultSet
 	 * @return the left & the right nearest point
 	 */
-	private double xNearestLeftCoordinates(Envelope envelopeState, LineSegment middleLine, ResultSetOneDimensional oneDimensionalResultSet) {
+	private double xNearestLeftCoordinates(Envelope envelopeState, LineSegment middleLine, ResultSetD1 oneDimensionalResultSet) {
 		double minXBoundary = envelopeState.getMinX() - 1;
 		double bigX = minXBoundary;
 		List<APOI> leftPOIs = oneDimensionalResultSet.getLeftPOIs();
@@ -572,7 +575,7 @@ public class SliceCrawler extends OfflineStrategy {
 		return bigX;
 	}
 
-	private double xNearestRightCoordinates(Envelope envelopeState, LineSegment middleLine, ResultSetOneDimensional oneDimensionalResultSet) {
+	private double xNearestRightCoordinates(Envelope envelopeState, LineSegment middleLine, ResultSetD1 oneDimensionalResultSet) {
 		double maxXBoundary = envelopeState.getMaxX() + 1;
 		double smallX = maxXBoundary;
 		List<APOI> rightPOIs = oneDimensionalResultSet.getRightPOIs();
@@ -592,7 +595,7 @@ public class SliceCrawler extends OfflineStrategy {
 	 * 
 	 * @return
 	 */
-	private double distanceCovered(Envelope envelopeState, ResultSetOneDimensional oneDimensionalResultSet) {
+	private double distanceCovered(Envelope envelopeState, ResultSetD1 oneDimensionalResultSet) {
 		List<Circle> circleList = oneDimensionalResultSet.getCircles();
 		if (circleList == null) {
 			logger.error(circleList == null);
@@ -692,7 +695,5 @@ public class SliceCrawler extends OfflineStrategy {
 		LineSegment lineSeg = new LineSegment(xOutsideCoordinate, y0, xOutsideCoordinate, y1);
 		return lineSeg;
 	}
-	
+
 }
-
-

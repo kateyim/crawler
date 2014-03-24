@@ -1,4 +1,4 @@
-package mo.umac.db;
+package mo.umac.analytics;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,6 +14,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import mo.umac.db.DBExternal;
+import mo.umac.db.H2DB;
 
 
 public class MainData {

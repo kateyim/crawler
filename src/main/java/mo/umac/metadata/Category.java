@@ -1,4 +1,4 @@
-package mo.umac.crawler;
+package mo.umac.metadata;
 
 public class Category {
 	private int id;

@@ -5,6 +5,10 @@ package mo.umac.crawler;
 
 import java.util.List;
 
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.AQuery;
+import mo.umac.metadata.ResultSetD1;
+import mo.umac.metadata.ResultSetD2;
 import mo.umac.spatial.Circle;
 
 import org.apache.log4j.Logger;
@@ -22,12 +26,12 @@ import com.vividsolutions.jts.geomgraph.Position;
  * 
  * @author Kate
  */
-public class OneDimensionalCrawler extends OfflineStrategy {
+public class CrawlerD1 extends Strategy {
 
-	public static Logger logger = Logger.getLogger(OneDimensionalCrawler.class.getName());
+//	public static Logger logger = Logger.getLogger(CrawlerD1.class.getName());
 
-	public static ResultSetOneDimensional oneDimCrawl(String state, int category, String query, LineSegment middleLine) {
-		ResultSetOneDimensional finalResultSet = new ResultSetOneDimensional();
+	public static ResultSetD1 oneDimCrawl(String state, int category, String query, LineSegment middleLine) {
+		ResultSetD1 finalResultSet = new ResultSetD1();
 		Coordinate up = middleLine.p0;
 		Coordinate down = middleLine.p1;
 		if (logger.isDebugEnabled()) {
@@ -37,7 +41,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 		// query the one end point
 		// TODO only return
 		AQuery aQuery = new AQuery(up, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
-		ResultSet resultSet = query(aQuery);
+		ResultSetD2 resultSet = query(aQuery);
 		if (logger.isDebugEnabled()) {
 			logger.debug("resultSet.getPOIs().size() = " + resultSet.getPOIs().size());
 		}
@@ -139,7 +143,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 		}
 
 		LineSegment newMiddleLine = new LineSegment(up.x, newUp, up.x, newDown);
-		ResultSetOneDimensional middleResultSet = oneDimCrawlFromMiddle(state, category, query, newMiddleLine);
+		ResultSetD1 middleResultSet = oneDimCrawlFromMiddle(state, category, query, newMiddleLine);
 		addResults(finalResultSet, middleResultSet);
 		return finalResultSet;
 	}
@@ -158,8 +162,8 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	 * @param middleLine
 	 * @return
 	 */
-	public static ResultSetOneDimensional oneDimCrawlFromMiddle(String state, int category, String query, LineSegment middleLine) {
-		ResultSetOneDimensional finalResultSet = new ResultSetOneDimensional();
+	public static ResultSetD1 oneDimCrawlFromMiddle(String state, int category, String query, LineSegment middleLine) {
+		ResultSetD1 finalResultSet = new ResultSetD1();
 		Coordinate up = middleLine.p0;
 		Coordinate down = middleLine.p1;
 		Coordinate center = middleLine.midPoint();
@@ -171,7 +175,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 			logger.debug("center = " + center.toString());
 		}
 		AQuery aQuery = new AQuery(center, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
-		ResultSet resultSet = query(aQuery);
+		ResultSetD2 resultSet = query(aQuery);
 		if (logger.isDebugEnabled()) {
 			logger.debug("resultSet.getPOIs().size() = " + resultSet.getPOIs().size());
 		}
@@ -220,7 +224,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 			logger.debug("newDown: " + newDown.toString());
 			logger.debug("upperLine: " + upperLine.toString());
 		}
-		ResultSetOneDimensional newLeftResultSet = oneDimCrawlFromMiddle(state, category, query, upperLine);
+		ResultSetD1 newLeftResultSet = oneDimCrawlFromMiddle(state, category, query, upperLine);
 		addResults(finalResultSet, newLeftResultSet);
 		// lower
 		// Coordinate newLeft = middleLine.pointAlongOffset(0.5, radius);
@@ -230,7 +234,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 			logger.debug("newUp: " + newUp.toString());
 			logger.debug("lowerLine: " + lowerLine.toString());
 		}
-		ResultSetOneDimensional newRightResultSet = oneDimCrawlFromMiddle(state, category, query, lowerLine);
+		ResultSetD1 newRightResultSet = oneDimCrawlFromMiddle(state, category, query, lowerLine);
 		addResults(finalResultSet, newRightResultSet);
 
 		return finalResultSet;
@@ -253,7 +257,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 		return newDown;
 	}
 
-	public static Coordinate farthest(ResultSet resultSet) {
+	public static Coordinate farthest(ResultSetD2 resultSet) {
 		Coordinate farthestCoordinate;
 		int size = resultSet.getPOIs().size();
 		if (size == 0) {
@@ -274,7 +278,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	 * @param lower
 	 * @return
 	 */
-	private static Coordinate farthest(ResultSet resultSet, Coordinate p, boolean lower) {
+	private static Coordinate farthest(ResultSetD2 resultSet, Coordinate p, boolean lower) {
 		int size = resultSet.getPOIs().size();
 		if (size == 0) {
 			return null;
@@ -298,7 +302,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 		}
 	}
 
-	private static void addResults(Coordinate center, LineSegment line, ResultSetOneDimensional finalResultSet, ResultSet resultSet) {
+	private static void addResults(Coordinate center, LineSegment line, ResultSetD1 finalResultSet, ResultSetD2 resultSet) {
 		List<APOI> pois = resultSet.getPOIs();
 		for (int i = 0; i < pois.size(); i++) {
 			APOI poi = pois.get(i);
@@ -318,7 +322,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 		finalResultSet.addAll(finalResultSet.getCircles(), resultSet.getCircles());
 	}
 
-	private static void addResults(ResultSetOneDimensional finalResultSet, ResultSetOneDimensional newResultSet) {
+	private static void addResults(ResultSetD1 finalResultSet, ResultSetD1 newResultSet) {
 		finalResultSet.addAll(finalResultSet.getLeftPOIs(), newResultSet.getLeftPOIs());
 		finalResultSet.addAll(finalResultSet.getRightPOIs(), newResultSet.getRightPOIs());
 		finalResultSet.addAll(finalResultSet.getCircles(), newResultSet.getCircles());
