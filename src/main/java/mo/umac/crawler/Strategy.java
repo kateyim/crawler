@@ -1,10 +1,8 @@
 package mo.umac.crawler;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import mo.umac.db.DBExternal;
 import mo.umac.db.DBInMemory;
