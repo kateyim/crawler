@@ -65,6 +65,7 @@ public class DensityMap {
 	 * @return final results
 	 */
 	public ArrayList<Envelope> cluster(int numIteration, double alpha1, double alpha2) {
+		// FIXME yanhui cluster
 		int i = 1;
 		// clone this grid map for sorting the order.
 		// ArrayList<Grid> sortedMap = clone(grids);

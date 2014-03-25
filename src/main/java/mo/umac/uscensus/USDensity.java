@@ -79,7 +79,7 @@ public class USDensity {
 		// for NY
 		Envelope envelope = new Envelope(NYLongitudeMin, NYLongitudeMax, NYLatitudeMin, NYLatitudeMax);
 		String zipFolderPath = "../data-map/us-road/new-york/";
-		String densityFile = zipFolderPath + "densityMap.txt";
+		String densityFile = zipFolderPath + "densityMap.mbr";
 		double granularityX = 0.08;
 		double granularityY = 0.04;
 
@@ -474,13 +474,14 @@ public class USDensity {
 				file.createNewFile();
 			}
  
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true)));
-			bw.write(clusteredRegion.size());
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, false)));
+			bw.write(Integer.toString(clusteredRegion.size()));
 			bw.newLine();
 			
 			for (int i = 0; i < clusteredRegion.size(); i++) {
 				Envelope envelope = clusteredRegion.get(i);
-				String s = envelope.getMinX() + ";" + envelope.getMinY() + ";" + envelope.getMaxX() + ";" + envelope.getMaxY();
+//				String s = envelope.getMinX() + ";" + envelope.getMinY() + ";" + envelope.getMaxX() + ";" + envelope.getMaxY();
+				String s = envelope.getMinY() + ";" + envelope.getMinX() + ";" + envelope.getMaxY() + ";" + envelope.getMaxX();
 				bw.write(s);
 				bw.newLine();
 			}

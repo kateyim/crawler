@@ -1,6 +1,6 @@
 package mo.umac.analytics;
 
-public class DrawingOnOSM {
+public class MainForDn {
 
 	/**
 	 * @param args
