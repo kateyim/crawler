@@ -27,20 +27,20 @@ public class MainData {
 	public static void main(String[] args) {
 		MainData m = new MainData();
 		// ny
-		// String stateQ = "NY";
-		// String categoryQ = "Restaurants";
-		// String dbNameSource = "../crawler-data/yahoolocal-h2/source/ny";
-		// String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ny-prun";
+		String stateQ = "NY";
+		String categoryQ = "Restaurants";
+		String dbNameSource = "../crawler-data/yahoolocal-h2/source/ny";
+		String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ny-prun";
 		// ut
 		// String stateQ = "UT";
 		// String categoryQ = "Restaurants";
 		// String dbNameSource = "../crawler-data/yahoolocal-h2/source/ut";
 		// String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ut-prun";
 		// ok
-		String stateQ = "OK";
-		String categoryQ = "Restaurants";
-		String dbNameSource = "../crawler-data/yahoolocal-h2/source/ok";
-		String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ok-prun";
+//		String stateQ = "OK";
+//		String categoryQ = "Restaurants";
+//		String dbNameSource = "../crawler-data/yahoolocal-h2/source/ok";
+//		String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ok-prun";
 		// step 1
 		String folderPath = DBExternal.FOLDER_NAME + "/96926236+Restaurants/" + stateQ + "/";
 		// m.convertFromQRFileToH2(dbNameSource, folderPath);

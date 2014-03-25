@@ -19,7 +19,6 @@ import myrtree.MyRTree;
 
 import org.apache.log4j.Logger;
 
-
 import com.vividsolutions.jts.geom.Coordinate;
 
 public class DBInMemory {
@@ -58,8 +57,10 @@ public class DBInMemory {
 		pois = Strategy.dbExternal.readFromExtenalDB(category, state);
 	}
 
-	// public void writeToExternalDB(int queryID, int level, int parentID, YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
-	// Strategy.dbExternal.writeToExternalDBFromOnline(queryID, level, parentID, qc, resultSet);
+	// public void writeToExternalDB(int queryID, int level, int parentID,
+	// YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
+	// Strategy.dbExternal.writeToExternalDBFromOnline(queryID, level, parentID,
+	// qc, resultSet);
 	// }
 
 	/**
@@ -70,7 +71,8 @@ public class DBInMemory {
 	 * @param query
 	 * @param resultSet
 	 */
-	private void writeToExternalDB(int queryID, AQuery query, ResultSetD2 resultSet) {
+	private void writeToExternalDB(int queryID, AQuery query,
+			ResultSetD2 resultSet) {
 		Strategy.dbExternal.writeToExternalDB(queryID, query, resultSet);
 	}
 
@@ -97,7 +99,8 @@ public class DBInMemory {
 		if (logger.isDebugEnabled()) {
 			logger.debug("query point = " + queryPoint.toString());
 		}
-		List<Integer> resultsID = rtreePoints.searchNN(queryPoint, qc.getTopK());
+		List<Integer> resultsID = rtreePoints
+				.searchNN(queryPoint, qc.getTopK());
 		//
 		for (int i = 0; i < resultsID.size(); i++) {
 			int id = resultsID.get(i);
@@ -153,7 +156,7 @@ public class DBInMemory {
 
 		if (queryID % 10 == 0) {
 			logger.info("countNumQueries = " + Strategy.countNumQueries);
-			logger.info("number of points crawled = " + numCrawlerPoints());
+			logger.info("countCrawledPoints = " + numCrawlerPoints());
 		}
 		Strategy.countNumQueries++;
 		return resultSet;

@@ -229,7 +229,7 @@ public abstract class Strategy {
 		logger.info("time for crawling = " + (after - before) / 1000);
 		//
 		logger.info("countNumQueries = " + Strategy.countNumQueries);
-		logger.info("number of points crawled = "
+		logger.info("countCrawledPoints = "
 				+ Strategy.dbInMemory.poisIDs.size());
 		logger.info("Finished ! Oh ! Yeah! ");
 
