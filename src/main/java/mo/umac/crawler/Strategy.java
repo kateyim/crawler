@@ -42,7 +42,8 @@ public abstract class Strategy {
 	 * The maximum number of results on can get through this query by only
 	 * changing the start value.
 	 */
-	protected static int MAX_TOTAL_RESULTS_RETURNED = MAX_START + MAX_RESULTS_NUM; // =270;
+	protected static int MAX_TOTAL_RESULTS_RETURNED;// = MAX_START +
+													// MAX_RESULTS_NUM; // =270;
 
 	public static int countNumQueries = 1;
 
@@ -66,7 +67,8 @@ public abstract class Strategy {
 	/**
 	 * This is the crawling algorithm
 	 */
-	protected abstract void crawl(String state, int category, String query, Envelope envelopeState);
+	protected abstract void crawl(String state, int category, String query,
+			Envelope envelopeState);
 
 	/**
 	 * Entrance of the crawler
@@ -74,14 +76,18 @@ public abstract class Strategy {
 	 * @param listNameStates
 	 * @param listCategoryNames
 	 */
-	protected void callCrawling(LinkedList<String> listNameStates, List<String> listCategoryNames) {
+	protected void callCrawling(LinkedList<String> listNameStates,
+			List<String> listCategoryNames) {
 
 		LinkedList<Envelope> listEnvelopeStates = selectEnvelopes(listNameStates);
 		if (listNameStates.size() == 0) {
-			listNameStates = (LinkedList<String>) UScensusData.stateName(UScensusData.STATE_DBF_FILE_NAME);
+			listNameStates = (LinkedList<String>) UScensusData
+					.stateName(UScensusData.STATE_DBF_FILE_NAME);
 		}
-		HashMap<Integer, String> categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);
-		crawlByCategoriesStates(listEnvelopeStates, listCategoryNames, listNameStates, categoryIDMap);
+		HashMap<Integer, String> categoryIDMap = FileOperator
+				.readCategoryID(CATEGORY_ID_PATH);
+		crawlByCategoriesStates(listEnvelopeStates, listCategoryNames,
+				listNameStates, categoryIDMap);
 	}
 
 	/**
@@ -91,10 +97,13 @@ public abstract class Strategy {
 	 * @param listNameStates
 	 * @return
 	 */
-	private LinkedList<Envelope> selectEnvelopes(LinkedList<String> listNameStates) {
+	private LinkedList<Envelope> selectEnvelopes(
+			LinkedList<String> listNameStates) {
 		// State's information provided by UScensus
-		LinkedList<Envelope> allEnvelopeStates = (LinkedList<Envelope>) UScensusData.MBR(UScensusData.STATE_SHP_FILE_NAME);
-		LinkedList<String> allNameStates = (LinkedList<String>) UScensusData.stateName(UScensusData.STATE_DBF_FILE_NAME);
+		LinkedList<Envelope> allEnvelopeStates = (LinkedList<Envelope>) UScensusData
+				.MBR(UScensusData.STATE_SHP_FILE_NAME);
+		LinkedList<String> allNameStates = (LinkedList<String>) UScensusData
+				.stateName(UScensusData.STATE_DBF_FILE_NAME);
 
 		LinkedList<Envelope> listEnvelopeStates = new LinkedList<Envelope>();
 
@@ -142,15 +151,17 @@ public abstract class Strategy {
 		Strategy.dbInMemory.poisCrawledTimes = new HashMap<Integer, Integer>();
 		Strategy.dbInMemory.readFromExtenalDB(category, state);
 		Strategy.dbInMemory.index();
-		logger.info("There are in total " + Strategy.dbInMemory.pois.size() + " points.");
+		logger.info("There are in total " + Strategy.dbInMemory.pois.size()
+				+ " points.");
 		// target database
 		Strategy.dbExternal.createTables(Main.DB_NAME_TARGET);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see mo.umac.crawler.YahooLocalCrawlerStrategy#endData()
-	 * shut down the connection
+	 * 
+	 * @see mo.umac.crawler.YahooLocalCrawlerStrategy#endData() shut down the
+	 * connection
 	 */
 	protected static void endData() {
 		DBExternal.distroyConn();
@@ -158,12 +169,15 @@ public abstract class Strategy {
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see
 	 * mo.umac.crawler.YahooLocalCrawlerStrategy#crawlByCategoriesStates(java
 	 * .util.LinkedList, java.util.List, java.util.LinkedList,
 	 * java.util.HashMap)
 	 */
-	protected void crawlByCategoriesStates(LinkedList<Envelope> listEnvelopeStates, List<String> listCategoryNames, LinkedList<String> nameStates,
+	protected void crawlByCategoriesStates(
+			LinkedList<Envelope> listEnvelopeStates,
+			List<String> listCategoryNames, LinkedList<String> nameStates,
 			HashMap<Integer, String> categoryIDMap) {
 
 		long before = System.currentTimeMillis();
@@ -181,7 +195,8 @@ public abstract class Strategy {
 
 				// initial category
 				int category = -1;
-				Object searchingResult = CommonUtils.getKeyByValue(categoryIDMap, query);
+				Object searchingResult = CommonUtils.getKeyByValue(
+						categoryIDMap, query);
 				if (searchingResult != null) {
 					category = (Integer) searchingResult;
 					//
@@ -196,7 +211,8 @@ public abstract class Strategy {
 					crawl(state, category, query, envelopeStateLLA);
 					//
 				} else {
-					logger.error("Cannot find category id for query: " + query + " in categoryIDMap");
+					logger.error("Cannot find category id for query: " + query
+							+ " in categoryIDMap");
 				}
 				logger.info("removing duplicate records in the external db");
 				Strategy.dbExternal.removeDuplicate();
@@ -213,7 +229,8 @@ public abstract class Strategy {
 		logger.info("time for crawling = " + (after - before) / 1000);
 		//
 		logger.info("countNumQueries = " + Strategy.countNumQueries);
-		logger.info("number of points crawled = " + Strategy.dbInMemory.poisIDs.size());
+		logger.info("number of points crawled = "
+				+ Strategy.dbInMemory.poisIDs.size());
 		logger.info("Finished ! Oh ! Yeah! ");
 
 		// logger.info("poisCrawledTimes:");

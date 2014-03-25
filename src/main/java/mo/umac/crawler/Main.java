@@ -20,13 +20,13 @@ public class Main {
 	public static boolean debug = false;
 
 	// used in offline algorithm
-	public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ok-prun";
-	public final static String DB_NAME_TARGET = "../crawler-data/yahoolocal-h2/target/ok-prun-c-one";
+	public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ny-prun";
+	public final static String DB_NAME_TARGET = "../crawler-data/yahoolocal-h2/target/ny-prun-c-one";
 	public final static String DB_NAME_CRAWL = "../crawler-data/yahoolocal-h2/crawl/datasets";
 
 	public static void main(String[] args) {
 		/************************* Change these lines *************************/
-		debug = true;
+		debug = false;
 		initForServer(false);
 		DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
 		shutdownLogs(Main.debug);
@@ -39,12 +39,13 @@ public class Main {
 		// specify the states to be crawled
 		LinkedList<String> listNameStates = new LinkedList<String>();
 		// if the listNameStates is empty, then crawl all states.
-		// String city1 = "NY";
-		// listNameStates.add(city1);
+		String city1 = "NY";
+		listNameStates.add(city1);
 		// String city2 = "UT";
 		// listNameStates.add(city2);
-		String city3 = "OK";
-		listNameStates.add(city3);
+		// String city3 = "OK";
+		// listNameStates.add(city3);
+		//
 		List<String> listCategoryNames = new LinkedList<String>();
 		// String category1 = "Hotels & Motels";
 		// listCategoryNames.add(category1);
@@ -53,7 +54,7 @@ public class Main {
 		//
 		PaintShapes.painting = false;
 		// change top-k
-		Strategy.MAX_TOTAL_RESULTS_RETURNED = 100;
+		Strategy.MAX_TOTAL_RESULTS_RETURNED = /* 100 */270;
 		crawlerContext.callCrawling(listNameStates, listCategoryNames);
 	}
 
@@ -72,7 +73,8 @@ public class Main {
 			UScensusData.STATE_DBF_FILE_NAME = "target/UScensus/tl_2012_us_state/tl_2012_us_state.dbf";
 		} else {
 			// for debugging, set the resources folder as
-			// OnlineStrategy.PROPERTY_PATH = "./src/main/resources/crawler.properties";
+			// OnlineStrategy.PROPERTY_PATH =
+			// "./src/main/resources/crawler.properties";
 			Strategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 			// Main.LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
 			Main.LOG_PROPERTY_PATH = "./log4j.xml";

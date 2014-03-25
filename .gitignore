@@ -17,7 +17,7 @@
 
 # reports files
 /reports
-
+/results
 # logs
 
 # "temporary" build files
