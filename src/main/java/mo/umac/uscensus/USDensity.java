@@ -576,10 +576,8 @@ public class USDensity {
 
 			for (int j = 1; j < aPartRoad.length; j++) {
 				Coordinate q = aPartRoad[j];
-				int qGridX = (int) Math.ceil(Math.abs(q.x - minX)
-						/ granularityX);
-				int qGridY = (int) Math.ceil(Math.abs(q.y - minY)
-						/ granularityY);
+				int qGridX = (int) ((q.x - minX) / granularityX);
+				int qGridY = (int) ((q.y - minY) / granularityY);
 
 				if (debug) {
 					logger.debug("----------a part of road-----------");
@@ -600,227 +598,14 @@ public class USDensity {
 						logger.debug("p.distance(q) : " + p.toString() + ","
 								+ q.toString() + " = " + length);
 					}
-					p = new Coordinate(q);
-					pGridX = qGridX;
-					pGridY = qGridY;
-					continue;
-				}
-				// Now we are going to deal with the situation when the p and q
-				// point of this road are located on two different grids
-				// slope of the line
-				if (q.x == p.x) {
-					// FIXME todo
-				}
-				double slope = (q.y - p.y) / (q.x - p.x);
-				if (debug) {
-					logger.debug("slope = " + slope);
-				}
-				// flag
-				double xDirect = 1;
-				double yDirect = 1;
-				double xLine;
-				double xLineLast;
-				double yLine;
-				double yLineLast;
-				if (p.x > q.x) {
-					xDirect = -1;
-					// xLine = minX + (pGridX - 1) * granularityX;
-					xLine = minX + pGridX * granularityX;
-
-					xLineLast = minX + qGridX * granularityX;
+					// p = new Coordinate(q);
+					// pGridX = qGridX;
+					// pGridY = qGridY;
+					// continue;
 				} else {
-					xDirect = 1;
-					xLine = minX + pGridX * granularityX;
-					xLineLast = minX + (qGridX - 1) * granularityX;
-				}
-				if (p.y > q.y) {
-					yDirect = -1;
-					yLine = minY + (pGridY - 1) * granularityY;
-					yLineLast = minY + qGridY * granularityY;
-				} else {
-					yDirect = 1;
-					yLine = minY + pGridY * granularityY;
-					yLineLast = minY + (qGridY - 1) * granularityY;
-				}
-				//
-				int numCrossGridX = Math.abs(qGridX - pGridX);
-				int numCrossGridY = Math.abs(qGridY - pGridY);
-
-				if (debug) {
-					logger.debug("xDirect = " + xDirect);
-					logger.debug("yDirect = " + yDirect);
-					logger.debug("xLine = " + xLine);
-					logger.debug("yLine = " + yLine);
-					logger.debug("xLineLast = " + xLineLast);
-					logger.debug("yLineLast = " + yLineLast);
-					logger.debug("numCrossGridX = " + numCrossGridX);
-					logger.debug("numCrossGridY = " + numCrossGridY);
-				}
-
-				if (numCrossGridX == 0) {
-					if (debug) {
-						logger.debug("case 1");
-					}
-					// case 1: this road only intersect with different grids on
-					// y-axis
-					for (int k2 = pGridY, ki = 0; ki < numCrossGridY; k2 += yDirect, ki++) {
-						// compute the intersect points
-						double x = (yLine - p.y) / slope + p.x;
-						Coordinate pointOnLine = new Coordinate(x, yLine);
-						double length = p.distance(pointOnLine);
-						density[pGridX][k2] += length;
-						totalLength += length;
-						if (debug) {
-							logger.debug("p: " + p.toString());
-							logger.debug("pointOnLine = "
-									+ pointOnLine.toString());
-							logger.debug("density[" + pGridX + "][" + k2
-									+ "]: ");
-						}
-						p = new Coordinate(pointOnLine);
-						//
-						yLine += yDirect * granularityY;
-					}
-					double length = p.distance(q);
-					density[qGridX][qGridY] += length;
-					totalLength += length;
-
-					if (debug) {
-						logger.debug("p: " + p.toString());
-						logger.debug("q = " + q.toString());
-						logger.debug("density[" + qGridX + "][" + qGridY
-								+ "]: ");
-					}
-
-				} else if (numCrossGridY == 0) {
-					if (debug) {
-						logger.debug("case 2");
-					}
-					// case 2: this road only intersect with different grids on
-					// x-axis
-					for (int k1 = pGridX, ki = 0; ki < numCrossGridX; k1 += xDirect, ki++) {
-						double y = (xLine - p.x) * slope + p.y;
-						Coordinate pointOnLine = new Coordinate(xLine, y);
-						double length = p.distance(pointOnLine);
-						density[k1][pGridY] += length;
-						totalLength += length;
-						if (debug) {
-							logger.debug("p: " + p.toString());
-							logger.debug("pointOnLine = "
-									+ pointOnLine.toString());
-							logger.debug("density[" + k1 + "][" + pGridY
-									+ "]: ");
-						}
-						p = new Coordinate(pointOnLine);
-
-						xLine += xDirect * granularityX;
-					}
-					double length = p.distance(q);
-					density[qGridX][qGridY] += length;
-					totalLength += length;
-
-					if (debug) {
-						logger.debug("p: " + p.toString());
-						logger.debug("q = " + q.toString());
-						logger.debug("density[" + qGridX + "][" + qGridY
-								+ "]: ");
-					}
-				} else {
-					if (debug) {
-						logger.debug("case 3");
-					}
-					// case 3
-					// the start point
-					// the nearest point on Line X
-					double y = (xLine - p.x) * slope + p.y;
-					Coordinate pointOnLineX = new Coordinate(xLine, y);
-					double distancePointLineX = p.distance(pointOnLineX);
-					// the nearest point on Line Y
-					double x = (yLine - p.y) / slope + p.x;
-					Coordinate pointOnLineY = new Coordinate(x, yLine);
-					double distancePointLineY = p.distance(pointOnLineY);
-					//
-					boolean pointOnLine2IsOnLineY = false;
-					Coordinate pointOnLine1 = new Coordinate(p);
-					Coordinate pointOnLine2;
-					if (distancePointLineY > distancePointLineX) {
-						pointOnLine2IsOnLineY = false;
-						pointOnLine2 = pointOnLineX;
-						xLine += xDirect * granularityX;
-					} else {
-						// less than or equals to
-						pointOnLine2IsOnLineY = true;
-						pointOnLine2 = pointOnLineY;
-						yLine += yDirect * granularityY;
-					}
-					// the end point
-					double yEnd = (xLineLast - p.x) * slope + p.y;
-					Coordinate lastPointOnLineX = new Coordinate(xLineLast,
-							yEnd);
-					double distanceLastPointLineX = q
-							.distance(lastPointOnLineX);
-					// the nearest point on Line Y
-					double xEnd = (yLineLast - p.y) / slope + p.x;
-					Coordinate lastPointOnLineY = new Coordinate(xEnd,
-							yLineLast);
-					double distanceLastPointLineY = q
-							.distance(lastPointOnLineY);
-					//
-					Coordinate lastPointOnLine;
-					if (distanceLastPointLineY > distanceLastPointLineX) {
-						lastPointOnLine = new Coordinate(lastPointOnLineX);
-					} else {
-						lastPointOnLine = new Coordinate(lastPointOnLineY);
-					}
-
-					//
-					int k1 = pGridX, k2 = pGridY;
-					while (true) {
-						double length = pointOnLine1.distance(pointOnLine2);
-						density[k1][k2] += length;
-						totalLength += length;
-						//
-						if (debug) {
-							logger.debug("pointOnLine1: "
-									+ pointOnLine1.toString());
-							logger.debug("pointOnLine2 = "
-									+ pointOnLine2.toString());
-							logger.debug("density[" + k1 + "][" + k2 + "]: ");
-							logger.debug("nextPointLineY: "
-									+ pointOnLine2IsOnLineY);
-						}
-						if (pointOnLine2.equals(lastPointOnLine)) {
-							if (debug) {
-								logger.debug("reach to the near end point.");
-							}
-							break;
-						}
-						pointOnLine1 = new Coordinate(pointOnLine2);
-						// next point on line 2
-						pointOnLine2IsOnLineY = !pointOnLine2IsOnLineY;
-						if (pointOnLine2IsOnLineY) {
-							x = (yLine - p.y) / slope + p.x;
-							pointOnLine2 = new Coordinate(x, yLine);
-							yLine += yDirect * granularityY;
-							k1 += xDirect;
-						} else {
-							y = (xLine - p.x) * slope + p.y;
-							pointOnLine2 = new Coordinate(xLine, y);
-							xLine += xDirect * granularityX;
-							k2 += yDirect;
-						}
-
-					}
-					double length = pointOnLine2.distance(q);
-					density[qGridX][qGridY] += length;
-					totalLength += length;
-
-					if (debug) {
-						logger.debug("pointOnLine2: " + pointOnLine2.toString());
-						logger.debug("q = " + q.toString());
-						logger.debug("density[" + qGridX + "][" + qGridY
-								+ "]: ");
-					}
+					// add distance to the related grids
+					totalLength = difGrids(p, q, pGridX, pGridY, qGridX,
+							qGridY, density, totalLength);
 				}
 				p = new Coordinate(q);
 				pGridX = qGridX;
@@ -835,6 +620,22 @@ public class USDensity {
 			}
 		}
 		return density;
+	}
+
+	/**
+	 * p & q belong to different grids.
+	 * 
+	 * @param p
+	 * @param q
+	 * @param density
+	 * @param totalLength
+	 */
+	private double difGrids(Coordinate p, Coordinate q, int pGridX, int pGridY,
+			int qGridX, int qGridY, double[][] density, double totalLength) {
+		// FIXME
+		
+		
+		return 0.0;
 	}
 
 	private void writePartition(String clusterRegionFile,
