@@ -40,8 +40,6 @@ public class USDensity {
 
 	private static Logger logger = Logger.getLogger(USDensity.class.getName());
 
-	private static boolean debug = true;
-
 	// yanhui
 	// NY: Env[-79.76259 : -71.777491, 40.477399 : 45.015865]
 	private static final double NYLatitudeMin = 40.477399;
@@ -72,42 +70,42 @@ public class USDensity {
 
 	private static final String SHP_EXTENSION = "shp";
 
+	private static final String ZIP_FOLDER_PATH = "../data-map/us-road/new-york/";
+	private static final String UN_ZIP_FOLDER_PATH = "../data-map/us-road/new-york-upzip/";
+
+	private static String densityFile = "../data-experiment/densityMap-ny-0.001.txt";
+	private static String clusterRegionFile = "../data-experiment/combinedDensity-ny.mbr";
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		debug = true;
+		boolean debug = true;
 		shutdownLogs(debug);
 		DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
 		// for NY
-		Envelope envelope = new Envelope(NYLongitudeMin, NYLongitudeMax,
-				NYLatitudeMin, NYLatitudeMax);
-		String zipFolderPath = "../data-map/us-road/new-york/";
-		String densityFile = zipFolderPath + "densityMap.txt";
+		Envelope envelope = new Envelope(NYLongitudeMin, NYLongitudeMax, NYLatitudeMin, NYLatitudeMax);
 		double granularityX = 0.001;
 		double granularityY = 0.001;
 
 		USDensity usDensity = new USDensity();
 
 		/** compute the density on the map, run only once for a state folder */
-		String unZipfolderPath = "../data-map/us-road/new-york-upzip/";
-		// usDensity.unzip(zipFolderPath, unZipfolderPath);
-		ArrayList<Coordinate[]> roadList = usDensity.readRoad(unZipfolderPath);
-		double[][] density1 = usDensity.densityList(envelope, granularityX,
-				granularityY, roadList);
-		usDensity.writeDensityToFile(density1, densityFile);
+		// // usDensity.unzip(ZIP_FOLDER_PATH, UN_ZIP_FOLDER_PATH);
+		// ArrayList<Coordinate[]> roadList = usDensity.readRoad(UN_ZIP_FOLDER_PATH);
+		// double[][] density1 = densityList(envelope, granularityX, granularityY, roadList);
+		// usDensity.writeDensityToFile(density1, densityFile);
 		/** End */
 
 		/** cluster the regions, and then write to file */
-		ArrayList<double[]> density = usDensity
-				.readDensityFromFile(densityFile);
-		DensityMap map = new DensityMap(granularityX, granularityY, envelope,
-				density);
-		String clusterRegionFile = zipFolderPath + "combinedDensity.mbr";
-		double alpha1 = 0.1;
-		double alpha2 = 10;
-		// only find one density region
-		// yanhui
+		ArrayList<double[]> density = usDensity.readDensityFromFile(densityFile);
+		// FIXME 2d array -> 1d array(only store non 0 values) -> TreeMap/HashMap 
+		DensityMap map = new DensityMap(granularityX, granularityY, envelope, density);
+
+		// double alpha1 = 0.1;
+		// double alpha2 = 10;
+		// // only find one density region
+		// // yanhui
 		// ArrayList<Envelope> testRegions = new ArrayList<Envelope>();
 		// for (alpha1 = 0.1; alpha1 <= 1; alpha1 = alpha1 + 0.1) {
 		// for (alpha2 = 0.1; alpha2 <= 1; alpha2 = alpha2 + 0.1) {
@@ -199,8 +197,7 @@ public class USDensity {
 			if (!file.exists()) {
 				file.createNewFile();
 			}
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(file, true)));
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true)));
 			for (int i = 0; i < density.length; i++) {
 				double[] ds = density[i];
 				for (int j = 0; j < ds.length; j++) {
@@ -211,6 +208,7 @@ public class USDensity {
 				bw.newLine();
 			}
 			bw.close();
+			logger.info("--------------finished writing");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -219,6 +217,7 @@ public class USDensity {
 	}
 
 	private ArrayList<double[]> readDensityFromFile(String densityFile) {
+		logger.info("readDensityFromFile...");
 		ArrayList<double[]> density = new ArrayList<double[]>();
 		File file = new File(densityFile);
 		if (!file.exists()) {
@@ -229,6 +228,7 @@ public class USDensity {
 					new FileInputStream(densityFile)));
 			String data = null;
 			String[] splitArray;
+			int i = 0;
 			while ((data = br.readLine()) != null) {
 				data = data.trim();
 				splitArray = data.split(";");
@@ -250,7 +250,7 @@ public class USDensity {
 	}
 
 	/**
-	 * Compute the density in the map
+	 * Compute the density in the map rewrite 2014-3-29
 	 * 
 	 * @param envelope
 	 * @param granularityX
@@ -262,7 +262,7 @@ public class USDensity {
 	 *            line segment
 	 * @return
 	 */
-	private double[][] densityList(Envelope envelope, double granularityX,
+	public static double[][] densityList(Envelope envelope, double granularityX,
 			double granularityY, ArrayList<Coordinate[]> roadList) {
 		logger.info("-------------computing unit density-------------");
 		double width = envelope.getWidth();
@@ -270,300 +270,11 @@ public class USDensity {
 		double minX = envelope.getMinX();
 		double minY = envelope.getMinY();
 
+		// the number of grids, begin from 0;
 		int countX = (int) Math.ceil(width / granularityX);
 		int countY = (int) Math.ceil(height / granularityY);
-		// initialize to 0.0;
-		double[][] density = new double[countX + 1][countY + 1];
-		double totalLength = 0.0;
-		//
-		for (int i = 0; i < roadList.size(); i++) {
-			Coordinate[] aPartRoad = roadList.get(i);
-			Coordinate p = aPartRoad[0];
-			int pGridX = (int) Math.ceil(Math.abs(p.x - minX) / granularityX);
-			int pGridY = (int) Math.ceil(Math.abs(p.y - minY) / granularityY);
-
-			for (int j = 1; j < aPartRoad.length; j++) {
-				Coordinate q = aPartRoad[j];
-				int qGridX = (int) Math.ceil(Math.abs(q.x - minX)
-						/ granularityX);
-				int qGridY = (int) Math.ceil(Math.abs(q.y - minY)
-						/ granularityY);
-
-				if (debug) {
-					logger.debug("----------a part of road-----------");
-					logger.debug("p: " + p.toString());
-					logger.debug("q: " + q.toString());
-					logger.debug("p: [" + pGridX + "][" + pGridY + "]: ");
-					logger.debug("q: [" + qGridX + "][" + qGridY + "]: ");
-				}
-
-				// This is the easiest case
-				if (pGridX == qGridX && pGridY == qGridY) {
-					// the p and the q point belong to the same small square
-					double length = p.distance(q);
-					density[pGridX][pGridY] += length;
-					totalLength += length;
-					if (debug) {
-						logger.debug("case 0: in the same grid");
-						logger.debug("p.distance(q) : " + p.toString() + ","
-								+ q.toString() + " = " + length);
-					}
-					p = new Coordinate(q);
-					pGridX = qGridX;
-					pGridY = qGridY;
-					continue;
-				}
-				// Now we are going to deal with the situation when the p and q
-				// point of this road are located on two different grids
-				// slope of the line
-				if (q.x == p.x) {
-					// FIXME todo
-				}
-				double slope = (q.y - p.y) / (q.x - p.x);
-				if (debug) {
-					logger.debug("slope = " + slope);
-				}
-				// flag
-				double xDirect = 1;
-				double yDirect = 1;
-				double xLine;
-				double xLineLast;
-				double yLine;
-				double yLineLast;
-				if (p.x > q.x) {
-					xDirect = -1;
-					// xLine = minX + (pGridX - 1) * granularityX;
-					xLine = minX + pGridX * granularityX;
-
-					xLineLast = minX + qGridX * granularityX;
-				} else {
-					xDirect = 1;
-					xLine = minX + pGridX * granularityX;
-					xLineLast = minX + (qGridX - 1) * granularityX;
-				}
-				if (p.y > q.y) {
-					yDirect = -1;
-					yLine = minY + (pGridY - 1) * granularityY;
-					yLineLast = minY + qGridY * granularityY;
-				} else {
-					yDirect = 1;
-					yLine = minY + pGridY * granularityY;
-					yLineLast = minY + (qGridY - 1) * granularityY;
-				}
-				//
-				int numCrossGridX = Math.abs(qGridX - pGridX);
-				int numCrossGridY = Math.abs(qGridY - pGridY);
-
-				if (debug) {
-					logger.debug("xDirect = " + xDirect);
-					logger.debug("yDirect = " + yDirect);
-					logger.debug("xLine = " + xLine);
-					logger.debug("yLine = " + yLine);
-					logger.debug("xLineLast = " + xLineLast);
-					logger.debug("yLineLast = " + yLineLast);
-					logger.debug("numCrossGridX = " + numCrossGridX);
-					logger.debug("numCrossGridY = " + numCrossGridY);
-				}
-
-				if (numCrossGridX == 0) {
-					if (debug) {
-						logger.debug("case 1");
-					}
-					// case 1: this road only intersect with different grids on
-					// y-axis
-					for (int k2 = pGridY, ki = 0; ki < numCrossGridY; k2 += yDirect, ki++) {
-						// compute the intersect points
-						double x = (yLine - p.y) / slope + p.x;
-						Coordinate pointOnLine = new Coordinate(x, yLine);
-						double length = p.distance(pointOnLine);
-						density[pGridX][k2] += length;
-						totalLength += length;
-						if (debug) {
-							logger.debug("p: " + p.toString());
-							logger.debug("pointOnLine = "
-									+ pointOnLine.toString());
-							logger.debug("density[" + pGridX + "][" + k2
-									+ "]: ");
-						}
-						p = new Coordinate(pointOnLine);
-						//
-						yLine += yDirect * granularityY;
-					}
-					double length = p.distance(q);
-					density[qGridX][qGridY] += length;
-					totalLength += length;
-
-					if (debug) {
-						logger.debug("p: " + p.toString());
-						logger.debug("q = " + q.toString());
-						logger.debug("density[" + qGridX + "][" + qGridY
-								+ "]: ");
-					}
-
-				} else if (numCrossGridY == 0) {
-					if (debug) {
-						logger.debug("case 2");
-					}
-					// case 2: this road only intersect with different grids on
-					// x-axis
-					for (int k1 = pGridX, ki = 0; ki < numCrossGridX; k1 += xDirect, ki++) {
-						double y = (xLine - p.x) * slope + p.y;
-						Coordinate pointOnLine = new Coordinate(xLine, y);
-						double length = p.distance(pointOnLine);
-						density[k1][pGridY] += length;
-						totalLength += length;
-						if (debug) {
-							logger.debug("p: " + p.toString());
-							logger.debug("pointOnLine = "
-									+ pointOnLine.toString());
-							logger.debug("density[" + k1 + "][" + pGridY
-									+ "]: ");
-						}
-						p = new Coordinate(pointOnLine);
-
-						xLine += xDirect * granularityX;
-					}
-					double length = p.distance(q);
-					density[qGridX][qGridY] += length;
-					totalLength += length;
-
-					if (debug) {
-						logger.debug("p: " + p.toString());
-						logger.debug("q = " + q.toString());
-						logger.debug("density[" + qGridX + "][" + qGridY
-								+ "]: ");
-					}
-				} else {
-					if (debug) {
-						logger.debug("case 3");
-					}
-					// case 3
-					// the start point
-					// the nearest point on Line X
-					double y = (xLine - p.x) * slope + p.y;
-					Coordinate pointOnLineX = new Coordinate(xLine, y);
-					double distancePointLineX = p.distance(pointOnLineX);
-					// the nearest point on Line Y
-					double x = (yLine - p.y) / slope + p.x;
-					Coordinate pointOnLineY = new Coordinate(x, yLine);
-					double distancePointLineY = p.distance(pointOnLineY);
-					//
-					boolean pointOnLine2IsOnLineY = false;
-					Coordinate pointOnLine1 = new Coordinate(p);
-					Coordinate pointOnLine2;
-					if (distancePointLineY > distancePointLineX) {
-						pointOnLine2IsOnLineY = false;
-						pointOnLine2 = pointOnLineX;
-						xLine += xDirect * granularityX;
-					} else {
-						// less than or equals to
-						pointOnLine2IsOnLineY = true;
-						pointOnLine2 = pointOnLineY;
-						yLine += yDirect * granularityY;
-					}
-					// the end point
-					double yEnd = (xLineLast - p.x) * slope + p.y;
-					Coordinate lastPointOnLineX = new Coordinate(xLineLast,
-							yEnd);
-					double distanceLastPointLineX = q
-							.distance(lastPointOnLineX);
-					// the nearest point on Line Y
-					double xEnd = (yLineLast - p.y) / slope + p.x;
-					Coordinate lastPointOnLineY = new Coordinate(xEnd,
-							yLineLast);
-					double distanceLastPointLineY = q
-							.distance(lastPointOnLineY);
-					//
-					Coordinate lastPointOnLine;
-					if (distanceLastPointLineY > distanceLastPointLineX) {
-						lastPointOnLine = new Coordinate(lastPointOnLineX);
-					} else {
-						lastPointOnLine = new Coordinate(lastPointOnLineY);
-					}
-
-					//
-					int k1 = pGridX, k2 = pGridY;
-					while (true) {
-						double length = pointOnLine1.distance(pointOnLine2);
-						density[k1][k2] += length;
-						totalLength += length;
-						//
-						if (debug) {
-							logger.debug("pointOnLine1: "
-									+ pointOnLine1.toString());
-							logger.debug("pointOnLine2 = "
-									+ pointOnLine2.toString());
-							logger.debug("density[" + k1 + "][" + k2 + "]: ");
-							logger.debug("nextPointLineY: "
-									+ pointOnLine2IsOnLineY);
-						}
-						if (pointOnLine2.equals(lastPointOnLine)) {
-							if (debug) {
-								logger.debug("reach to the near end point.");
-							}
-							break;
-						}
-						pointOnLine1 = new Coordinate(pointOnLine2);
-						// next point on line 2
-						pointOnLine2IsOnLineY = !pointOnLine2IsOnLineY;
-						if (pointOnLine2IsOnLineY) {
-							x = (yLine - p.y) / slope + p.x;
-							pointOnLine2 = new Coordinate(x, yLine);
-							yLine += yDirect * granularityY;
-							k1 += xDirect;
-						} else {
-							y = (xLine - p.x) * slope + p.y;
-							pointOnLine2 = new Coordinate(xLine, y);
-							xLine += xDirect * granularityX;
-							k2 += yDirect;
-						}
-
-					}
-					double length = pointOnLine2.distance(q);
-					density[qGridX][qGridY] += length;
-					totalLength += length;
-
-					if (debug) {
-						logger.debug("pointOnLine2: " + pointOnLine2.toString());
-						logger.debug("q = " + q.toString());
-						logger.debug("density[" + qGridX + "][" + qGridY
-								+ "]: ");
-					}
-				}
-				p = new Coordinate(q);
-				pGridX = qGridX;
-				pGridY = qGridY;
-			}
-		}
-		double areaSquare = granularityX * granularityY;
-		for (int i = 0; i < countX; i++) {
-			for (int j = 0; j < countY; j++) {
-				density[i][j] = density[i][j] / totalLength;
-
-			}
-		}
-		return density;
-	}
-
-	/**
-	 * write at 2014-3-25
-	 * 
-	 * @param envelope
-	 * @param granularityX
-	 * @param granularityY
-	 * @param roadList
-	 * @return
-	 */
-	private double[][] densityListUnit(Envelope envelope, double granularityX,
-			double granularityY, ArrayList<Coordinate[]> roadList) {
-		logger.info("-------------computing unit density-------------");
-		double width = envelope.getWidth();
-		double height = envelope.getHeight();
-		double minX = envelope.getMinX();
-		double minY = envelope.getMinY();
-
-		int countX = (int) Math.ceil(width / granularityX);
-		int countY = (int) Math.ceil(height / granularityY);
+		logger.info("countX = " + countX);
+		logger.info("countY = " + countY);
 		// initialize to 0.0;
 		double[][] density = new double[countX][countY];
 		double totalLength = 0.0;
@@ -571,15 +282,16 @@ public class USDensity {
 		for (int i = 0; i < roadList.size(); i++) {
 			Coordinate[] aPartRoad = roadList.get(i);
 			Coordinate p = aPartRoad[0];
-			int pGridX = (int) ((p.x - minX) / granularityX);
-			int pGridY = (int) ((p.y - minY) / granularityY);
-
+			//
+			int pGridX = (int) Math.floor((Math.abs(p.x - minX) / granularityX));
+			int pGridY = (int) Math.floor((Math.abs(p.y - minY) / granularityY));
+			//
 			for (int j = 1; j < aPartRoad.length; j++) {
 				Coordinate q = aPartRoad[j];
-				int qGridX = (int) ((q.x - minX) / granularityX);
-				int qGridY = (int) ((q.y - minY) / granularityY);
+				int qGridX = (int) Math.floor(Math.abs(q.x - minX) / granularityX);
+				int qGridY = (int) Math.floor(Math.abs(q.y - minY) / granularityY);
 
-				if (debug) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("----------a part of road-----------");
 					logger.debug("p: " + p.toString());
 					logger.debug("q: " + q.toString());
@@ -591,51 +303,159 @@ public class USDensity {
 				if (pGridX == qGridX && pGridY == qGridY) {
 					// the p and the q point belong to the same small square
 					double length = p.distance(q);
-					density[pGridX][pGridY] += length;
 					totalLength += length;
-					if (debug) {
+					density[pGridX][pGridY] += length;
+					if (logger.isDebugEnabled()) {
 						logger.debug("case 0: in the same grid");
-						logger.debug("p.distance(q) : " + p.toString() + ","
-								+ q.toString() + " = " + length);
+						logger.debug("p.distance(q) : " + p.toString() + "," + q.toString() + " = " + length);
 					}
-					// p = new Coordinate(q);
-					// pGridX = qGridX;
-					// pGridY = qGridY;
-					// continue;
-				} else {
-					// add distance to the related grids
-					totalLength = difGrids(p, q, pGridX, pGridY, qGridX,
-							qGridY, density, totalLength);
+					p = new Coordinate(q);
+					pGridX = qGridX;
+					pGridY = qGridY;
+					continue;
 				}
+				//
+				double xDirect = 1;
+				double yDirect = 1;
+				double xLinePNeighbor;
+				double xLineQNeighbor;
+				double yLinePNeighbor;
+				double yLineQNeighbor;
+				if (p.x > q.x) {
+					xDirect = -1;
+					xLinePNeighbor = minX + pGridX * granularityX;
+					xLineQNeighbor = minX + (qGridX + 1) * granularityX;
+				} else {
+					xDirect = 1;
+					xLinePNeighbor = minX + (pGridX + 1) * granularityX;
+					xLineQNeighbor = minX + qGridX * granularityX;
+				}
+				if (p.y >= q.y) {
+					yDirect = -1;
+					yLinePNeighbor = minY + pGridY * granularityY;
+					yLineQNeighbor = minY + (qGridY + 1) * granularityY;
+				} else {
+					yDirect = 1;
+					yLinePNeighbor = minY + (pGridY + 1) * granularityY;
+					yLineQNeighbor = minY + qGridY * granularityY;
+				}
+				int numCrossGridX = Math.abs(qGridX - pGridX);
+				int numCrossGridY = Math.abs(qGridY - pGridY);
+
+				if (logger.isDebugEnabled()) {
+					logger.debug("xDirect = " + xDirect);
+					logger.debug("yDirect = " + yDirect);
+					logger.debug("xLinePNeighbor = " + xLinePNeighbor);
+					logger.debug("yLinePNeighbor = " + yLinePNeighbor);
+					logger.debug("xLineQNeighbor = " + xLineQNeighbor);
+					logger.debug("yLineQNeighbor = " + yLineQNeighbor);
+					logger.debug("numCrossGridX = " + numCrossGridX);
+					logger.debug("numCrossGridY = " + numCrossGridY);
+				}
+				//
+				if (q.x == p.x) {
+					for (int k2 = pGridY, ki = 0; ki < numCrossGridY; k2 += yDirect, ki++) {
+						Coordinate pointOnLine = new Coordinate(q.x, yLinePNeighbor);
+						double length = p.distance(pointOnLine);
+						density[pGridX][k2] += length;
+						totalLength += length;
+						if (logger.isDebugEnabled()) {
+							logger.debug("p: " + p.toString());
+							logger.debug("pointOnLine = " + pointOnLine.toString());
+							logger.debug("density[" + pGridX + "][" + k2 + "]: ");
+						}
+						p = new Coordinate(pointOnLine);
+						yLinePNeighbor += yDirect * granularityY;
+					}
+					double length = p.distance(q);
+					density[qGridX][qGridY] += length;
+					totalLength += length;
+
+					if (logger.isDebugEnabled()) {
+						logger.debug("p = " + p.toString());
+						logger.debug("q = " + q.toString());
+						logger.debug("density[" + qGridX + "][" + qGridY + "]");
+					}
+					continue;
+				}
+				// y = k*x + b
+				double k = (q.y - p.y) / (q.x - p.x);
+				double b = (q.x * p.y - q.y * p.x) / (q.x - p.x);
+				if (logger.isDebugEnabled()) {
+					logger.debug("k = " + k);
+					logger.debug("b = " + b);
+				}
+				//
+				Coordinate p1 = new Coordinate(p);
+				Coordinate p2 = null;
+				boolean p2OnLineY = false;
+				for (int k1 = pGridX, k2 = pGridY, ki1 = 0, ki2 = 0; ki1 < numCrossGridX || ki2 < numCrossGridY;) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("ki1 = " + ki1);
+						logger.debug("ki2 = " + ki2);
+					}
+					// compute which line will be reached first
+					double y = xLinePNeighbor * k + b;
+					Coordinate pointOnLineX = new Coordinate(xLinePNeighbor, y);
+					double distancePointLineX = p.distance(pointOnLineX);
+					// the nearest point on Line Y
+					double x = (yLinePNeighbor - b) / k;
+					Coordinate pointOnLineY = new Coordinate(x, yLinePNeighbor);
+					double distancePointLineY = p.distance(pointOnLineY);
+					if (distancePointLineY > distancePointLineX) {
+						p2OnLineY = false;
+						p2 = pointOnLineX;
+						// xLinePNeighbor += xDirect * granularityX;
+					} else {
+						// less than or equals to
+						p2OnLineY = true;
+						p2 = pointOnLineY;
+						// yLinePNeighbor += yDirect * granularityY;
+					}
+					double length = p1.distance(p2);
+					density[k1][k2] += length;
+					totalLength += length;
+					if (logger.isDebugEnabled()) {
+						logger.debug("p1: " + p1.toString());
+						logger.debug("p2 = " + p2.toString());
+						logger.debug("density[" + k1 + "][" + k2 + "]: ");
+						logger.debug("p2OnLineY: " + p2OnLineY);
+					}
+					p1 = new Coordinate(p2);
+					if (p2OnLineY) {
+						yLinePNeighbor += yDirect * granularityY;
+						k2 += yDirect;
+						ki2++;
+					} else {
+						xLinePNeighbor += xDirect * granularityX;
+						k1 += xDirect;
+						ki1++;
+					}
+
+				}
+				double length = p2.distance(q);
+				density[qGridX][qGridY] += length;
+				totalLength += length;
+
+				if (logger.isDebugEnabled()) {
+					logger.debug("pointOnLine2: " + p2.toString());
+					logger.debug("q = " + q.toString());
+					logger.debug("density[" + qGridX + "][" + qGridY + "]");
+				}
+
 				p = new Coordinate(q);
 				pGridX = qGridX;
 				pGridY = qGridY;
 			}
 		}
-		double areaSquare = granularityX * granularityY;
-		for (int i = 0; i < countX; i++) {
-			for (int j = 0; j < countY; j++) {
-				density[i][j] = density[i][j] / totalLength;
-
-			}
-		}
+		// double areaSquare = granularityX * granularityY;
+		// for (int i = 0; i < countX; i++) {
+		// for (int j = 0; j < countY; j++) {
+		// density[i][j] = density[i][j] / totalLength;
+		//
+		// }
+		// }
 		return density;
-	}
-
-	/**
-	 * p & q belong to different grids.
-	 * 
-	 * @param p
-	 * @param q
-	 * @param density
-	 * @param totalLength
-	 */
-	private double difGrids(Coordinate p, Coordinate q, int pGridX, int pGridY,
-			int qGridX, int qGridY, double[][] density, double totalLength) {
-		// FIXME
-		
-		
-		return 0.0;
 	}
 
 	private void writePartition(String clusterRegionFile,

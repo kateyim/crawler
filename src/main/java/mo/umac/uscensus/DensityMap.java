@@ -37,20 +37,27 @@ public class DensityMap {
 
 	// private ArrayList<Envelope> denseRegions = new ArrayList<Envelope>();
 
-	public DensityMap(double granularityX, double granularityY,
-			Envelope envelope, ArrayList<double[]> density) {
+	public DensityMap(double granularityX, double granularityY, Envelope envelope, ArrayList<double[]> density) {
+		logger.info("Building DensityMap...");
 		this.granularityX = granularityX;
 		this.granularityY = granularityY;
 		this.boardEnvelope = envelope;
 		numGridX = (int) Math.ceil(envelope.getWidth() / granularityX);
 		numGridY = (int) Math.ceil(envelope.getHeight() / granularityY);
+		// if (logger.isDebugEnabled()) {
+		// logger.debug("density.size() = " + density.size());
+		// logger.debug("numGridX = " + numGridX);
+		// logger.debug("numGridY = " + numGridY);
+		// }
 		grids = new Grid[numGridX][numGridY];
-		for (int i = 1; i < density.size(); i++) {
+		for (int i = 0; i < density.size(); i++) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(i);
+			}
 			double[] aRow = density.get(i);
-			for (int j = 1; j < aRow.length; j++) {
+			for (int j = 0; j < aRow.length; j++) {
 				double d = aRow[j];
-				grids[i - 1][j - 1] = new Grid(i - 1, j - 1, d,
-						Grid.Flag.UNVISITED);
+				grids[i][j] = new Grid(i, j, d, Grid.Flag.UNVISITED);
 			}
 		}
 	}
@@ -67,7 +74,6 @@ public class DensityMap {
 	 *            TODO
 	 * @param alpha2
 	 *            TODO
-	 * 
 	 * @return final results
 	 */
 	public ArrayList<Envelope> cluster(int numIteration, double alpha1,
@@ -217,7 +223,6 @@ public class DensityMap {
 	 * @param alpha2
 	 *            TODO
 	 * @param centerGrid
-	 * 
 	 * @return a clustered envelope
 	 */
 	private Envelope expandFromMiddle(Grid seed, double alpha1, double alpha2) {
