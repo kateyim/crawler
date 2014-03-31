@@ -39,7 +39,7 @@ public class CrawlerTest extends Strategy{
 		DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
 		CrawlerTest test = new CrawlerTest();
 		PaintShapes.painting = true;
-		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
+//		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		test.calling();
 
 	}
