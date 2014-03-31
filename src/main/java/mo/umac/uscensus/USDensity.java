@@ -80,7 +80,8 @@ public class USDensity {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		boolean debug = true;
+		boolean debug = false;
+		boolean zipped = false;
 		shutdownLogs(debug);
 		DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
 		// for NY
@@ -91,7 +92,9 @@ public class USDensity {
 		USDensity usDensity = new USDensity();
 
 		/** compute the density on the map, run only once for a state folder */
-		// // usDensity.unzip(ZIP_FOLDER_PATH, UN_ZIP_FOLDER_PATH);
+		// if (zipped) {
+		// usDensity.unzip(ZIP_FOLDER_PATH, UN_ZIP_FOLDER_PATH);
+		// }
 		// ArrayList<Coordinate[]> roadList = usDensity.readRoad(UN_ZIP_FOLDER_PATH);
 		// double[][] density1 = densityList(envelope, granularityX, granularityY, roadList);
 		// usDensity.writeDensityToFile(density1, densityFile);
@@ -99,37 +102,18 @@ public class USDensity {
 
 		/** cluster the regions, and then write to file */
 		ArrayList<double[]> density = usDensity.readDensityFromFile(densityFile);
-		// FIXME 2d array -> 1d array(only store non 0 values) -> TreeMap/HashMap 
-		DensityMap map = new DensityMap(granularityX, granularityY, envelope, density);
+		// FIXME 2d array -> 1d array(only store non 0 values) -> TreeMap/HashMap
+		// XXX cannot build this map
+		// DensityMap map = new DensityMap(granularityX, granularityY, envelope, density);
 
-		// double alpha1 = 0.1;
-		// double alpha2 = 10;
-		// // only find one density region
-		// // yanhui
-		// ArrayList<Envelope> testRegions = new ArrayList<Envelope>();
-		// for (alpha1 = 0.1; alpha1 <= 1; alpha1 = alpha1 + 0.1) {
-		// for (alpha2 = 0.1; alpha2 <= 1; alpha2 = alpha2 + 0.1) {
-		// int numIteration = 1;
-		// ArrayList<Envelope> clusteredRegion = map.cluster(numIteration,
-		// alpha1, alpha2);
-		// testRegions.addAll(clusteredRegion);
-		// }
-		// }
-		// usDensity.writePartition(clusterRegionFile, testRegions);
-	}
-
-	private void unzip(String zipFolderPath, String unZipfolderPath) {
-		logger.info("-----------unzip roads in " + zipFolderPath);
-		ArrayList<Coordinate[]> roadList = new ArrayList<Coordinate[]>();
-		//
-		ArrayList<String> zipFileList = (ArrayList<String>) FileOperator
-				.traverseFolder(zipFolderPath, ZIP_EXTENSION);
-		for (int i = 0; i < zipFileList.size(); i++) {
-			String aZipFile = zipFileList.get(i);
-			// unzip it
-			FileOperator.unzip(aZipFile, unZipfolderPath, "");
+		logger.info("finished");
+		double a = 0.0;
+		ArrayList<Envelope> testRegions = new ArrayList<Envelope>();
+		for (a = 0.0; a < 1; a = a + 0.1) {
+			ArrayList<Envelope> clusteredRegion = cluster(granularityX, granularityY, envelope, density, a);
+			testRegions.addAll(clusteredRegion);
 		}
-
+		usDensity.writePartition(clusterRegionFile, testRegions);
 	}
 
 	public static void shutdownLogs(boolean debug) {
@@ -140,6 +124,19 @@ public class USDensity {
 			USDensity.logger.setLevel(Level.DEBUG);
 			DensityMap.logger.setLevel(Level.DEBUG);
 		}
+	}
+
+	private void unzip(String zipFolderPath, String unZipfolderPath) {
+		logger.info("-----------unzip roads in " + zipFolderPath);
+		ArrayList<Coordinate[]> roadList = new ArrayList<Coordinate[]>();
+		//
+		ArrayList<String> zipFileList = (ArrayList<String>) FileOperator.traverseFolder(zipFolderPath, ZIP_EXTENSION);
+		for (int i = 0; i < zipFileList.size(); i++) {
+			String aZipFile = zipFileList.get(i);
+			// unzip it
+			FileOperator.unzip(aZipFile, unZipfolderPath, "");
+		}
+
 	}
 
 	/**
@@ -158,16 +155,14 @@ public class USDensity {
 		// /
 		// traverse again
 		ArrayList<Coordinate[]> roadList = new ArrayList<Coordinate[]>();
-		ArrayList<String> shpFileList = (ArrayList<String>) FileOperator
-				.traverseFolder(unzipFolderPath, SHP_EXTENSION);
+		ArrayList<String> shpFileList = (ArrayList<String>) FileOperator.traverseFolder(unzipFolderPath, SHP_EXTENSION);
 
 		for (int i = 0; i < shpFileList.size(); i++) {
 			String shpFile = shpFileList.get(i);
 			try {
 				ShpFiles shpFiles = new ShpFiles(shpFile);
 				GeometryFactory gf = new GeometryFactory();
-				ShapefileReader r = new ShapefileReader(shpFiles, true, true,
-						gf);
+				ShapefileReader r = new ShapefileReader(shpFiles, true, true, gf);
 				while (r.hasNext()) {
 					Geometry shape = (Geometry) r.nextRecord().shape();
 					Coordinate[] coordinates = shape.getCoordinates();
@@ -224,8 +219,7 @@ public class USDensity {
 			logger.error("densityFile does not exist");
 		}
 		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					new FileInputStream(densityFile)));
+			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(densityFile)));
 			String data = null;
 			String[] splitArray;
 			int i = 0;
@@ -262,8 +256,7 @@ public class USDensity {
 	 *            line segment
 	 * @return
 	 */
-	public static double[][] densityList(Envelope envelope, double granularityX,
-			double granularityY, ArrayList<Coordinate[]> roadList) {
+	public static double[][] densityList(Envelope envelope, double granularityX, double granularityY, ArrayList<Coordinate[]> roadList) {
 		logger.info("-------------computing unit density-------------");
 		double width = envelope.getWidth();
 		double height = envelope.getHeight();
@@ -458,8 +451,16 @@ public class USDensity {
 		return density;
 	}
 
-	private void writePartition(String clusterRegionFile,
-			ArrayList<Envelope> clusteredRegion) {
+	private static ArrayList<Envelope> cluster(double granularityX, double granularityY, Envelope envelope, ArrayList<double[]> density, double a) {
+		// FIXME Auto-generated method stub
+		return null;
+	}
+	
+	private void discardZero(){
+		
+	}
+
+	private void writePartition(String clusterRegionFile, ArrayList<Envelope> clusteredRegion) {
 		try {
 
 			File file = new File(clusterRegionFile);
@@ -471,15 +472,13 @@ public class USDensity {
 				file.createNewFile();
 			}
 
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(file, true)));
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true)));
 			bw.write(Integer.toString(clusteredRegion.size()));
 			bw.newLine();
 
 			for (int i = 0; i < clusteredRegion.size(); i++) {
 				Envelope envelope = clusteredRegion.get(i);
-				String s = envelope.getMinY() + ";" + envelope.getMinX() + ";"
-						+ envelope.getMaxY() + ";" + envelope.getMaxX();
+				String s = envelope.getMinY() + ";" + envelope.getMinX() + ";" + envelope.getMaxY() + ";" + envelope.getMaxX();
 				bw.write(s);
 				bw.newLine();
 			}

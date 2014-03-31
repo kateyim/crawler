@@ -51,9 +51,7 @@ public class DensityMap {
 		// }
 		grids = new Grid[numGridX][numGridY];
 		for (int i = 0; i < density.size(); i++) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(i);
-			}
+			logger.info(i);
 			double[] aRow = density.get(i);
 			for (int j = 0; j < aRow.length; j++) {
 				double d = aRow[j];
