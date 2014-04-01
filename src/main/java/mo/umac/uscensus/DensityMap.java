@@ -14,8 +14,7 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class DensityMap {
 
-	protected static Logger logger = Logger.getLogger(DensityMap.class
-			.getName());
+	protected static Logger logger = Logger.getLogger(DensityMap.class.getName());
 
 	private double granularityX;
 
@@ -74,8 +73,7 @@ public class DensityMap {
 	 *            TODO
 	 * @return final results
 	 */
-	public ArrayList<Envelope> cluster(int numIteration, double alpha1,
-			double alpha2) {
+	public ArrayList<Envelope> cluster(int numIteration, double alpha1, double alpha2) {
 		// FIXME yanhui cluster
 		int i = 1;
 		// clone this grid map for sorting the order.
@@ -97,7 +95,7 @@ public class DensityMap {
 			clusterGrids = partition(entireRegion, denseRegion);
 			i++;
 		}
-		// coverting
+		// converting
 		ArrayList<Envelope> clusterEnvelopes = new ArrayList<Envelope>();
 		// FIXME cancel comment
 		// for (int j = 0; j < clusterGrids.size(); j++) {
@@ -116,8 +114,7 @@ public class DensityMap {
 	 * @param alpha2
 	 * @return
 	 */
-	public ArrayList<Envelope> cluster2(int numIteration, double alpha1,
-			double alpha2) {
+	public ArrayList<Envelope> cluster2(int numIteration, double alpha1, double alpha2) {
 		// FIXME yanhui cluster
 		int i = 1;
 		// clone this grid map for sorting the order.
@@ -189,23 +186,13 @@ public class DensityMap {
 	 * @param denseRegion
 	 * @return in grid
 	 */
-	private ArrayList<Envelope> partition(Envelope entireRegion,
-			Envelope denseRegion) {
+	private ArrayList<Envelope> partition(Envelope entireRegion, Envelope denseRegion) {
 		ArrayList<Envelope> clusterGrids = new ArrayList<Envelope>();
 		// TODO need check
-
-		Envelope e1 = new Envelope(entireRegion.getMinX(),
-				denseRegion.getMinX(), denseRegion.getMinY(),
-				entireRegion.getMaxY());
-		Envelope e2 = new Envelope(denseRegion.getMinX(),
-				entireRegion.getMaxX(), denseRegion.getMaxY(),
-				entireRegion.getMaxY());
-		Envelope e3 = new Envelope(denseRegion.getMaxX(),
-				entireRegion.getMaxX(), entireRegion.getMinY(),
-				denseRegion.getMaxY());
-		Envelope e4 = new Envelope(entireRegion.getMinX(),
-				denseRegion.getMaxX(), entireRegion.getMinY(),
-				denseRegion.getMinY());
+		Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), denseRegion.getMinY(), entireRegion.getMaxY());
+		Envelope e2 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(), entireRegion.getMaxY());
+		Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMaxY());
+		Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMinY());
 		clusterGrids.add(e1);
 		clusterGrids.add(e2);
 		clusterGrids.add(e3);
@@ -240,9 +227,7 @@ public class DensityMap {
 				Grid neighbor = udlrList.get(i);
 				if (neighbor.flag == Flag.UNVISITED) {
 					// simple similarity function
-					double similarity = Math
-							.abs((neighbor.density - seed.density)
-									/ seed.density);
+					double similarity = Math.abs((neighbor.density - seed.density) / seed.density);
 					if (similarity <= alpha2 && similarity >= alpha1) {
 						neighbor.flag = Flag.VISITED;
 						queue.add(neighbor);
@@ -279,8 +264,7 @@ public class DensityMap {
 	 * @param yRight
 	 * @return
 	 */
-	private Envelope densityEnvelopes(ArrayList<Grid> borderGrid, double xLeft,
-			double xRight, double yLeft, double yRight) {
+	private Envelope densityEnvelopes(ArrayList<Grid> borderGrid, double xLeft, double xRight, double yLeft, double yRight) {
 		Envelope envelope = new Envelope(xLeft, xRight, yLeft, yRight);
 		return envelope;
 	}

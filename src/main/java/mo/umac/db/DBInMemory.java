@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import mo.umac.crawler.Main;
+import mo.umac.crawler.MainYahoo;
 import mo.umac.crawler.Strategy;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
@@ -71,8 +71,7 @@ public class DBInMemory {
 	 * @param query
 	 * @param resultSet
 	 */
-	private void writeToExternalDB(int queryID, AQuery query,
-			ResultSetD2 resultSet) {
+	private void writeToExternalDB(int queryID, AQuery query, ResultSetD2 resultSet) {
 		Strategy.dbExternal.writeToExternalDB(queryID, query, resultSet);
 	}
 
@@ -99,8 +98,7 @@ public class DBInMemory {
 		if (logger.isDebugEnabled()) {
 			logger.debug("query point = " + queryPoint.toString());
 		}
-		List<Integer> resultsID = rtreePoints
-				.searchNN(queryPoint, qc.getTopK());
+		List<Integer> resultsID = rtreePoints.searchNN(queryPoint, qc.getTopK());
 		//
 		for (int i = 0; i < resultsID.size(); i++) {
 			int id = resultsID.get(i);
@@ -158,6 +156,10 @@ public class DBInMemory {
 			logger.info("countNumQueries = " + Strategy.countNumQueries);
 			logger.info("countCrawledPoints = " + numCrawlerPoints());
 		}
+		// another drawing method
+		logger.info("countCrawledPoints2 = " + numCrawlerPoints());
+		logger.info("countNumQueries2 = " + Strategy.countNumQueries);
+
 		Strategy.countNumQueries++;
 		return resultSet;
 	}
@@ -169,7 +171,7 @@ public class DBInMemory {
 	 */
 	public int numOfTuplesInExternalDB(Set set) {
 		H2DB h2db = new H2DB();
-		String dbName = Main.DB_NAME_TARGET;
+		String dbName = MainYahoo.DB_NAME_TARGET;
 		Connection conn = h2db.getConnection(dbName);
 		try {
 			Statement stat = conn.createStatement();

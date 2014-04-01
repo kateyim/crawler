@@ -6,6 +6,8 @@ package mo.umac.crawler;
 import java.util.ArrayList;
 import java.util.List;
 
+import mo.umac.uscensus.USDensity;
+
 import org.apache.log4j.Logger;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -14,11 +16,11 @@ import com.vividsolutions.jts.geom.Envelope;
  * split the region by the external knowledge
  * 
  * @author kate
- * 
  */
 public class AlgoPartition extends Strategy {
+	public static Logger logger = Logger.getLogger(AlgoPartition.class.getName());
 
-//	public static Logger logger = Logger.getLogger(AlgoPartition.class.getName());
+	public static String clusterRegionFile;
 
 	public AlgoPartition() {
 		super();
@@ -27,13 +29,20 @@ public class AlgoPartition extends Strategy {
 
 	@Override
 	public void crawl(String state, int category, String query, Envelope envelopeState) {
-		ArrayList<Envelope> list = AlgoPartition.getOKEnvelopes();
+		// ArrayList<Envelope> list = AlgoPartition.getOKEnvelopes();
+		ArrayList<Envelope> list = readPartitionedEnvelopes(clusterRegionFile);
 		for (int i = 0; i < list.size(); i++) {
 			Envelope envelope = list.get(i);
 			AlgoSlice sc = new AlgoSlice();
 			sc.crawl(state, category, query, envelope);
 		}
 
+	}
+
+	public static ArrayList<Envelope> readPartitionedEnvelopes(String fileName) {
+		ArrayList<Envelope> list = new ArrayList<Envelope>();
+		list = USDensity.readPartition(fileName);
+		return list;
 	}
 
 	public static List getNYEnList() {
@@ -51,7 +60,6 @@ public class AlgoPartition extends Strategy {
 		//
 		/**
 		 * 2) partition by density
-		 * 
 		 * [-97.6619662:-97.3635542, 35.3743439:35.6130527]
 		 * // [-96.1299444:-95.7177651,35.9353284:36.2231295]
 		 */

@@ -24,7 +24,7 @@ import com.vividsolutions.jts.geom.LineSegment;
  */
 public class AlgoSlice extends Strategy {
 
-//	public static Logger logger = Logger.getLogger(AlgoSlice.class.getName());
+	// public static Logger logger = Logger.getLogger(AlgoSlice.class.getName());
 
 	public AlgoSlice() {
 		super();
@@ -243,7 +243,6 @@ public class AlgoSlice extends Strategy {
 		if (logger.isDebugEnabled()) {
 			logger.debug("leftBoarderLine = " + leftBoarderLine.toString());
 			if (PaintShapes.painting) {
-
 				PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
 				PaintShapes.paint.addLine(leftBoarderLine);
 				PaintShapes.paint.myRepaint();
@@ -374,8 +373,7 @@ public class AlgoSlice extends Strategy {
 	 * @param envelopeState
 	 * @param envelope
 	 */
-	private void fillGaps(String state, int category, String query, LineSegment middleLine, LineSegment boardLine,
-			ResultSetD1 oneDimensionalResultSet) {
+	private void fillGaps(String state, int category, String query, LineSegment middleLine, LineSegment boardLine, ResultSetD1 oneDimensionalResultSet) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("...............fillGaps................");
 		}
@@ -403,8 +401,7 @@ public class AlgoSlice extends Strategy {
 			Circle circle = circles.get(i);
 			List<Coordinate> list = GeoOperator.intersect(circle, boardLine);
 			if (logger.isDebugEnabled()) {
-				logger.debug("intersection of circle: " + circle.getCenter().toString() + ", " + circle.getRadius() + " with line: " + boardLine.toString()
-						+ " is: ");
+				logger.debug("intersection of circle: " + circle.getCenter().toString() + ", " + circle.getRadius() + " with line: " + boardLine.toString() + " is: ");
 				if (list == null) {
 					logger.error("not intersect with a circle");
 				} else {

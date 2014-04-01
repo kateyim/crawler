@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-import mo.umac.crawler.Main;
+import mo.umac.crawler.MainYahoo;
 import mo.umac.uscensus.USDensity;
 
 import org.apache.log4j.Logger;
@@ -18,8 +18,8 @@ public class DensityListTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		USDensity.shutdownLogs(debug);
-		DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
+		MainYahoo.shutdownLogs(debug);
+		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		Envelope envelope = new Envelope(0.5, 3.3, 0.5, 3.3);
 		double granularityX = 0.5;
 		double granularityY = 0.5;

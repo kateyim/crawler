@@ -18,7 +18,6 @@ import java.util.Map.Entry;
 import mo.umac.db.DBExternal;
 import mo.umac.db.H2DB;
 
-
 public class MainData {
 
 	/**
@@ -37,10 +36,10 @@ public class MainData {
 		// String dbNameSource = "../crawler-data/yahoolocal-h2/source/ut";
 		// String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ut-prun";
 		// ok
-//		String stateQ = "OK";
-//		String categoryQ = "Restaurants";
-//		String dbNameSource = "../crawler-data/yahoolocal-h2/source/ok";
-//		String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ok-prun";
+		// String stateQ = "OK";
+		// String categoryQ = "Restaurants";
+		// String dbNameSource = "../crawler-data/yahoolocal-h2/source/ok";
+		// String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ok-prun";
 		// step 1
 		String folderPath = DBExternal.FOLDER_NAME + "/96926236+Restaurants/" + stateQ + "/";
 		// m.convertFromQRFileToH2(dbNameSource, folderPath);
@@ -58,7 +57,7 @@ public class MainData {
 
 		// step 4
 		String logFile = "../crawlerlog/info.log";
-//		m.numVSCrawled(logFile);
+		// m.numVSCrawled(logFile);
 
 		// test remove duplicate
 		// m.examData(dbName);
@@ -181,7 +180,6 @@ public class MainData {
 	 * 
 	 * @param fileName
 	 * @return
-	 * 
 	 * @deprecated
 	 */
 	private Map numCrawledFrequency(String fileName) {

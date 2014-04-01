@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import mo.umac.crawler.Main;
+import mo.umac.crawler.MainYahoo;
 import mo.umac.crawler.Strategy;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
@@ -51,8 +51,8 @@ public class H2DB extends DBExternal {
 
 	public H2DB() {
 		super();
-		super.dbNameSource = Main.DB_NAME_SOURCE;
-		super.dbNameTarget = Main.DB_NAME_TARGET;
+		super.dbNameSource = MainYahoo.DB_NAME_SOURCE;
+		super.dbNameTarget = MainYahoo.DB_NAME_TARGET;
 	}
 
 	public H2DB(String dbNameSource, String dbNameTarget) {

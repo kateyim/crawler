@@ -13,7 +13,7 @@ import java.util.Random;
 import java.util.Set;
 
 import mo.umac.crawler.AlgoSlice;
-import mo.umac.crawler.Main;
+import mo.umac.crawler.MainYahoo;
 import mo.umac.crawler.Strategy;
 import mo.umac.db.DBInMemory;
 import mo.umac.db.H2DB;
@@ -41,7 +41,7 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
+		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		CrawlerTest test = new CrawlerTest();
 		PaintShapes.painting = true;
 		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);

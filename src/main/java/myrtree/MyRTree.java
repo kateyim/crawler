@@ -232,7 +232,9 @@ public class MyRTree extends RTree {
 		}
 		// else maybe
 		List<Integer> list = v.getList();
-		logger.debug(list.size());
+		if (logger.isDebugEnabled()) {
+			logger.debug(list.size());
+		}
 		// FIXME wrong, the objective is bigger than all relative rectangles
 		if (list != null && list.size() == 0) {
 			return true;
@@ -242,12 +244,18 @@ public class MyRTree extends RTree {
 		ArrayList<Rectangle> listIntersectRectangles = new ArrayList<Rectangle>();
 		for (int i = 0; i < list.size(); i++) {
 			int id = list.get(i);
-			logger.debug("id = " + id);
+			if (logger.isDebugEnabled()) {
+				logger.debug("id = " + id);
+			}
 			Rectangle rr = (Rectangle) mapRectangleId.get(id);
 			if (rr == null) {
-				logger.debug("null rectangle");
+				if (logger.isDebugEnabled()) {
+					logger.debug("null rectangle");
+				}
 			} else {
-				logger.debug(rr.minX + ", " + rr.maxX + ", " + rr.minY + ", " + rr.maxY);
+				if (logger.isDebugEnabled()) {
+					logger.debug(rr.minX + ", " + rr.maxX + ", " + rr.minY + ", " + rr.maxY);
+				}
 				listIntersectRectangles.add(rr);
 			}
 		}

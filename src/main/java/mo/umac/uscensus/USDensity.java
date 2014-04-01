@@ -15,9 +15,9 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
-import mo.umac.crawler.Main;
+import mo.umac.analytics.Cluster;
+import mo.umac.crawler.MainYahoo;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.geotools.data.shapefile.ShpFiles;
@@ -38,7 +38,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  */
 public class USDensity {
 
-	private static Logger logger = Logger.getLogger(USDensity.class.getName());
+	public static Logger logger = Logger.getLogger(USDensity.class.getName());
 
 	// yanhui
 	// NY: Env[-79.76259 : -71.777491, 40.477399 : 45.015865]
@@ -70,10 +70,19 @@ public class USDensity {
 
 	private static final String SHP_EXTENSION = "shp";
 
+	// for NY
+	private static Envelope envelope = new Envelope(NYLongitudeMin, NYLongitudeMax, NYLatitudeMin, NYLatitudeMax);
+	private static double granularityX = 0.01;
+	private static double granularityY = 0.01;
+
+	private static boolean zipped = false;
 	private static final String ZIP_FOLDER_PATH = "../data-map/us-road/new-york/";
 	private static final String UN_ZIP_FOLDER_PATH = "../data-map/us-road/new-york-upzip/";
 
-	private static String densityFile = "../data-experiment/densityMap-ny-0.001.txt";
+	private static String densityFile = "../data-experiment/densityMap-ny-0.01";
+	// temple
+	private static String clusterRegionFilePre = "../data-experiment/combinedDensity-ny-";
+	private static String dentiestRegionFile = "combinedDensity-ny-0.8-11.mbr";
 	private static String clusterRegionFile = "../data-experiment/combinedDensity-ny.mbr";
 
 	/**
@@ -81,52 +90,47 @@ public class USDensity {
 	 */
 	public static void main(String[] args) {
 		boolean debug = false;
-		boolean zipped = false;
-		shutdownLogs(debug);
-		DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
-		// for NY
-		Envelope envelope = new Envelope(NYLongitudeMin, NYLongitudeMax, NYLatitudeMin, NYLatitudeMax);
-		double granularityX = 0.001;
-		double granularityY = 0.001;
+		MainYahoo.shutdownLogs(debug);
+		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
+		// computeDensityInEachGrids();
+		// findDentiestRegions();
+		partition();
+	}
 
-		USDensity usDensity = new USDensity();
+	/** compute the density on the map, run only once for a state folder */
+	public static void computeDensityInEachGrids() {
+		if (zipped) {
+			USDensity.unzip(ZIP_FOLDER_PATH, UN_ZIP_FOLDER_PATH);
+		}
+		ArrayList<Coordinate[]> roadList = USDensity.readRoad(UN_ZIP_FOLDER_PATH);
+		double[][] density1 = densityList(envelope, granularityX, granularityY, roadList);
+		USDensity.writeDensityToFile(density1, densityFile);
+	}
 
-		/** compute the density on the map, run only once for a state folder */
-		// if (zipped) {
-		// usDensity.unzip(ZIP_FOLDER_PATH, UN_ZIP_FOLDER_PATH);
-		// }
-		// ArrayList<Coordinate[]> roadList = usDensity.readRoad(UN_ZIP_FOLDER_PATH);
-		// double[][] density1 = densityList(envelope, granularityX, granularityY, roadList);
-		// usDensity.writeDensityToFile(density1, densityFile);
-		/** End */
-
-		/** cluster the regions, and then write to file */
-		ArrayList<double[]> density = usDensity.readDensityFromFile(densityFile);
+	/** cluster the regions, and then write to file */
+	public static void findDentiestRegions() {
+		ArrayList<double[]> density = USDensity.readDensityFromFile(densityFile);
 		// FIXME 2d array -> 1d array(only store non 0 values) -> TreeMap/HashMap
-		// XXX cannot build this map
-		// DensityMap map = new DensityMap(granularityX, granularityY, envelope, density);
-
-		logger.info("finished");
-		double a = 0.0;
-		ArrayList<Envelope> testRegions = new ArrayList<Envelope>();
-		for (a = 0.0; a < 1; a = a + 0.1) {
-			ArrayList<Envelope> clusteredRegion = cluster(granularityX, granularityY, envelope, density, a);
-			testRegions.addAll(clusteredRegion);
-		}
-		usDensity.writePartition(clusterRegionFile, testRegions);
-	}
-
-	public static void shutdownLogs(boolean debug) {
-		if (!debug) {
-			USDensity.logger.setLevel(Level.INFO);
-			DensityMap.logger.setLevel(Level.INFO);
-		} else {
-			USDensity.logger.setLevel(Level.DEBUG);
-			DensityMap.logger.setLevel(Level.DEBUG);
+		double a = 0.8;
+		int loop = 6;
+		for (loop = 11; loop <= 15; loop++) {
+			for (a = 0.8; a < 1; a = a + 0.2) {
+				ArrayList<Envelope> clusteredRegion = Cluster.cluster(granularityX, granularityY, envelope, density, a, loop);
+				USDensity.writePartition(clusterRegionFilePre + a + "-" + loop + ".mbr", clusteredRegion);
+			}
 		}
 	}
 
-	private void unzip(String zipFolderPath, String unZipfolderPath) {
+	private static void partition() {
+		ArrayList<Envelope> dentiestRegion = readPartition(dentiestRegionFile);
+		ArrayList<Envelope> allRegion = new ArrayList<Envelope>();
+		allRegion.addAll(dentiestRegion);
+		ArrayList<Envelope> sparseRegion = Cluster.partition(envelope, dentiestRegion);
+		allRegion.addAll(sparseRegion);
+		USDensity.writePartition(clusterRegionFile, allRegion);
+	}
+
+	public static void unzip(String zipFolderPath, String unZipfolderPath) {
 		logger.info("-----------unzip roads in " + zipFolderPath);
 		ArrayList<Coordinate[]> roadList = new ArrayList<Coordinate[]>();
 		//
@@ -142,7 +146,7 @@ public class USDensity {
 	/**
 	 * Read all roads in the .shp file.
 	 */
-	private ArrayList<Coordinate[]> readRoad(String unzipFolderPath) {
+	public static ArrayList<Coordinate[]> readRoad(String unzipFolderPath) {
 		logger.info("-----------read roads in " + unzipFolderPath);
 		// //
 		// ArrayList<String> zipFileList = (ArrayList<String>) FileOperator
@@ -182,7 +186,7 @@ public class USDensity {
 		return roadList;
 	}
 
-	private void writeDensityToFile(double[][] density, String densityFile) {
+	public static void writeDensityToFile(double[][] density, String densityFile) {
 		logger.info("--------------writing unit density to file");
 		File file = new File(densityFile);
 		try {
@@ -197,6 +201,11 @@ public class USDensity {
 				double[] ds = density[i];
 				for (int j = 0; j < ds.length; j++) {
 					double d = ds[j];
+					if (logger.isDebugEnabled()) {
+						if (d != 0) {
+							logger.debug("writing: " + i + ", " + j + " = " + d);
+						}
+					}
 					bw.write(Double.toString(d));
 					bw.write(";");
 				}
@@ -211,13 +220,13 @@ public class USDensity {
 		}
 	}
 
-	private ArrayList<double[]> readDensityFromFile(String densityFile) {
+	public static ArrayList<double[]> readDensityFromFile(String densityFile) {
 		logger.info("readDensityFromFile...");
 		ArrayList<double[]> density = new ArrayList<double[]>();
-		File file = new File(densityFile);
-		if (!file.exists()) {
-			logger.error("densityFile does not exist");
-		}
+		// File file = new File(densityFile);
+		// if (!file.exists()) {
+		// logger.error("densityFile does not exist");
+		// }
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(densityFile)));
 			String data = null;
@@ -231,7 +240,13 @@ public class USDensity {
 					String split = splitArray[j];
 					double value = Double.parseDouble(split);
 					densityRow[j] = value;
+					if (logger.isDebugEnabled()) {
+						if (value != 0) {
+							logger.debug("reading: " + i + ", " + j + " = " + value);
+						}
+					}
 				}
+				i++;
 				density.add(densityRow);
 			}
 			br.close();
@@ -441,26 +456,10 @@ public class USDensity {
 				pGridY = qGridY;
 			}
 		}
-		// double areaSquare = granularityX * granularityY;
-		// for (int i = 0; i < countX; i++) {
-		// for (int j = 0; j < countY; j++) {
-		// density[i][j] = density[i][j] / totalLength;
-		//
-		// }
-		// }
 		return density;
 	}
 
-	private static ArrayList<Envelope> cluster(double granularityX, double granularityY, Envelope envelope, ArrayList<double[]> density, double a) {
-		// FIXME Auto-generated method stub
-		return null;
-	}
-	
-	private void discardZero(){
-		
-	}
-
-	private void writePartition(String clusterRegionFile, ArrayList<Envelope> clusteredRegion) {
+	public static void writePartition(String clusterRegionFile, ArrayList<Envelope> clusteredRegion) {
 		try {
 
 			File file = new File(clusterRegionFile);
@@ -472,13 +471,14 @@ public class USDensity {
 				file.createNewFile();
 			}
 
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true)));
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, false)));
 			bw.write(Integer.toString(clusteredRegion.size()));
 			bw.newLine();
 
 			for (int i = 0; i < clusteredRegion.size(); i++) {
 				Envelope envelope = clusteredRegion.get(i);
 				String s = envelope.getMinY() + ";" + envelope.getMinX() + ";" + envelope.getMaxY() + ";" + envelope.getMaxX();
+				// String s = envelope.getMinX() + ";" + envelope.getMinY() + ";" + envelope.getMaxX() + ";" + envelope.getMaxY();
 				bw.write(s);
 				bw.newLine();
 			}
@@ -488,6 +488,45 @@ public class USDensity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static ArrayList<Envelope> readPartition(String clusterRegionFile) {
+		ArrayList<Envelope> clusteredRegion = new ArrayList<Envelope>();
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(clusterRegionFile)));
+			String data = null;
+			String[] splitArray;
+			int i = 0;
+			double x1, x2, y1, y2;
+			// String s = envelope.getMinY() + ";" + envelope.getMinX() + ";" + envelope.getMaxY() + ";" + envelope.getMaxX();
+			while ((data = br.readLine()) != null) {
+				data = data.trim();
+				if (logger.isDebugEnabled()) {
+					logger.debug(data);
+				}
+				if (!data.contains(";")) {
+					continue;
+				}
+				splitArray = data.split(";");
+				// x1 = Double.parseDouble(splitArray[0]);
+				// y1 = Double.parseDouble(splitArray[1]);
+				// x2 = Double.parseDouble(splitArray[2]);
+				// y2 = Double.parseDouble(splitArray[3]);
+				y1 = Double.parseDouble(splitArray[0]);
+				x1 = Double.parseDouble(splitArray[1]);
+				y2 = Double.parseDouble(splitArray[2]);
+				x2 = Double.parseDouble(splitArray[3]);
+
+				Envelope e = new Envelope(x1, x2, y1, y2);
+				clusteredRegion.add(e);
+			}
+			br.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return clusteredRegion;
 	}
 
 }
