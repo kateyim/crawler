@@ -22,9 +22,12 @@ public class MainYahoo {
 	public static boolean debug = false;
 
 	// used in offline algorithm
-	// public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ny-prun";
-	// public final static String DB_NAME_TARGET = "../crawler-data/yahoolocal-h2/target/ny-prun-c-one";
-	// public final static String DB_NAME_CRAWL = "../crawler-data/yahoolocal-h2/crawl/datasets";
+	// public final static String DB_NAME_SOURCE =
+	// "../crawler-data/yahoolocal-h2/source/ny-prun";
+	// public final static String DB_NAME_TARGET =
+	// "../crawler-data/yahoolocal-h2/target/ny-prun-c-one";
+	// public final static String DB_NAME_CRAWL =
+	// "../crawler-data/yahoolocal-h2/crawl/datasets";
 
 	public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun";
 	public final static String DB_NAME_TARGET = "../data-experiment/ny-prun-c-one";
@@ -37,9 +40,9 @@ public class MainYahoo {
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		shutdownLogs(MainYahoo.debug);
 		/************************* Crawling Algorithm ***************************/
-		// CrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
-		Strategy crawlerStrategy = new AlgoSlice();
-		// CrawlerStrategy crawlerStrategy = new BlockCrawler();
+//		Strategy crawlerStrategy = new AlgoSlice();
+		Strategy crawlerStrategy = new AlgoPartition();
+		AlgoPartition.clusterRegionFile = USDensity.clusterRegionFile;
 		/**********************************************************************/
 		Context crawlerContext = new Context(crawlerStrategy);
 		// specify the states to be crawled
