@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import mo.umac.crawler.AlgoDCDT;
 import mo.umac.crawler.AlgoPartition;
-import mo.umac.crawler.AlgoSlice;
 import mo.umac.crawler.MainYahoo;
 import mo.umac.crawler.Strategy;
 import mo.umac.db.DBInMemory;
@@ -33,11 +33,14 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class MainSynthetic extends Strategy {
 
-	private static String source = "../data-experiment/synthetic/skew-1000-0.3";
+	private static String source = "../data-experiment/synthetic/test";
+	// private static String source = "../data-experiment/synthetic/skew-1000-0.3";
 	// private static String source = "../data-experiment/synthetic/uniform-1000";
 	private static String target = "../data-experiment/synthetic/target";
-	private static int n = 1000;
-	private int topK = 10;
+	// private static int n = 1000;
+	private static int n = 10;
+	// private int topK = 10;
+	private int topK = 2;
 	private static Envelope envelope = new Envelope(0, 1000, 0, 1000);
 	private static String state = "NY";
 	private static int categoryID = 96926236;
@@ -52,8 +55,8 @@ public class MainSynthetic extends Strategy {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		boolean debug = false;
-		PaintShapes.painting = false;
+		boolean debug = true;
+		PaintShapes.painting = true;
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		MainSynthetic test = new MainSynthetic();
@@ -78,8 +81,8 @@ public class MainSynthetic extends Strategy {
 	}
 
 	public void generateData() {
-		// List<Coordinate> points = uniformDataset(n);
-		List<Coordinate> points = skewDataset(n);
+		List<Coordinate> points = uniformDataset(n);
+		// List<Coordinate> points = skewDataset(n);
 		exportToH2(points, source, category, state);
 	}
 
@@ -158,8 +161,9 @@ public class MainSynthetic extends Strategy {
 		Strategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 		/** switch algorithms */
 		// AlgoSlice crawler = new AlgoSlice();
-		AlgoPartition crawler = new AlgoPartition();
-		AlgoPartition.clusterRegionFile = clusterRegionFile;
+		// AlgoPartition crawler = new AlgoPartition();
+		AlgoDCDT crawler = new AlgoDCDT();
+		// AlgoPartition.clusterRegionFile = clusterRegionFile;
 		//
 		/** end switching algorithms */
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;

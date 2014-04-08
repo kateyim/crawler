@@ -3,6 +3,7 @@ package paint;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
@@ -83,6 +84,30 @@ public class PaintShapes extends JPanel {
 
 	public static void addLine(LineSegment line) {
 		arrDraw.add(getLine(line));
+	}
+
+	public static void addConstraintPolygon(ArrayList<Coordinate> points) {
+		int npoints = points.size();
+		int[] xpoints = new int[npoints];
+		int[] ypoints = new int[npoints];
+		for (int i = 0; i < points.size(); i++) {
+			xpoints[i] = (int) points.get(i).x;
+			ypoints[i] = (int) points.get(i).y;
+		}
+		Polygon polygon = new Polygon(xpoints, ypoints, npoints);
+		arrFill.add(polygon);
+	}
+
+	public static void addPolygon(ArrayList<Coordinate> points) {
+		int npoints = points.size();
+		int[] xpoints = new int[npoints];
+		int[] ypoints = new int[npoints];
+		for (int i = 0; i < points.size(); i++) {
+			xpoints[i] = (int) points.get(i).x;
+			ypoints[i] = (int) points.get(i).y;
+		}
+		Polygon polygon = new Polygon(xpoints, ypoints, npoints);
+		arrDraw.add(polygon);
 	}
 
 	public static Ellipse2D.Double getCircle(Circle circle) {
