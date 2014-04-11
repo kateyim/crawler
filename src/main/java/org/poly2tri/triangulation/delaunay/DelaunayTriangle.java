@@ -215,7 +215,6 @@ public class DelaunayTriangle {
 		} else if (point == points[2]) {
 			return points[0];
 		}
-		// FIXME yanhui what's wrong?
 		logger.error("point location error");
 		throw new RuntimeException("[FIXME] point location error");
 	}

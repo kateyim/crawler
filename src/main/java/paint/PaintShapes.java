@@ -15,6 +15,9 @@ import javax.swing.JPanel;
 
 import mo.umac.spatial.Circle;
 
+import org.poly2tri.triangulation.TriangulationPoint;
+import org.poly2tri.triangulation.delaunay.DelaunayTriangle;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.LineSegment;
@@ -25,6 +28,9 @@ public class PaintShapes extends JPanel {
 
 	public static List<Shape> arrDraw = new ArrayList<Shape>();
 	public static List<Shape> arrFill = new ArrayList<Shape>();
+	// for polygon
+	public static List<Shape> arrFillConstraintPoly = new ArrayList<Shape>();
+	public static List<Shape> arrDrawTempTriangles = new ArrayList<Shape>();
 
 	public static PaintShapes paint = new PaintShapes();
 
@@ -36,6 +42,7 @@ public class PaintShapes extends JPanel {
 	public static Color color;
 
 	public void paintComponent(Graphics g) {
+		// XXX clear() only used testing AlgoDCDT
 		// clear(g);
 		g.setColor(color);
 		for (Shape i : arrDraw) {
@@ -46,9 +53,21 @@ public class PaintShapes extends JPanel {
 			Graphics2D g2d = (Graphics2D) g;
 			g2d.fill(i);
 		}
+		// PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
+		for (Shape i : arrDrawTempTriangles) {
+			Graphics2D g2d = (Graphics2D) g;
+			g2d.draw(i);
+		}
+		// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		for (Shape i : arrFillConstraintPoly) {
+			Graphics2D g2d = (Graphics2D) g;
+			g2d.fill(i);
+		}
 		arrDraw.clear();
 		arrFill.clear();
-
+		arrDrawTempTriangles.clear();
+		//
+		arrFillConstraintPoly.clear();
 	}
 
 	/**
@@ -86,28 +105,54 @@ public class PaintShapes extends JPanel {
 		arrDraw.add(getLine(line));
 	}
 
-	public static void addConstraintPolygon(ArrayList<Coordinate> points) {
-		int npoints = points.size();
+	// public static void addConstraintPolygon(ArrayList<Coordinate> points) {
+	// int npoints = points.size();
+	// int[] xpoints = new int[npoints];
+	// int[] ypoints = new int[npoints];
+	// for (int i = 0; i < points.size(); i++) {
+	// xpoints[i] = (int) points.get(i).x;
+	// ypoints[i] = (int) points.get(i).y;
+	// }
+	// Polygon polygon = new Polygon(xpoints, ypoints, npoints);
+	// arrFill.add(polygon);
+	// }
+	//
+	// public static void addPolygon(ArrayList<Coordinate> points) {
+	// int npoints = points.size();
+	// int[] xpoints = new int[npoints];
+	// int[] ypoints = new int[npoints];
+	// for (int i = 0; i < points.size(); i++) {
+	// xpoints[i] = (int) points.get(i).x;
+	// ypoints[i] = (int) points.get(i).y;
+	// }
+	// Polygon polygon = new Polygon(xpoints, ypoints, npoints);
+	// arrDraw.add(polygon);
+	// }
+
+	public static void addTriangle(DelaunayTriangle dt) {
+		int npoints = dt.points.length;
 		int[] xpoints = new int[npoints];
 		int[] ypoints = new int[npoints];
-		for (int i = 0; i < points.size(); i++) {
-			xpoints[i] = (int) points.get(i).x;
-			ypoints[i] = (int) points.get(i).y;
+		for (int i = 0; i < dt.points.length; i++) {
+			xpoints[i] = (int) dt.points[i].getX();
+			ypoints[i] = (int) dt.points[i].getY();
 		}
 		Polygon polygon = new Polygon(xpoints, ypoints, npoints);
-		arrFill.add(polygon);
+		arrDrawTempTriangles.add(polygon);
 	}
 
-	public static void addPolygon(ArrayList<Coordinate> points) {
-		int npoints = points.size();
+	public static void addPolygon(org.poly2tri.geometry.polygon.Polygon p) {
+		List<TriangulationPoint> list = p.getPoints();
+		int npoints = list.size();
 		int[] xpoints = new int[npoints];
 		int[] ypoints = new int[npoints];
-		for (int i = 0; i < points.size(); i++) {
-			xpoints[i] = (int) points.get(i).x;
-			ypoints[i] = (int) points.get(i).y;
+		for (int i = 0; i < list.size(); i++) {
+			TriangulationPoint tp = list.get(i);
+			xpoints[i] = (int) tp.getX();
+			ypoints[i] = (int) tp.getY();
 		}
 		Polygon polygon = new Polygon(xpoints, ypoints, npoints);
-		arrDraw.add(polygon);
+		arrFillConstraintPoly.add(polygon);
 	}
 
 	public static Ellipse2D.Double getCircle(Circle circle) {

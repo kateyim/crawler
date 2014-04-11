@@ -36,11 +36,6 @@ public class AlgoDCDT extends Strategy {
 			logger.info("------------crawling---------");
 			logger.info(envelope.toString());
 		}
-		// finished crawling
-		if (envelope == null) {
-			return;
-		}
-		//
 		Coordinate center = envelope.centre();
 		AQuery aQuery = new AQuery(center, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
 		ResultSetD2 resultSet = query(aQuery);
@@ -64,34 +59,29 @@ public class AlgoDCDT extends Strategy {
 			PaintShapes.paint.myRepaint();
 		}
 		//
+		ArrayList<Polygon> holeList = new ArrayList<Polygon>();
+		//
 		Polygon polygonHexagon = findInnerHexagon(aCircle);
-		Polygon polygon = boundary(envelope);
-		polygon.addHole(polygonHexagon);
-		// should paint here, not inside findInnerHexagon
-		Poly2Tri.triangulate(polygon);
+		if (logger.isDebugEnabled() && PaintShapes.painting) {
+			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			PaintShapes.paint.addPolygon(polygonHexagon);
+			PaintShapes.paint.myRepaint();
+		}
 
+		holeList.add(polygonHexagon);
+		Polygon polygon = boundary(envelope);
+		addHoles(polygon, holeList);
+		Poly2Tri.triangulate(polygon);
 
 		List<DelaunayTriangle> list = polygon.getTriangles();
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
 			PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
 			for (int i = 0; i < list.size(); i++) {
 				DelaunayTriangle dt = list.get(i);
-				TriangulationPoint[] tp = dt.points;
-				ArrayList<Coordinate> polyList = new ArrayList<Coordinate>();
-				polyList.add(new Coordinate(tp[0].getX(), tp[0].getY()));
-				polyList.add(new Coordinate(tp[1].getX(), tp[1].getY()));
-				polyList.add(new Coordinate(tp[2].getX(), tp[2].getY()));
-				PaintShapes.paint.addPolygon(polyList);
+				PaintShapes.paint.addTriangle(dt);
 			}
 			PaintShapes.paint.myRepaint();
 		}
-		//
-		// Queue<DelaunayTriangle> queue = new LinkedList<DelaunayTriangle>();
-		// for (int i = 0; i < list.size(); i++) {
-		// DelaunayTriangle dt = list.get(i);
-		// queue.add(dt);
-		// }
-		//
 
 		while (list.size() != 0) {
 			double maxArea = Double.MIN_VALUE;
@@ -107,9 +97,14 @@ public class AlgoDCDT extends Strategy {
 			if (logger.isDebugEnabled()) {
 				logger.debug("List<DelaunayTriangle> size = " + list.size());
 				logger.debug("maxArea = " + maxArea);
+				logger.debug("maxIndex = " + maxIndex);
+				for (int i = 0; i < list.size(); i++) {
+					DelaunayTriangle tri = list.get(i);
+					logger.debug(triangleToString(tri));
+				}
 			}
 			DelaunayTriangle triangle = list.get(maxIndex);
-			list.remove(maxIndex);
+			list.clear();
 			TPoint centroid = triangle.centroid();
 			if (logger.isDebugEnabled()) {
 				logger.debug("centroid = " + centroid.toString());
@@ -118,28 +113,19 @@ public class AlgoDCDT extends Strategy {
 			center = new Coordinate(centroid.getX(), centroid.getY());
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
 				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-				TriangulationPoint[] tp = triangle.points;
-				ArrayList<Coordinate> polyList = new ArrayList<Coordinate>();
-				polyList.add(new Coordinate(tp[0].getX(), tp[0].getY()));
-				polyList.add(new Coordinate(tp[1].getX(), tp[1].getY()));
-				polyList.add(new Coordinate(tp[2].getX(), tp[2].getY()));
-				PaintShapes.paint.addPolygon(polyList);
+				PaintShapes.paint.addTriangle(triangle);
 				PaintShapes.paint.color = PaintShapes.paint.color.red;
 				PaintShapes.paint.addPoint(center);
 				PaintShapes.paint.myRepaint();
 			}
 			aQuery = new AQuery(center, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
 			resultSet = query(aQuery);
-			if (logger.isDebugEnabled()) {
-				logger.debug("resultSet.getPOIs().size() = " + resultSet.getPOIs().size());
-			}
 			farthestCoordinate = CrawlerD1.farthest(resultSet);
 			if (farthestCoordinate == null) {
 				logger.error("farestest point is null");
 			}
 			radius = center.distance(farthestCoordinate);
 			if (logger.isDebugEnabled()) {
-				logger.debug("farthestCoordinate = " + farthestCoordinate.toString());
 				logger.debug("radius = " + radius);
 			}
 			aCircle = new Circle(center, radius);
@@ -152,36 +138,33 @@ public class AlgoDCDT extends Strategy {
 			//
 			Polygon inner = intersect(aCircle, triangle);
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
+				logger.debug(polygonToString(inner));
 				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-				List<TriangulationPoint> tpList = inner.getPoints();
-				ArrayList<Coordinate> Drawlist = new ArrayList<Coordinate>();
-				for (int i = 0; i < tpList.size(); i++) {
-					Drawlist.add(trans(tpList.get(i)));
-				}
-				PaintShapes.paint.addConstraintPolygon(Drawlist);
+				PaintShapes.paint.addPolygon(inner);
 				PaintShapes.paint.myRepaint();
 			}
-			polygon.addHole(inner);
+
+			holeList.add(inner);
+			polygon = boundary(envelope);
+			addHoles(polygon, holeList);
 			Poly2Tri.triangulate(polygon);
-			// TODO check
+			//
 			list = polygon.getTriangles();
-			// for (int i = 0; i < list.size(); i++) {
-			// DelaunayTriangle dt = list.get(i);
-			// queue.add(dt);
-			// }
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
-				PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
+				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
 				for (int i = 0; i < list.size(); i++) {
 					DelaunayTriangle dt = list.get(i);
-					TriangulationPoint[] tp = dt.points;
-					ArrayList<Coordinate> polyList = new ArrayList<Coordinate>();
-					polyList.add(new Coordinate(tp[0].getX(), tp[0].getY()));
-					polyList.add(new Coordinate(tp[1].getX(), tp[1].getY()));
-					polyList.add(new Coordinate(tp[2].getX(), tp[2].getY()));
-					PaintShapes.paint.addPolygon(polyList);
+					PaintShapes.paint.addTriangle(dt);
 				}
 				PaintShapes.paint.myRepaint();
 			}
+		}
+	}
+
+	private void addHoles(Polygon polygon, ArrayList<Polygon> holeList) {
+		for (int i = 0; i < holeList.size(); i++) {
+			Polygon hole = holeList.get(i);
+			polygon.addHole(hole);
 		}
 	}
 
@@ -210,18 +193,6 @@ public class AlgoDCDT extends Strategy {
 		points.add(p5);
 		points.add(p6);
 		Polygon polygon = new Polygon(points);
-		if (logger.isDebugEnabled() && PaintShapes.painting) {
-			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-			ArrayList<Coordinate> list = new ArrayList<Coordinate>();
-			list.add(trans(p1));
-			list.add(trans(p2));
-			list.add(trans(p3));
-			list.add(trans(p4));
-			list.add(trans(p5));
-			list.add(trans(p6));
-			PaintShapes.paint.addConstraintPolygon(list);
-			PaintShapes.paint.myRepaint();
-		}
 		return polygon;
 	}
 
@@ -618,4 +589,24 @@ public class AlgoDCDT extends Strategy {
 		return p;
 	}
 
+	private String triangleToString(DelaunayTriangle dt) {
+		StringBuffer sb = new StringBuffer("triangle: ");
+		TriangulationPoint[] tp = dt.points;
+		for (int i = 0; i < tp.length; i++) {
+			TriangulationPoint p = tp[i];
+			sb.append("[" + p.getX() + ", " + p.getY() + "]; ");
+		}
+		return sb.toString();
+	}
+
+	private String polygonToString(Polygon inner) {
+		StringBuffer sb = new StringBuffer("Polygon: ");
+		List<TriangulationPoint> list = inner.getPoints();
+		for (int i = 0; i < list.size(); i++) {
+			TriangulationPoint p = list.get(i);
+			sb.append("[" + p.getX() + ", " + p.getY() + "]; ");
+		}
+		return sb.toString();
+	}
+	
 }

@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * Zalik, B.(2008)'Sweep-line algorithm for constrained Delaunay triangulation',
  * International Journal of Geographical Information Science
  * "FlipScan" Constrained Edge Algorithm invented by author of this code.
- * Author: Thomas Åhlén, thahlen@gmail.com
+ * Author: Thomas ï¿½hlï¿½n, thahlen@gmail.com
  */
 
 public class DTSweep {
@@ -514,6 +514,9 @@ public class DTSweep {
 				// We are modifying the constraint maybe it would be better to
 				// not change the given constraint and just keep a variable for the new constraint
 				tcx.edgeEvent.constrainedEdge.q = p2;
+				if(triangle.neighborAcross(point) == null){
+					System.out.println("triangle.neighborAcross(point) == null");
+				}
 				triangle = triangle.neighborAcross(point);
 				edgeEvent(tcx, ep, p2, triangle, p2);
 			} else {

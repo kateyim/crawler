@@ -51,17 +51,17 @@ public class AlgoDCDTTest {
 		// TPoint p2 = new TPoint(300, 0);
 		// TPoint p3 = new TPoint(100, 300);
 		// case 4.2
-//		TPoint p1 = new TPoint(30, 70);
-//		TPoint p2 = new TPoint(200, 80);
-//		TPoint p3 = new TPoint(190, 170);
+		// TPoint p1 = new TPoint(30, 70);
+		// TPoint p2 = new TPoint(200, 80);
+		// TPoint p3 = new TPoint(190, 170);
 		// case 4.2: 3 edges
-//		TPoint p1 = new TPoint(30, 70);
-//		TPoint p2 = new TPoint(160, 100);
-//		TPoint p3 = new TPoint(100, 160);
+		// TPoint p1 = new TPoint(30, 70);
+		// TPoint p2 = new TPoint(160, 100);
+		// TPoint p3 = new TPoint(100, 160);
 		// case: 4.3a
-//		TPoint p1 = new TPoint(0, 0);
-//		TPoint p2 = new TPoint(200, 60);
-//		TPoint p3 = new TPoint(100, 180);
+		// TPoint p1 = new TPoint(0, 0);
+		// TPoint p2 = new TPoint(200, 60);
+		// TPoint p3 = new TPoint(100, 180);
 		// case: 4.3b
 		TPoint p1 = new TPoint(10, 40);
 		TPoint p2 = new TPoint(50, 130);
@@ -85,12 +85,7 @@ public class AlgoDCDTTest {
 		Polygon p = algo.intersect(circle, triangle);
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
 			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-			List<TriangulationPoint> tpList = p.getPoints();
-			ArrayList<Coordinate> list = new ArrayList<Coordinate>();
-			for (int i = 0; i < tpList.size(); i++) {
-				list.add(trans(tpList.get(i)));
-			}
-			PaintShapes.paint.addConstraintPolygon(list);
+			PaintShapes.paint.addPolygon(p);
 			PaintShapes.paint.myRepaint();
 		}
 

@@ -94,15 +94,15 @@ public class Circle {
 				}
 			}
 		} else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("p1.x!=p2.x");
-			}
+			// if (logger.isDebugEnabled()) {
+			// logger.debug("p1.x!=p2.x");
+			// }
 			double k = (p2.y - p1.y) / (p2.x - p1.x);
 			double c = p1.y - k * p1.x;
 			double delt = 4 * Math.pow(k * c - point.x - k * point.y, 2) - 4 * (1 + k * k) * ((c - point.y) * (c - point.y) + point.x * point.x - radius * radius);
-			if (logger.isDebugEnabled()) {
-				logger.debug("delt=" + delt + "  k=" + k);
-			}
+//			if (logger.isDebugEnabled()) {
+//				logger.debug("delt=" + delt + "  k=" + k);
+//			}
 
 			if (delt >= 0) {
 				double x1 = (2 * (point.x + k * point.y - k * c) + Math.sqrt(delt)) / (2 * (1 + k * k));
@@ -130,8 +130,8 @@ public class Circle {
 			if(p1.distance(c1) > p1.distance(c2)){
 				intersect2.add(c2);
 				intersect2.add(c1);
+				return intersect2;
 			}
-			return intersect2;
 		}
 		
 		return intersect;
