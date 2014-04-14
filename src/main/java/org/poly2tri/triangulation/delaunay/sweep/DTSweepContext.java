@@ -44,7 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author Thomas Åhlén, thahlen@gmail.com
+ * @author Thomas ï¿½hlï¿½n, thahlen@gmail.com
  */
 public class DTSweepContext extends TriangulationContext<DTSweepDebugContext> {
 	private final static Logger logger = LoggerFactory.getLogger(DTSweepContext.class);
@@ -167,6 +167,7 @@ public class DTSweepContext extends TriangulationContext<DTSweepDebugContext> {
 		tail = new AdvancingFrontNode(iTriangle.points[2]);
 
 		aFront = new AdvancingFront(head, tail);
+		// XXX Kate: didn't add node middle
 		aFront.addNode(middle);
 
 		// TODO: I think it would be more intuitive if head is middles next and not previous

@@ -37,12 +37,15 @@ import static org.poly2tri.triangulation.TriangulationUtil.smartIncircle;
 
 import java.util.List;
 
+//import mo.umac.crawler.AlgoDCDT;
+
+import org.apache.log4j.Logger;
 import org.poly2tri.triangulation.TriangulationMode;
 import org.poly2tri.triangulation.TriangulationPoint;
 import org.poly2tri.triangulation.TriangulationUtil.Orientation;
 import org.poly2tri.triangulation.delaunay.DelaunayTriangle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+//import org.slf4j.Logger;
 
 /**
  * Sweep-line, Constrained Delauney Triangulation (CDT) See: Domiter, V. and
@@ -53,7 +56,8 @@ import org.slf4j.LoggerFactory;
  */
 
 public class DTSweep {
-	private final static Logger logger = LoggerFactory.getLogger(DTSweep.class);
+	// private final static Logger logger = LoggerFactory.getLogger(DTSweep.class);
+	protected static Logger logger = Logger.getLogger(DTSweep.class.getName());
 
 	private final static double PI_div2 = Math.PI / 2;
 	private final static double PI_3div4 = 3 * Math.PI / 4;
@@ -85,16 +89,26 @@ public class DTSweep {
 		List<TriangulationPoint> points;
 		TriangulationPoint point;
 		AdvancingFrontNode node;
-
+		// XXX Kate: already sorted first by y-axis, and then by x-axis.
 		points = tcx.getPoints();
-
+		// XXX Kate: why i starts at i = 1?
 		for (int i = 1; i < points.size(); i++) {
 			point = points.get(i);
+			if (logger.isDebugEnabled()) {
+				logger.debug("points: [" + point.getX() + ", " + point.getY() + "]");
+			}
 
 			node = pointEvent(tcx, point);
-
-			if (point.hasEdges()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("node: [" + node.point.getX() + ", " + node.point.getY() + "]");
+			}
+			// XXX Kate: one point may link to many edges
+			if (point.hasEdges()) { // XXX Kate: the edge only related to the upper point of a real edge.
 				for (DTSweepConstraint e : point.getEdges()) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("e: " + e.p + "->" + e.q);
+					}
+
 					if (tcx.isDebugEnabled()) {
 						tcx.getDebugContext().setActiveConstraint(e);
 					}
@@ -239,7 +253,7 @@ public class DTSweep {
 	 */
 	private static AdvancingFrontNode pointEvent(DTSweepContext tcx, TriangulationPoint point) {
 		AdvancingFrontNode node, newNode;
-
+		// XXX Kate: locate the previous node of the point
 		node = tcx.locateNode(point);
 		if (tcx.isDebugEnabled()) {
 			tcx.getDebugContext().setActiveNode(node);
@@ -248,6 +262,7 @@ public class DTSweep {
 
 		// Only need to check +epsilon since point never have smaller
 		// x value than node due to how we fetch nodes from the front
+		// XXX Kate: why?
 		if (point.getX() <= node.point.getX() + EPSILON) {
 			fill(tcx, node);
 		}
@@ -268,7 +283,7 @@ public class DTSweep {
 	private static AdvancingFrontNode newFrontTriangle(DTSweepContext tcx, TriangulationPoint point, AdvancingFrontNode node) {
 		AdvancingFrontNode newNode;
 		DelaunayTriangle triangle;
-
+		// [1000.0,0.0], [0.0,0.0], [1300.000011920929,-300.00001192092896]
 		triangle = new DelaunayTriangle(point, node.point, node.next.point);
 		triangle.markNeighbor(node.triangle);
 		tcx.addToList(triangle);
@@ -306,6 +321,22 @@ public class DTSweep {
 				tcx.getDebugContext().setPrimaryTriangle(node.triangle);
 			}
 
+			// XXX Kate: add this to allow polygon on the edge
+			// if (node.triangle == null) {
+			// return;
+			// }
+			if (logger.isDebugEnabled()) {
+				logger.debug("edgeEvent: ");
+				if (node.triangle == null) {
+					logger.debug("triangle == null");
+				} else {
+					logger.debug(node.triangle.toString());
+					logger.debug(node.triangle.neighborInfo());
+				}
+				logger.debug("edge.p: [" + edge.p.getX() + ", " + edge.p.getY() + "]");
+				logger.debug("edge.q: [" + edge.q.getX() + ", " + edge.q.getY() + "]");
+			}
+
 			if (isEdgeSideOfTriangle(node.triangle, edge.p, edge.q)) {
 				return;
 			}
@@ -317,11 +348,16 @@ public class DTSweep {
 
 			edgeEvent(tcx, edge.p, edge.q, node.triangle, edge.q);
 		} catch (PointOnEdgeException e) {
-			logger.warn("Skipping edge: {}", e.getMessage());
+			// logger.warn("Skipping edge: {}", e.getMessage());
+			// XXX Kate
+			logger.error("Skipping edge: {}" + e.getMessage());
 		}
 	}
 
 	private static void fillEdgeEvent(DTSweepContext tcx, DTSweepConstraint edge, AdvancingFrontNode node) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("tcx.edgeEvent.right = " + tcx.edgeEvent.right);
+		}
 		if (tcx.edgeEvent.right) {
 			fillRightAboveEdgeEvent(tcx, edge, node);
 		} else {
@@ -382,6 +418,7 @@ public class DTSweep {
 	}
 
 	private static void fillRightAboveEdgeEvent(DTSweepContext tcx, DTSweepConstraint edge, AdvancingFrontNode node) {
+		// FIXME Kate comment from here
 		while (node.next.point.getX() < edge.p.getX()) {
 			if (tcx.isDebugEnabled()) {
 				tcx.getDebugContext().setActiveNode(node);
@@ -465,15 +502,33 @@ public class DTSweep {
 	private static boolean isEdgeSideOfTriangle(DelaunayTriangle triangle, TriangulationPoint ep, TriangulationPoint eq) {
 		int index;
 		index = triangle.edgeIndex(ep, eq);
+		if (logger.isDebugEnabled()) {
+			logger.debug("index = " + index);
+		}
 		if (index != -1) {
 			triangle.markConstrainedEdge(index);
 			triangle = triangle.neighbors[index];
 			if (triangle != null) {
 				triangle.markConstrainedEdge(ep, eq);
 			}
+			if (logger.isDebugEnabled()) {
+				if (triangle != null) {
+					logger.debug("triangle = it's neighbor: " + triangle.toString());
+					logger.debug("triangle = it's neighbor: " + triangle.neighborInfo());
+				} else {
+					logger.debug("triangle = it's neighbor = null");
+				}
+				logger.debug("return true");
+			}
+
 			return true;
+
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("return false");
 		}
 		return false;
+
 	}
 
 	private static void edgeEvent(DTSweepContext tcx, TriangulationPoint ep, TriangulationPoint eq, DelaunayTriangle triangle, TriangulationPoint point) {
@@ -482,13 +537,40 @@ public class DTSweep {
 		if (tcx.isDebugEnabled()) {
 			tcx.getDebugContext().setPrimaryTriangle(triangle);
 		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("edgeEvent: ");
+			if (triangle == null) {
+				logger.debug("triangle == null");
+			} else {
+				logger.debug(triangle.toString());
+				logger.debug(triangle.neighborInfo());
+			}
+			logger.debug("ep: [" + ep.getX() + ", " + ep.getY() + "]");
+			logger.debug("ep: [" + eq.getX() + ", " + eq.getY() + "]");
+		}
+		// XXX Kate
+		// if (triangle == null) {
+		// logger.info("triangle == null");
+		// return; // ?
+		// }
 
+		// XXX Kate: triangle has changed to it's neighbor
 		if (isEdgeSideOfTriangle(triangle, ep, eq)) {
 			return;
 		}
-
+		if (logger.isDebugEnabled()) {
+			logger.debug(triangle.toString());
+			logger.debug(triangle.neighborInfo());
+			logger.debug("point: [" + point.getX() + ", " + point.getY() + "]");
+		}
 		p1 = triangle.pointCCW(point);
+		if (logger.isDebugEnabled()) {
+			logger.debug("pointCCW: p1: [" + p1.getX() + ", " + p1.getY() + "]");
+		}
 		Orientation o1 = orient2d(eq, p1, ep);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Orientation o1= " + o1);
+		}
 		if (o1 == Orientation.Collinear) {
 			if (triangle.contains(eq, p1)) {
 				triangle.markConstrainedEdge(eq, p1);
@@ -496,6 +578,10 @@ public class DTSweep {
 				// not change the given constraint and just keep a variable for the new constraint
 				tcx.edgeEvent.constrainedEdge.q = p1;
 				triangle = triangle.neighborAcross(point);
+				if (logger.isDebugEnabled()) {
+					logger.debug(triangle.toString());
+					logger.debug(triangle.neighborInfo());
+				}
 				edgeEvent(tcx, ep, p1, triangle, p1);
 			} else {
 				throw new PointOnEdgeException("EdgeEvent - Point on constrained edge not supported yet");
@@ -507,17 +593,28 @@ public class DTSweep {
 		}
 
 		p2 = triangle.pointCW(point);
+		if (logger.isDebugEnabled()) {
+			logger.debug("pointCW: p2: [" + p2.getX() + ", " + p2.getY() + "]");
+		}
 		Orientation o2 = orient2d(eq, p2, ep);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Orientation o2= " + o2);
+		}
 		if (o2 == Orientation.Collinear) {
 			if (triangle.contains(eq, p2)) {
 				triangle.markConstrainedEdge(eq, p2);
 				// We are modifying the constraint maybe it would be better to
 				// not change the given constraint and just keep a variable for the new constraint
 				tcx.edgeEvent.constrainedEdge.q = p2;
-				if(triangle.neighborAcross(point) == null){
+				if (triangle.neighborAcross(point) == null) {
 					System.out.println("triangle.neighborAcross(point) == null");
 				}
+				// XXX Kate: triangle.neighborAcross(point) maybe null
 				triangle = triangle.neighborAcross(point);
+				if (logger.isDebugEnabled()) {
+					logger.debug(triangle.toString());
+					logger.debug(triangle.neighborInfo());
+				}
 				edgeEvent(tcx, ep, p2, triangle, p2);
 			} else {
 				throw new PointOnEdgeException("EdgeEvent - Point on constrained edge not supported yet");
@@ -529,16 +626,25 @@ public class DTSweep {
 		}
 
 		if (o1 == o2) {
-			// Need to decide if we are rotating CW or CCW to get to a triangle
-			// that will cross edge
+			// Need to decide if we are rotating CW or CCW to get to a triangle that will cross edge
+			if (logger.isDebugEnabled()) {
+				logger.debug("o1 == o2");
+			}
 			if (o1 == Orientation.CW) {
 				triangle = triangle.neighborCCW(point);
 			} else {
 				triangle = triangle.neighborCW(point);
 			}
+			if (logger.isDebugEnabled()) {
+				logger.debug(triangle.toString());
+				logger.debug(triangle.neighborInfo());
+			}
 			edgeEvent(tcx, ep, eq, triangle, point);
 		} else {
 			// This triangle crosses constraint so lets flippin start!
+			if (logger.isDebugEnabled()) {
+				logger.debug("o1 != o2");
+			}
 			flipEdgeEvent(tcx, ep, eq, triangle, point);
 		}
 	}
@@ -547,6 +653,10 @@ public class DTSweep {
 		TriangulationPoint op, newP;
 		DelaunayTriangle ot;
 		boolean inScanArea;
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("flipEdgeEvent------------------------");
+		}
 
 		ot = t.neighborAcross(p);
 		op = ot.oppositePoint(t, p);
@@ -586,7 +696,7 @@ public class DTSweep {
 					if (tcx.isDebugEnabled()) {
 						System.out.println("[FLIP] - subedge done");
 					} // TODO: remove
-					// XXX: I think one of the triangles should be legalized here?
+						// XXX: I think one of the triangles should be legalized here?
 				}
 			} else {
 				if (tcx.isDebugEnabled()) {

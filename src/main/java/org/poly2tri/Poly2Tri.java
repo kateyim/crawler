@@ -30,23 +30,24 @@
  */
 package org.poly2tri;
 
+import org.apache.log4j.Logger;
 import org.poly2tri.geometry.polygon.Polygon;
 import org.poly2tri.geometry.polygon.PolygonSet;
 import org.poly2tri.triangulation.Triangulatable;
 import org.poly2tri.triangulation.TriangulationAlgorithm;
 import org.poly2tri.triangulation.TriangulationContext;
-import org.poly2tri.triangulation.TriangulationMode;
 import org.poly2tri.triangulation.TriangulationProcess;
 import org.poly2tri.triangulation.delaunay.sweep.DTSweep;
 import org.poly2tri.triangulation.delaunay.sweep.DTSweepContext;
 import org.poly2tri.triangulation.sets.ConstrainedPointSet;
 import org.poly2tri.triangulation.sets.PointSet;
 import org.poly2tri.triangulation.util.PolygonGenerator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 public class Poly2Tri {
-	private final static Logger logger = LoggerFactory.getLogger(Poly2Tri.class);
+//	private final static Logger logger = LoggerFactory.getLogger(Poly2Tri.class);
+	protected static Logger logger = Logger.getLogger(Poly2Tri.class.getName());
 
 	private static final TriangulationAlgorithm _defaultAlgorithm = TriangulationAlgorithm.DTSweep;
 

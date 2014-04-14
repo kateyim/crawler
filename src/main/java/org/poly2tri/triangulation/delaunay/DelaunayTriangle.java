@@ -512,4 +512,37 @@ public class DelaunayTriangle {
 	public void isInterior(boolean b) {
 		interior = b;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 * @author Kate
+	 */
+	public String toString() {
+		StringBuffer sb = new StringBuffer("DelaunayTriangle' points: [");
+		for (int i = 0; i < 3; i++) {
+			sb.append(points[i]);
+			sb.append(", ");
+		}
+		sb.append("]");
+		return sb.toString();
+	}
+
+	/**
+	 * @author kate
+	 * @return
+	 */
+	public String neighborInfo() {
+		StringBuffer sb = new StringBuffer("DelaunayTriangle' neighbors: ");
+		for (int i = 0; i < 3; i++) {
+			if (neighbors[i] == null) {
+				sb.append("null");
+			} else {
+				sb.append(neighbors[i].toString());
+			}
+			sb.append("; ");
+		}
+		return sb.toString();
+	}
+
 }
