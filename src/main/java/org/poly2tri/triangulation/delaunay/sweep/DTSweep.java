@@ -255,11 +255,18 @@ public class DTSweep {
 		AdvancingFrontNode node, newNode;
 		// XXX Kate: locate the previous node of the point
 		node = tcx.locateNode(point);
+		if (logger.isDebugEnabled()) {
+			logger.debug("AdvancingFrontNode...");
+			logger.debug("point: " + point.getX() + ", " + point.getY());
+			logger.debug("node: " + node.point.getX() + ", " + node.point.getY());
+		}
 		if (tcx.isDebugEnabled()) {
 			tcx.getDebugContext().setActiveNode(node);
 		}
 		newNode = newFrontTriangle(tcx, point, node);
-
+		if (logger.isDebugEnabled()) {
+			logger.debug("newNode : " + newNode.point.getX() + ", " + newNode.point.getY());
+		}
 		// Only need to check +epsilon since point never have smaller
 		// x value than node due to how we fetch nodes from the front
 		// XXX Kate: why?
@@ -346,7 +353,7 @@ public class DTSweep {
 			// but for now this avoid the issue with cases that needs both flips and fills
 			fillEdgeEvent(tcx, edge, node);
 
-			edgeEvent(tcx, edge.p, edge.q, node.triangle, edge.q);
+			edgeEvent5(tcx, edge.p, edge.q, node.triangle, edge.q);
 		} catch (PointOnEdgeException e) {
 			// logger.warn("Skipping edge: {}", e.getMessage());
 			// XXX Kate
@@ -531,7 +538,7 @@ public class DTSweep {
 
 	}
 
-	private static void edgeEvent(DTSweepContext tcx, TriangulationPoint ep, TriangulationPoint eq, DelaunayTriangle triangle, TriangulationPoint point) {
+	private static void edgeEvent5(DTSweepContext tcx, TriangulationPoint ep, TriangulationPoint eq, DelaunayTriangle triangle, TriangulationPoint point) {
 		TriangulationPoint p1, p2;
 
 		if (tcx.isDebugEnabled()) {
@@ -546,14 +553,8 @@ public class DTSweep {
 				logger.debug(triangle.neighborInfo());
 			}
 			logger.debug("ep: [" + ep.getX() + ", " + ep.getY() + "]");
-			logger.debug("ep: [" + eq.getX() + ", " + eq.getY() + "]");
+			logger.debug("eq: [" + eq.getX() + ", " + eq.getY() + "]");
 		}
-		// XXX Kate
-		// if (triangle == null) {
-		// logger.info("triangle == null");
-		// return; // ?
-		// }
-
 		// XXX Kate: triangle has changed to it's neighbor
 		if (isEdgeSideOfTriangle(triangle, ep, eq)) {
 			return;
@@ -582,7 +583,7 @@ public class DTSweep {
 					logger.debug(triangle.toString());
 					logger.debug(triangle.neighborInfo());
 				}
-				edgeEvent(tcx, ep, p1, triangle, p1);
+				edgeEvent5(tcx, ep, p1, triangle, p1);
 			} else {
 				throw new PointOnEdgeException("EdgeEvent - Point on constrained edge not supported yet");
 			}
@@ -615,7 +616,7 @@ public class DTSweep {
 					logger.debug(triangle.toString());
 					logger.debug(triangle.neighborInfo());
 				}
-				edgeEvent(tcx, ep, p2, triangle, p2);
+				edgeEvent5(tcx, ep, p2, triangle, p2);
 			} else {
 				throw new PointOnEdgeException("EdgeEvent - Point on constrained edge not supported yet");
 			}
@@ -625,7 +626,7 @@ public class DTSweep {
 			return;
 		}
 
-		if (o1 == o2) {
+		if (o1 == o2) { // XXX Kate what?
 			// Need to decide if we are rotating CW or CCW to get to a triangle that will cross edge
 			if (logger.isDebugEnabled()) {
 				logger.debug("o1 == o2");
@@ -639,7 +640,7 @@ public class DTSweep {
 				logger.debug(triangle.toString());
 				logger.debug(triangle.neighborInfo());
 			}
-			edgeEvent(tcx, ep, eq, triangle, point);
+			edgeEvent5(tcx, ep, eq, triangle, point);
 		} else {
 			// This triangle crosses constraint so lets flippin start!
 			if (logger.isDebugEnabled()) {
@@ -709,7 +710,7 @@ public class DTSweep {
 		} else {
 			newP = nextFlipPoint(ep, eq, ot, op);
 			flipScanEdgeEvent(tcx, ep, eq, t, ot, newP);
-			edgeEvent(tcx, ep, eq, t, p);
+			edgeEvent5(tcx, ep, eq, t, p);
 		}
 	}
 
@@ -1077,9 +1078,14 @@ public class DTSweep {
 	 *            - middle node, that is the bottom of the hole
 	 */
 	private static void fill(DTSweepContext tcx, AdvancingFrontNode node) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("fill...");
+		}
 		DelaunayTriangle triangle = new DelaunayTriangle(node.prev.point, node.point, node.next.point);
-		// TODO: should copy the cEdge value from neighbor triangles
-		// for now cEdge values are copied during the legalize
+		if (logger.isDebugEnabled()) {
+			logger.debug(triangle.toString());
+		}
+		// TODO: should copy the cEdge value from neighbor triangles for now cEdge values are copied during the legalize
 		triangle.markNeighbor(node.prev.triangle);
 		triangle.markNeighbor(node.triangle);
 		tcx.addToList(triangle);
