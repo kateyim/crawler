@@ -118,8 +118,7 @@ public class USDensity {
 		int loop = 2;
 		for (loop = 2; loop <= 2; loop++) {
 			for (a = 0.8; a < 1; a = a + 0.2) {
-				ArrayList<Envelope> clusteredRegion = Cluster.cluster(granularityX, granularityY, envelope, density, a,
-						loop);
+				ArrayList<Envelope> clusteredRegion = Cluster.cluster(granularityX, granularityY, envelope, density, a, loop);
 				USDensity.writePartition(clusterRegionFilePre + a + "-" + loop + ".mbr", clusteredRegion);
 			}
 		}
@@ -272,8 +271,7 @@ public class USDensity {
 	 *            line segment
 	 * @return
 	 */
-	public static double[][] densityList(Envelope envelope, double granularityX, double granularityY,
-			ArrayList<Coordinate[]> roadList) {
+	public static double[][] densityList(Envelope envelope, double granularityX, double granularityY, ArrayList<Coordinate[]> roadList) {
 		logger.info("-------------computing unit density-------------");
 		double width = envelope.getWidth();
 		double height = envelope.getHeight();
@@ -479,8 +477,7 @@ public class USDensity {
 
 			for (int i = 0; i < clusteredRegion.size(); i++) {
 				Envelope envelope = clusteredRegion.get(i);
-				String s = envelope.getMinY() + ";" + envelope.getMinX() + ";" + envelope.getMaxY() + ";"
-						+ envelope.getMaxX();
+				String s = envelope.getMinY() + ";" + envelope.getMinX() + ";" + envelope.getMaxY() + ";" + envelope.getMaxX();
 				// String s = envelope.getMinX() + ";" + envelope.getMinY() +
 				// ";" + envelope.getMaxX() + ";" + envelope.getMaxY();
 				bw.write(s);

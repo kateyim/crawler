@@ -494,6 +494,11 @@ public class Cluster {
 	// LEFT, RIGHT, UP, DOWN, LEFT_DOWN, LEFT_UP, RIGHT_DOWN, RIGHT_UP
 	// }
 
+	/**
+	 * @param entireRegion
+	 * @param denseRegion
+	 * @return
+	 */
 	public static ArrayList<Envelope> partition(Envelope entireRegion, ArrayList<Envelope> denseRegion) {
 		ArrayList<Envelope> allRegion = new ArrayList<Envelope>();
 
