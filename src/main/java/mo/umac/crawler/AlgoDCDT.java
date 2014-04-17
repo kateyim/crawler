@@ -70,11 +70,17 @@ public class AlgoDCDT extends Strategy {
 
 		holeList.add(polygonHexagon);
 		Polygon polygon = boundary(envelope);
-		if(logger.isDebugEnabled()){
-			logger.error(polygonToString(polygon));
-			logger.error(polygonToString(polygonHexagon));
-		}
 		addHoles(polygon, holeList);
+		if (logger.isDebugEnabled()) {
+			logger.debug(polygonToString(polygon));
+			logger.error("--------------------");
+			logger.error(polygonToString(polygon));
+
+			for (int i = 0; i < holeList.size(); i++) {
+				logger.debug(polygonToString(holeList.get(i)));
+				logger.error(polygonToString(holeList.get(i)));
+			}
+		}
 		Poly2Tri.triangulate(polygon);
 
 		List<DelaunayTriangle> list = polygon.getTriangles();
@@ -142,7 +148,7 @@ public class AlgoDCDT extends Strategy {
 			//
 			Polygon inner = intersect(aCircle, triangle);
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
-				logger.debug(polygonToString(inner));
+				// logger.debug(polygonToString(inner));
 				logger.error(polygonToString(inner));
 				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
 				PaintShapes.paint.addPolygon(inner);
@@ -152,6 +158,18 @@ public class AlgoDCDT extends Strategy {
 			holeList.add(inner);
 			polygon = boundary(envelope);
 			addHoles(polygon, holeList);
+			// add at 2014-4-17
+			if (logger.isDebugEnabled()) {
+				logger.debug(polygonToString(polygon));
+				logger.error("--------------------");
+				logger.error(polygonToString(polygon));
+
+				for (int i = 0; i < holeList.size(); i++) {
+					logger.debug(polygonToString(holeList.get(i)));
+					logger.error(polygonToString(holeList.get(i)));
+
+				}
+			}
 			Poly2Tri.triangulate(polygon);
 			//
 			list = polygon.getTriangles();
@@ -168,9 +186,30 @@ public class AlgoDCDT extends Strategy {
 
 	private void addHoles(Polygon polygon, ArrayList<Polygon> holeList) {
 		for (int i = 0; i < holeList.size(); i++) {
-			Polygon hole = holeList.get(i);
+			Polygon hole = clone(holeList.get(i));
 			polygon.addHole(hole);
 		}
+	}
+
+	/**
+	 * only preserve the basic latitude and longitude informations
+	 * 
+	 * @param p
+	 * @return
+	 */
+	public static Polygon clone(Polygon p) {
+		List<TriangulationPoint> points = p.getPoints();
+		List<PolygonPoint> pointsc = new ArrayList<PolygonPoint>();
+		for (int i = 0; i < points.size(); i++) {
+			TriangulationPoint pi = points.get(i);
+			double x = pi.getX();
+			double y = pi.getY();
+			PolygonPoint pic = new PolygonPoint(x, y);
+			pointsc.add(pic);
+
+		}
+		Polygon c = new Polygon(pointsc);
+		return c;
 	}
 
 	/**
@@ -604,7 +643,7 @@ public class AlgoDCDT extends Strategy {
 		return sb.toString();
 	}
 
-	private String polygonToString(Polygon inner) {
+	public static String polygonToString(Polygon inner) {
 		StringBuffer sb = new StringBuffer("Polygon: ");
 		List<TriangulationPoint> list = inner.getPoints();
 		for (int i = 0; i < list.size(); i++) {
@@ -613,5 +652,5 @@ public class AlgoDCDT extends Strategy {
 		}
 		return sb.toString();
 	}
-	
+
 }

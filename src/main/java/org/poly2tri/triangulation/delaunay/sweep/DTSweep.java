@@ -104,6 +104,9 @@ public class DTSweep {
 			}
 			// XXX Kate: one point may link to many edges
 			if (point.hasEdges()) { // XXX Kate: the edge only related to the upper point of a real edge.
+				if (logger.isDebugEnabled()) {
+					logger.debug("point.getEdges().size() = " + point.getEdges().size());
+				}
 				for (DTSweepConstraint e : point.getEdges()) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("e: " + e.p + "->" + e.q);
@@ -560,8 +563,12 @@ public class DTSweep {
 			return;
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug(triangle.toString());
-			logger.debug(triangle.neighborInfo());
+			if (triangle == null) {
+				logger.debug("triangle == null");
+			} else {
+				logger.debug(triangle.toString());
+				logger.debug(triangle.neighborInfo());
+			}
 			logger.debug("point: [" + point.getX() + ", " + point.getY() + "]");
 		}
 		p1 = triangle.pointCCW(point);
@@ -580,8 +587,12 @@ public class DTSweep {
 				tcx.edgeEvent.constrainedEdge.q = p1;
 				triangle = triangle.neighborAcross(point);
 				if (logger.isDebugEnabled()) {
-					logger.debug(triangle.toString());
-					logger.debug(triangle.neighborInfo());
+					if (triangle == null) {
+						logger.debug("triangle == null");
+					} else {
+						logger.debug(triangle.toString());
+						logger.debug(triangle.neighborInfo());
+					}
 				}
 				edgeEvent5(tcx, ep, p1, triangle, p1);
 			} else {
@@ -641,8 +652,12 @@ public class DTSweep {
 				triangle = triangle.neighborCW(point);
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug(triangle.toString());
-				logger.debug(triangle.neighborInfo());
+				if (triangle == null) {
+					logger.debug("triangle == null");
+				} else {
+					logger.debug(triangle.toString());
+					logger.debug(triangle.neighborInfo());
+				}
 			}
 			edgeEvent5(tcx, ep, eq, triangle, point);
 		} else {
@@ -1087,7 +1102,11 @@ public class DTSweep {
 		}
 		DelaunayTriangle triangle = new DelaunayTriangle(node.prev.point, node.point, node.next.point);
 		if (logger.isDebugEnabled()) {
-			logger.debug(triangle.toString());
+			if (triangle == null) {
+				logger.debug("triangle == null");
+			} else {
+				logger.debug(triangle.toString());
+			}
 		}
 		// TODO: should copy the cEdge value from neighbor triangles for now cEdge values are copied during the legalize
 		triangle.markNeighbor(node.prev.triangle);

@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author Thomas Åhlén, thahlen@gmail.com
+ * @author Thomas ï¿½hlï¿½n, thahlen@gmail.com
  */
 public class DTSweepConstraint extends TriangulationConstraint {
 	private final static Logger logger = LoggerFactory.getLogger(DTSweepConstraint.class);
@@ -68,6 +68,11 @@ public class DTSweepConstraint extends TriangulationConstraint {
 				// throw new DuplicatePointException( p1 + "=" + p2 );
 				// return;
 			}
+		}
+		if(logger.isDebugEnabled()){
+			logger.debug("DTSweepConstraint, q is [" + q.getX() + ", " + q.getY() + "]");
+			logger.debug("DTSweepConstraint, p is [" + p.getX() + ", " + p.getY() + "]");
+
 		}
 		q.addEdge(this);
 	}
