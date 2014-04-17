@@ -611,9 +611,13 @@ public class DTSweep {
 					System.out.println("triangle.neighborAcross(point) == null");
 				}
 				// XXX Kate: triangle.neighborAcross(point) maybe null
+				if (logger.isDebugEnabled()) {
+					logger.debug("before triangle.neighborAcross: " + triangle.toString());
+					logger.debug(triangle.neighborInfo());
+				}
 				triangle = triangle.neighborAcross(point);
 				if (logger.isDebugEnabled()) {
-					logger.debug(triangle.toString());
+					logger.debug("after triangle.neighborAcross: " + triangle.toString());
 					logger.debug(triangle.neighborInfo());
 				}
 				edgeEvent5(tcx, ep, p2, triangle, p2);

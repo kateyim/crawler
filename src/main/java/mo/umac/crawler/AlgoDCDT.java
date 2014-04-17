@@ -70,6 +70,10 @@ public class AlgoDCDT extends Strategy {
 
 		holeList.add(polygonHexagon);
 		Polygon polygon = boundary(envelope);
+		if(logger.isDebugEnabled()){
+			logger.error(polygonToString(polygon));
+			logger.error(polygonToString(polygonHexagon));
+		}
 		addHoles(polygon, holeList);
 		Poly2Tri.triangulate(polygon);
 
@@ -139,6 +143,7 @@ public class AlgoDCDT extends Strategy {
 			Polygon inner = intersect(aCircle, triangle);
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
 				logger.debug(polygonToString(inner));
+				logger.error(polygonToString(inner));
 				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
 				PaintShapes.paint.addPolygon(inner);
 				PaintShapes.paint.myRepaint();
