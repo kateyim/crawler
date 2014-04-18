@@ -356,6 +356,35 @@ public class DelaunayTriangle {
 		return new TPoint(cx, cy);
 	}
 
+//	/**
+//	 * Get the neighbor that share this edge
+//	 * 
+//	 * @param constrainedEdge
+//	 * @return index of the shared edge or -1 if edge isn't shared
+//	 */
+//	public int edgeIndex(TriangulationPoint p1, TriangulationPoint p2) {
+//		if (points[0] == p1) {
+//			if (points[1] == p2) {
+//				return 2;
+//			} else if (points[2] == p2) {
+//				return 1;
+//			}
+//		} else if (points[1] == p1) {
+//			if (points[2] == p2) {
+//				return 0;
+//			} else if (points[0] == p2) {
+//				return 2;
+//			}
+//		} else if (points[2] == p1) {
+//			if (points[0] == p2) {
+//				return 1;
+//			} else if (points[1] == p2) {
+//				return 0;
+//			}
+//		}
+//		return -1;
+//	}
+	
 	/**
 	 * Get the neighbor that share this edge
 	 * 
@@ -363,22 +392,22 @@ public class DelaunayTriangle {
 	 * @return index of the shared edge or -1 if edge isn't shared
 	 */
 	public int edgeIndex(TriangulationPoint p1, TriangulationPoint p2) {
-		if (points[0] == p1) {
-			if (points[1] == p2) {
+		if (points[0].getX() == p1.getX() && points[0].getY() == p1.getY()) {
+			if (points[1].getX() == p2.getX() && points[1].getY() == p2.getY()) {
 				return 2;
-			} else if (points[2] == p2) {
+			} else if (points[2].getX() == p2.getX() && points[2].getY() == p2.getY()) {
 				return 1;
 			}
-		} else if (points[1] == p1) {
-			if (points[2] == p2) {
+		} else if (points[1].getX() == p1.getX() && points[1].getY() == p1.getY()) {
+			if (points[2].getX() == p2.getX() && points[2].getY() == p2.getY()) {
 				return 0;
-			} else if (points[0] == p2) {
+			} else if (points[0].getX() == p2.getX() && points[0].getY() == p2.getY()) {
 				return 2;
 			}
-		} else if (points[2] == p1) {
-			if (points[0] == p2) {
+		} else if (points[2].getX() == p1.getX() && points[2].getY() == p1.getY()) {
+			if (points[0].getX() == p2.getX() && points[0].getY() == p2.getY()) {
 				return 1;
-			} else if (points[1] == p2) {
+			} else if (points[1].getX() == p2.getX() && points[1].getY() == p2.getY()) {
 				return 0;
 			}
 		}

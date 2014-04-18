@@ -43,6 +43,7 @@ public class Poly2TriTest {
 		boundary.addHole(hole3());
 		boundary.addHole(hole4());
 		boundary.addHole(hole5());
+		boundary.addHole(hole6());
 
 		Poly2Tri.triangulate(boundary);
 
@@ -289,6 +290,31 @@ public class Poly2TriTest {
 
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
 			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			PaintShapes.paint.addPolygon(polygon);
+			PaintShapes.paint.myRepaint();
+		}
+
+		return polygon;
+	}
+	
+	private Polygon hole6() {
+		List<PolygonPoint> points = new ArrayList<PolygonPoint>();
+		PolygonPoint p1 = new PolygonPoint(0.0, 0.0);
+		PolygonPoint p2 = new PolygonPoint(218.81850471369796, 144.25415267198147);
+//		PolygonPoint p3 = new PolygonPoint(218.81850471369796, 144.25415267198147);
+		PolygonPoint p4 = new PolygonPoint(0.0, 424.54094972544385);
+		points.add(p1);
+		points.add(p2);
+//		points.add(p3);
+		points.add(p4);
+
+		Polygon polygon = new Polygon(points);
+		if (logger.isDebugEnabled()) {
+			logger.debug(AlgoDCDT.polygonToString(polygon));
+		}
+
+		if (logger.isDebugEnabled() && PaintShapes.painting) {
+//			PaintShapes.paint. = PaintShapes.paint.blueTranslucence;
 			PaintShapes.paint.addPolygon(polygon);
 			PaintShapes.paint.myRepaint();
 		}
