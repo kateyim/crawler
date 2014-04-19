@@ -39,6 +39,8 @@ import java.util.List;
 
 //import mo.umac.crawler.AlgoDCDT;
 
+import mo.umac.crawler.AlgoDCDT;
+
 import org.apache.log4j.Logger;
 import org.poly2tri.triangulation.TriangulationMode;
 import org.poly2tri.triangulation.TriangulationPoint;
@@ -677,10 +679,17 @@ public class DTSweep {
 		if (logger.isDebugEnabled()) {
 			logger.debug("flipEdgeEvent------------------------");
 		}
-
+		if (logger.isDebugEnabled()) {
+			logger.debug("t: " + t.toString());
+		}
 		ot = t.neighborAcross(p);
+		if (logger.isDebugEnabled()) {
+			logger.debug("ot: " + ot.toString());
+		}
 		op = ot.oppositePoint(t, p);
-
+		if (logger.isDebugEnabled()) {
+			logger.debug("op: " + op.toString());
+		}
 		if (ot == null) {
 			// If we want to integrate the fillEdgeEvent do it here
 			// With current implementation we should never get here

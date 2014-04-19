@@ -48,8 +48,7 @@ public class Cluster {
 		return list;
 	}
 
-	public static ArrayList<Envelope> cluster(double gX, double gY, Envelope e, ArrayList<double[]> d, double a,
-			int loop) {
+	public static ArrayList<Envelope> cluster(double gX, double gY, Envelope e, ArrayList<double[]> d, double a, int loop) {
 		logger.info("clustering...");
 		density = d;
 		envelope = e;
@@ -196,14 +195,10 @@ public class Cluster {
 
 	private static ArrayList<Envelope> partition(Envelope entireRegion, Envelope denseRegion) {
 		ArrayList<Envelope> sparseRegion = new ArrayList<Envelope>();
-		Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), denseRegion.getMinY(),
-				entireRegion.getMaxY());
-		Envelope e2 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(),
-				entireRegion.getMaxY());
-		Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(),
-				denseRegion.getMaxY());
-		Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(),
-				denseRegion.getMinY());
+		Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), denseRegion.getMinY(), entireRegion.getMaxY());
+		Envelope e2 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(), entireRegion.getMaxY());
+		Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMaxY());
+		Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMinY());
 		sparseRegion.add(e1);
 		sparseRegion.add(e2);
 		sparseRegion.add(e3);
@@ -223,14 +218,10 @@ public class Cluster {
 		Envelope denseRegion = denseRegionList.get(0);
 		denseRegionList.clear();
 		if (entireRegion.contains(denseRegion)) {
-			Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), denseRegion.getMinY(),
-					entireRegion.getMaxY());
-			Envelope e2 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(),
-					entireRegion.getMaxY());
-			Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(),
-					denseRegion.getMaxY());
-			Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(),
-					denseRegion.getMinY());
+			Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), denseRegion.getMinY(), entireRegion.getMaxY());
+			Envelope e2 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(), entireRegion.getMaxY());
+			Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMaxY());
+			Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMinY());
 			sparseRegion.add(e1);
 			sparseRegion.add(e2);
 			sparseRegion.add(e3);
@@ -258,91 +249,66 @@ public class Cluster {
 
 			if (flags[0] & !flags[1] & !flags[2] & !flags[3]) {
 				// return DIRECTION.LEFT;
-				Envelope e2 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(),
-						entireRegion.getMaxY());
-				Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMaxY());
-				Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMinY());
+				Envelope e2 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(), entireRegion.getMaxY());
+				Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMaxY());
+				Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMinY());
 				sparseRegion.add(e2);
 				sparseRegion.add(e3);
 				sparseRegion.add(e4);
-				Envelope d1 = new Envelope(denseRegion.getMinX(), entireRegion.getMinX(), denseRegion.getMinY(),
-						denseRegion.getMaxY());
-				Envelope d11 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(),
-						denseRegion.getMaxY());
+				Envelope d1 = new Envelope(denseRegion.getMinX(), entireRegion.getMinX(), denseRegion.getMinY(), denseRegion.getMaxY());
+				Envelope d11 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(), denseRegion.getMaxY());
 				newDenseRegion.add(d1);
 				newDenseRegion.add(d11);
 
 			}
 			if (!flags[0] & flags[1] & !flags[2] & !flags[3]) {
 				// return DIRECTION.RIGHT;
-				Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), denseRegion.getMinY(),
-						entireRegion.getMaxY());
-				Envelope e2 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(),
-						entireRegion.getMaxY());
-				Envelope e4 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMinY());
+				Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), denseRegion.getMinY(), entireRegion.getMaxY());
+				Envelope e2 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(), entireRegion.getMaxY());
+				Envelope e4 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMinY());
 				sparseRegion.add(e1);
 				sparseRegion.add(e2);
 				sparseRegion.add(e4);
-				Envelope d3 = new Envelope(entireRegion.getMaxX(), denseRegion.getMaxX(), denseRegion.getMinY(),
-						denseRegion.getMaxY());
-				Envelope d33 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMinY(),
-						denseRegion.getMaxY());
+				Envelope d3 = new Envelope(entireRegion.getMaxX(), denseRegion.getMaxX(), denseRegion.getMinY(), denseRegion.getMaxY());
+				Envelope d33 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMinY(), denseRegion.getMaxY());
 				newDenseRegion.add(d3);
 				newDenseRegion.add(d33);
 			}
 			if (!flags[0] & !flags[1] & flags[2] & !flags[3]) {
 				// return DIRECTION.UP;
-				Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), denseRegion.getMinY(),
-						entireRegion.getMaxY());
-				Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMaxY());
-				Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMinY());
+				Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), denseRegion.getMinY(), entireRegion.getMaxY());
+				Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMaxY());
+				Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMinY());
 				sparseRegion.add(e1);
 				sparseRegion.add(e3);
 				sparseRegion.add(e4);
-				Envelope d2 = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMaxY(),
-						denseRegion.getMaxY());
-				Envelope d22 = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(),
-						entireRegion.getMaxY());
+				Envelope d2 = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMaxY(), denseRegion.getMaxY());
+				Envelope d22 = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(), entireRegion.getMaxY());
 				newDenseRegion.add(d2);
 				newDenseRegion.add(d22);
 			}
 			if (!flags[0] & !flags[1] & !flags[2] & flags[3]) {
 				// return DIRECTION.DOWN;
-				Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), entireRegion.getMinY(),
-						entireRegion.getMaxY());
-				Envelope e2 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(),
-						entireRegion.getMaxY());
-				Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMaxY());
+				Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), entireRegion.getMinY(), entireRegion.getMaxY());
+				Envelope e2 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(), entireRegion.getMaxY());
+				Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMaxY());
 				sparseRegion.add(e1);
 				sparseRegion.add(e2);
 				sparseRegion.add(e3);
-				Envelope d4 = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(),
-						entireRegion.getMinY());
-				Envelope d44 = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMaxY());
+				Envelope d4 = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(), entireRegion.getMinY());
+				Envelope d44 = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMaxY());
 				newDenseRegion.add(d4);
 				newDenseRegion.add(d44);
 			}
 			if (flags[0] & !flags[1] & flags[2] & !flags[3]) {
 				// left-up
-				Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(),
-						entireRegion.getMaxY());
-				Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMinY());
+				Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(), entireRegion.getMaxY());
+				Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMinY());
 				sparseRegion.add(e3);
 				sparseRegion.add(e4);
-				Envelope d = new Envelope(denseRegion.getMinX(), entireRegion.getMinX(), denseRegion.getMinY(),
-						denseRegion.getMaxY());
-				Envelope dd = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(),
-						entireRegion.getMaxY());
-				Envelope ddd = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMaxY(),
-						denseRegion.getMaxY());
+				Envelope d = new Envelope(denseRegion.getMinX(), entireRegion.getMinX(), denseRegion.getMinY(), denseRegion.getMaxY());
+				Envelope dd = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(), entireRegion.getMaxY());
+				Envelope ddd = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMaxY(), denseRegion.getMaxY());
 				newDenseRegion.add(d);
 				newDenseRegion.add(dd);
 				newDenseRegion.add(ddd);
@@ -350,18 +316,13 @@ public class Cluster {
 			}
 			if (flags[0] & !flags[1] & !flags[2] & flags[3]) {
 				// left-down
-				Envelope e2 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(),
-						entireRegion.getMaxY());
-				Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMaxY());
+				Envelope e2 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(), entireRegion.getMaxY());
+				Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMaxY());
 				sparseRegion.add(e2);
 				sparseRegion.add(e3);
-				Envelope d = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(),
-						entireRegion.getMinY());
-				Envelope dd = new Envelope(denseRegion.getMinX(), entireRegion.getMinX(), entireRegion.getMinY(),
-						denseRegion.getMaxY());
-				Envelope ddd = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMaxY());
+				Envelope d = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(), entireRegion.getMinY());
+				Envelope dd = new Envelope(denseRegion.getMinX(), entireRegion.getMinX(), entireRegion.getMinY(), denseRegion.getMaxY());
+				Envelope ddd = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMaxY());
 				newDenseRegion.add(d);
 				newDenseRegion.add(dd);
 				newDenseRegion.add(ddd);
@@ -369,18 +330,13 @@ public class Cluster {
 			}
 			if (!flags[0] & flags[1] & flags[2] & !flags[3]) {
 				// right-up
-				Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), denseRegion.getMinY(),
-						entireRegion.getMaxY());
-				Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMinY());
+				Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), denseRegion.getMinY(), entireRegion.getMaxY());
+				Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMinY());
 				sparseRegion.add(e1);
 				sparseRegion.add(e4);
-				Envelope d = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMaxY(),
-						denseRegion.getMaxY());
-				Envelope dd = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMinY(),
-						entireRegion.getMaxY());
-				Envelope ddd = new Envelope(entireRegion.getMaxX(), denseRegion.getMaxX(), denseRegion.getMinY(),
-						entireRegion.getMaxY());
+				Envelope d = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMaxY(), denseRegion.getMaxY());
+				Envelope dd = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMinY(), entireRegion.getMaxY());
+				Envelope ddd = new Envelope(entireRegion.getMaxX(), denseRegion.getMaxX(), denseRegion.getMinY(), entireRegion.getMaxY());
 				newDenseRegion.add(d);
 				newDenseRegion.add(dd);
 				newDenseRegion.add(ddd);
@@ -388,35 +344,25 @@ public class Cluster {
 			}
 			if (!flags[0] & flags[1] & !flags[2] & flags[3]) {
 				// right-down
-				Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), entireRegion.getMinY(),
-						entireRegion.getMaxY());
-				Envelope e2 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(),
-						entireRegion.getMaxY());
+				Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), entireRegion.getMinY(), entireRegion.getMaxY());
+				Envelope e2 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(), entireRegion.getMaxY());
 				sparseRegion.add(e1);
 				sparseRegion.add(e2);
-				Envelope d = new Envelope(entireRegion.getMaxX(), denseRegion.getMaxX(), denseRegion.getMinY(),
-						denseRegion.getMaxY());
-				Envelope dd = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMinY(),
-						entireRegion.getMinY());
-				Envelope ddd = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMaxY());
+				Envelope d = new Envelope(entireRegion.getMaxX(), denseRegion.getMaxX(), denseRegion.getMinY(), denseRegion.getMaxY());
+				Envelope dd = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMinY(), entireRegion.getMinY());
+				Envelope ddd = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMaxY());
 				newDenseRegion.add(d);
 				newDenseRegion.add(dd);
 				newDenseRegion.add(ddd);
 			}
 			if (flags[0] & !flags[1] & flags[2] & flags[3]) {
 				// left-3
-				Envelope e1 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(),
-						entireRegion.getMaxY());
+				Envelope e1 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(), entireRegion.getMaxY());
 				sparseRegion.add(e1);
-				Envelope d1 = new Envelope(denseRegion.getMinX(), entireRegion.getMinX(), entireRegion.getMinY(),
-						denseRegion.getMaxY());
-				Envelope d2 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMaxY(),
-						denseRegion.getMaxY());
-				Envelope d3 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(),
-						entireRegion.getMaxY());
-				Envelope d4 = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(),
-						entireRegion.getMinY());
+				Envelope d1 = new Envelope(denseRegion.getMinX(), entireRegion.getMinX(), entireRegion.getMinY(), denseRegion.getMaxY());
+				Envelope d2 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMaxY(), denseRegion.getMaxY());
+				Envelope d3 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(), entireRegion.getMaxY());
+				Envelope d4 = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(), entireRegion.getMinY());
 				newDenseRegion.add(d1);
 				newDenseRegion.add(d2);
 				newDenseRegion.add(d3);
@@ -424,17 +370,12 @@ public class Cluster {
 			}
 			if (!flags[0] & flags[1] & flags[2] & flags[3]) {
 				// right-3
-				Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), entireRegion.getMinY(),
-						denseRegion.getMaxY());
+				Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), entireRegion.getMinY(), denseRegion.getMaxY());
 				sparseRegion.add(e1);
-				Envelope d1 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), entireRegion.getMinY(),
-						entireRegion.getMaxY());
-				Envelope d2 = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMaxY(),
-						denseRegion.getMaxY());
-				Envelope d3 = new Envelope(entireRegion.getMaxX(), denseRegion.getMaxX(), denseRegion.getMinY(),
-						entireRegion.getMaxY());
-				Envelope d4 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMinY(),
-						entireRegion.getMinY());
+				Envelope d1 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), entireRegion.getMinY(), entireRegion.getMaxY());
+				Envelope d2 = new Envelope(denseRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMaxY(), denseRegion.getMaxY());
+				Envelope d3 = new Envelope(entireRegion.getMaxX(), denseRegion.getMaxX(), denseRegion.getMinY(), entireRegion.getMaxY());
+				Envelope d4 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMinY(), entireRegion.getMinY());
 				newDenseRegion.add(d1);
 				newDenseRegion.add(d2);
 				newDenseRegion.add(d3);
@@ -442,18 +383,13 @@ public class Cluster {
 			}
 			if (flags[0] & flags[1] & flags[2] & !flags[3]) {
 				// up-3
-				Envelope e1 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMinY());
+				Envelope e1 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMinY());
 				sparseRegion.add(e1);
 				//
-				Envelope d1 = new Envelope(denseRegion.getMinX(), entireRegion.getMinX(), denseRegion.getMinY(),
-						denseRegion.getMaxY());
-				Envelope d2 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMaxY(),
-						denseRegion.getMaxY());
-				Envelope d3 = new Envelope(entireRegion.getMaxX(), denseRegion.getMaxX(), denseRegion.getMinY(),
-						entireRegion.getMaxY());
-				Envelope d4 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMinY(),
-						entireRegion.getMaxY());
+				Envelope d1 = new Envelope(denseRegion.getMinX(), entireRegion.getMinX(), denseRegion.getMinY(), denseRegion.getMaxY());
+				Envelope d2 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMaxY(), denseRegion.getMaxY());
+				Envelope d3 = new Envelope(entireRegion.getMaxX(), denseRegion.getMaxX(), denseRegion.getMinY(), entireRegion.getMaxY());
+				Envelope d4 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMinY(), entireRegion.getMaxY());
 				newDenseRegion.add(d1);
 				newDenseRegion.add(d2);
 				newDenseRegion.add(d3);
@@ -461,18 +397,13 @@ public class Cluster {
 			}
 			if (flags[0] & flags[1] & !flags[2] & flags[3]) {
 				// down-3
-				Envelope e1 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(),
-						entireRegion.getMaxY());
+				Envelope e1 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(), entireRegion.getMaxY());
 				sparseRegion.add(e1);
 				//
-				Envelope d1 = new Envelope(denseRegion.getMinX(), entireRegion.getMinX(), entireRegion.getMinY(),
-						denseRegion.getMaxY());
-				Envelope d2 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), entireRegion.getMinY(),
-						denseRegion.getMaxY());
-				Envelope d3 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(),
-						denseRegion.getMaxY());
-				Envelope d4 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMinY(),
-						entireRegion.getMinY());
+				Envelope d1 = new Envelope(denseRegion.getMinX(), entireRegion.getMinX(), entireRegion.getMinY(), denseRegion.getMaxY());
+				Envelope d2 = new Envelope(entireRegion.getMinX(), entireRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMaxY());
+				Envelope d3 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), denseRegion.getMinY(), denseRegion.getMaxY());
+				Envelope d4 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMinY(), entireRegion.getMinY());
 				newDenseRegion.add(d1);
 				newDenseRegion.add(d2);
 				newDenseRegion.add(d3);
