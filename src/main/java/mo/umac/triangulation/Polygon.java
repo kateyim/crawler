@@ -1,31 +1,21 @@
 package mo.umac.triangulation;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import mo.umac.crawler.AlgoDCDT;
 
 import org.apache.log4j.Logger;
-import org.poly2tri.triangulation.Triangulatable;
-import org.poly2tri.triangulation.TriangulationContext;
-import org.poly2tri.triangulation.TriangulationMode;
-import org.poly2tri.triangulation.TriangulationPoint;
-import org.poly2tri.triangulation.delaunay.DelaunayTriangle;
 
 public class Polygon {
-//	private final static Logger logger = LoggerFactory.getLogger(Polygon.class);
 	protected static Logger logger = Logger.getLogger(Polygon.class.getName());
 
-
-	protected ArrayList<TriangulationPoint> _points = new ArrayList<TriangulationPoint>();
-	protected ArrayList<TriangulationPoint> _steinerPoints;
+	protected ArrayList<Point> _points = new ArrayList<Point>();
 	protected ArrayList<Polygon> _holes;
 
 	protected List<DelaunayTriangle> m_triangles;
 
-	protected PolygonPoint _last;
+	protected Point _last;
 
 	/**
 	 * To create a polygon we need atleast 3 separate points
@@ -34,7 +24,7 @@ public class Polygon {
 	 * @param p2
 	 * @param p3
 	 */
-	public Polygon(PolygonPoint p1, PolygonPoint p2, PolygonPoint p3) {
+	public Polygon(Point p1, Point p2, Point p3) {
 		p1._next = p2;
 		p2._next = p3;
 		p3._next = p1;
@@ -53,9 +43,11 @@ public class Polygon {
 	 *            - ordered list of points forming the polygon.
 	 *            No duplicates are allowed
 	 */
-	public Polygon(List<PolygonPoint> points) {
-		// Lets do one sanity check that first and last point hasn't got same position
-		// Its something that often happen when importing polygon data from other formats
+	public Polygon(List<Point> points) {
+		// Lets do one sanity check that first and last point hasn't got same
+		// position
+		// Its something that often happen when importing polygon data from
+		// other formats
 		if (points.get(0).equals(points.get(points.size() - 1))) {
 			logger.warn("Removed duplicate point");
 			points.remove(points.size() - 1);
@@ -68,40 +60,8 @@ public class Polygon {
 	 * 
 	 * @param points
 	 */
-	public Polygon(PolygonPoint[] points) {
+	public Polygon(Point[] points) {
 		this(Arrays.asList(points));
-	}
-
-	public TriangulationMode getTriangulationMode() {
-		return TriangulationMode.POLYGON;
-	}
-
-	public int pointCount() {
-		int count = _points.size();
-		if (_steinerPoints != null) {
-			count += _steinerPoints.size();
-		}
-		return count;
-	}
-
-	public void addSteinerPoint(TriangulationPoint point) {
-		if (_steinerPoints == null) {
-			_steinerPoints = new ArrayList<TriangulationPoint>();
-		}
-		_steinerPoints.add(point);
-	}
-
-	public void addSteinerPoints(List<TriangulationPoint> points) {
-		if (_steinerPoints == null) {
-			_steinerPoints = new ArrayList<TriangulationPoint>();
-		}
-		_steinerPoints.addAll(points);
-	}
-
-	public void clearSteinerPoints() {
-		if (_steinerPoints != null) {
-			_steinerPoints.clear();
-		}
 	}
 
 	/**
@@ -126,7 +86,7 @@ public class Polygon {
 	 * @param b
 	 * @param p
 	 */
-	public void insertPointAfter(PolygonPoint a, PolygonPoint newPoint) {
+	public void insertPointAfter(Point a, Point newPoint) {
 		// Validate that
 		int index = _points.indexOf(a);
 		if (index != -1) {
@@ -140,9 +100,9 @@ public class Polygon {
 		}
 	}
 
-	public void addPoints(List<PolygonPoint> list) {
-		PolygonPoint first;
-		for (PolygonPoint p : list) {
+	public void addPoints(List<Point> list) {
+		Point first;
+		for (Point p : list) {
 			p.setPrevious(_last);
 			if (_last != null) {
 				p.setNext(_last.getNext());
@@ -151,7 +111,7 @@ public class Polygon {
 			_last = p;
 			_points.add(p);
 		}
-		first = (PolygonPoint) _points.get(0);
+		first = (Point) _points.get(0);
 		_last.setNext(first);
 		first.setPrevious(_last);
 	}
@@ -161,15 +121,15 @@ public class Polygon {
 	 * 
 	 * @param p
 	 */
-	public void addPoint(PolygonPoint p) {
+	public void addPoint(Point p) {
 		p.setPrevious(_last);
 		p.setNext(_last.getNext());
 		_last.setNext(p);
 		_points.add(p);
 	}
 
-	public void removePoint(PolygonPoint p) {
-		PolygonPoint next, prev;
+	public void removePoint(Point p) {
+		Point next, prev;
 
 		next = p.getNext();
 		prev = p.getPrevious();
@@ -178,11 +138,11 @@ public class Polygon {
 		_points.remove(p);
 	}
 
-	public PolygonPoint getPoint() {
+	public Point getPoint() {
 		return _last;
 	}
 
-	public List<TriangulationPoint> getPoints() {
+	public List<Point> getPoints() {
 		return _points;
 	}
 
@@ -204,55 +164,4 @@ public class Polygon {
 		}
 	}
 
-	/**
-	 * Creates constraints and populates the context with points
-	 */
-	public void prepareTriangulation(TriangulationContext<?> tcx) {
-		// print the points and the holes
-		if (logger.isDebugEnabled()) {
-			logger.debug("_points:");
-			for (int i = 0; i < _points.size(); i++) {
-				logger.debug("_points " + i + ": [" + _points.get(i).getX() + _points.get(i).getY() + "]");
-			}
-			logger.debug("_holes:");
-			int j = 0;
-			if (_holes != null) {
-				for (Polygon p : _holes) {
-					logger.debug("_points " + j + ": " + AlgoDCDT.polygonToString(p));
-					j++;
-				}
-			}
-
-		}
-
-		if (m_triangles == null) {
-			m_triangles = new ArrayList<DelaunayTriangle>(_points.size());
-		} else {
-			m_triangles.clear();
-		}
-
-		// Outer constraints
-		for (int i = 0; i < _points.size() - 1; i++) {
-			tcx.newConstraint(_points.get(i), _points.get(i + 1));
-		}
-		tcx.newConstraint(_points.get(0), _points.get(_points.size() - 1));
-		tcx.addPoints(_points);
-
-		// Hole constraints
-		if (_holes != null) {
-			for (Polygon p : _holes) {
-				for (int i = 0; i < p._points.size() - 1; i++) {
-					tcx.newConstraint(p._points.get(i), p._points.get(i + 1));
-				}
-				tcx.newConstraint(p._points.get(0), p._points.get(p._points.size() - 1));
-				tcx.addPoints(p._points);
-			}
-		}
-
-		if (_steinerPoints != null) {
-			tcx.addPoints(_steinerPoints);
-		}
-	}
-
 }
-
