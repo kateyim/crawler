@@ -41,8 +41,9 @@ public class DTSweepConstraint {
 	public Point q;
 
 	/**
-	 * Give two points in any order. Will always be ordered so
-	 * that q.y > p.y and q.x > p.x if same y value
+	 * Give two points in any order. Will always be ordered so that q.y > p.y and q.x > p.x if same y value
+	 * 
+	 * The constrained is added to the upper node. 
 	 * 
 	 * @param p1
 	 * @param p2
