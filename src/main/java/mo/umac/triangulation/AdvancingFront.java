@@ -1,14 +1,14 @@
 package mo.umac.triangulation;
 
+import java.util.List;
+
 public class AdvancingFront {
 	public AdvancingFrontNode head;
 	public AdvancingFrontNode tail;
-	protected AdvancingFrontNode search;
 
 	public AdvancingFront(AdvancingFrontNode head, AdvancingFrontNode tail) {
 		this.head = head;
 		this.tail = tail;
-		this.search = head;
 		addNode(head);
 		addNode(tail);
 	}
@@ -32,45 +32,36 @@ public class AdvancingFront {
 		return sb.toString();
 	}
 
-	private final AdvancingFrontNode findSearchNode(double x) {
-		// TODO: implement BST index
-		return search;
-	}
-
 	/**
 	 * We use a balancing tree to locate a node smaller or equal to
 	 * given key value
 	 * 
 	 * @param x
-	 * @return
+	 * @return the left node on the advancing front
 	 */
-	public AdvancingFrontNode locateNode(Point point) {
-		return locateNode(point.getX());
-	}
-
-	private AdvancingFrontNode locateNode(double x) {
-		AdvancingFrontNode node = findSearchNode(x);
-		if (x < node.value) {
-			while ((node = node.prev) != null) {
-				if (x >= node.value) {
-					search = node;
-					return node;
-				}
+	public boolean locateNode(Point point, AdvancingFrontNode nodeLeft) {
+		double x = point.getX();
+		// search from head.
+		AdvancingFrontNode node = head;
+		// TODO check whether the x value are always increasing on the front line
+		while (node.next != null) {
+			if (x > node.value) {
+				node = node.next;
+			} else if (x == node.value) {
+				nodeLeft = node;
+				return true;
+			} else {
+				nodeLeft = node.prev;
+				return false;
 			}
-		} else {
-			while ((node = node.next) != null) {
-				if (x < node.value) {
-					search = node.prev;
-					return node.prev;
-				}
-			}
+			node = node.next;
 		}
-		return null;
+		nodeLeft = node;
+		return false;
 	}
 
 	/**
-	 * This implementation will use simple node traversal algorithm to find
-	 * a point on the front
+	 * This implementation will use simple node traversal algorithm to find a point on the front
 	 * 
 	 * @param point
 	 * @return

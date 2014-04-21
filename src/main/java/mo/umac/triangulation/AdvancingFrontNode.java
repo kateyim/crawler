@@ -4,7 +4,13 @@ public class AdvancingFrontNode {
 	protected AdvancingFrontNode next = null;
 	protected AdvancingFrontNode prev = null;
 
+	/**
+	 * The x value of this node
+	 */
 	protected final Double key; // XXX: BST
+	/**
+	 * The x value of this node
+	 */
 	protected final double value;
 	protected final Point point;
 	protected DelaunayTriangle triangle;
