@@ -18,6 +18,8 @@ public class Poly2TriTest {
 
 	protected static Logger logger = Logger.getLogger(Poly2TriTest.class.getName());
 
+	public double EPSILON = 1e-6/* 1e-12 */;
+
 	/**
 	 * @param args
 	 */
@@ -41,9 +43,11 @@ public class Poly2TriTest {
 		boundary.addHole(hole1());
 		boundary.addHole(hole2());
 		boundary.addHole(hole3());
+		// boundary.addHole(hole13());
 		boundary.addHole(hole4());
 		boundary.addHole(hole5());
 		boundary.addHole(hole6());
+		// boundary.addHole(hole136());
 
 		Poly2Tri.triangulate(boundary);
 
@@ -154,11 +158,11 @@ public class Poly2TriTest {
 			logger.debug(AlgoDCDT.polygonToString(polygon));
 		}
 
-//		if (logger.isDebugEnabled() && PaintShapes.painting) {
-//			PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
-//			PaintShapes.paint.addRectangle(new Envelope(0.0, 1000, 0, 1000));
-//			PaintShapes.paint.myRepaint();
-//		}
+		// if (logger.isDebugEnabled() && PaintShapes.painting) {
+		// PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
+		// PaintShapes.paint.addRectangle(new Envelope(0.0, 1000, 0, 1000));
+		// PaintShapes.paint.myRepaint();
+		// }
 		return polygon;
 	}
 
@@ -225,13 +229,55 @@ public class Poly2TriTest {
 		PolygonPoint p1 = new PolygonPoint(245.22551393964045, 0.0);
 		PolygonPoint p2 = new PolygonPoint(802.2744579508885, 0.0);
 		PolygonPoint p3 = new PolygonPoint(828.2006326705192, 150.89951487587393);
-		PolygonPoint p4 = new PolygonPoint(571.2499578357936, 376.5914529912652);
+		PolygonPoint p4 = new PolygonPoint(571.2499578357936+ EPSILON, 376.5914529912652- EPSILON);
 		PolygonPoint p5 = new PolygonPoint(218.81850471369796, 144.25415267198147);
 		points.add(p1);
 		points.add(p2);
 		points.add(p3);
 		points.add(p4);
 		points.add(p5);
+
+		Polygon polygon = new Polygon(points);
+		if (logger.isDebugEnabled()) {
+			logger.debug(AlgoDCDT.polygonToString(polygon));
+		}
+
+		if (logger.isDebugEnabled() && PaintShapes.painting) {
+			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			PaintShapes.paint.addPolygon(polygon);
+			PaintShapes.paint.myRepaint();
+		}
+
+		return polygon;
+	}
+
+	private Polygon hole13() {
+		List<PolygonPoint> points = new ArrayList<PolygonPoint>();
+		PolygonPoint p1 = new PolygonPoint(571.2499578357936, 376.5914529912652);
+		PolygonPoint p2 = new PolygonPoint(428.7500421642064, 376.5914529912652);
+		PolygonPoint p3 = new PolygonPoint(357.50008432841275, 500.0);
+		PolygonPoint p4 = new PolygonPoint(428.7500421642064, 623.4085470087348);
+		PolygonPoint p5 = new PolygonPoint(571.2499578357936, 623.4085470087348);
+		PolygonPoint p6 = new PolygonPoint(642.4999156715872, 500.0);
+
+		points.add(p1);
+		points.add(p2);
+		points.add(p3);
+		points.add(p4);
+		points.add(p5);
+		points.add(p6);
+
+		// maybe add an epsilon
+		PolygonPoint p7 = new PolygonPoint(571.2499578357936, 376.5914529912652);
+		PolygonPoint p8 = new PolygonPoint(828.2006326705192, 150.89951487587393);
+		PolygonPoint p9 = new PolygonPoint(802.2744579508885, 0.0);
+		PolygonPoint p10 = new PolygonPoint(245.22551393964045, 0.0);
+		PolygonPoint p11 = new PolygonPoint(218.81850471369796, 144.25415267198147);
+		points.add(p7);
+		points.add(p8);
+		points.add(p9);
+		points.add(p10);
+		points.add(p11);
 
 		Polygon polygon = new Polygon(points);
 		if (logger.isDebugEnabled()) {
@@ -296,16 +342,16 @@ public class Poly2TriTest {
 
 		return polygon;
 	}
-	
+
 	private Polygon hole6() {
 		List<PolygonPoint> points = new ArrayList<PolygonPoint>();
-		PolygonPoint p1 = new PolygonPoint(0.0, 0.0);
+		PolygonPoint p1 = new PolygonPoint(0.0+ EPSILON, 0.0+ EPSILON);
 		PolygonPoint p2 = new PolygonPoint(218.81850471369796, 144.25415267198147);
-//		PolygonPoint p3 = new PolygonPoint(218.81850471369796, 144.25415267198147);
-		PolygonPoint p4 = new PolygonPoint(0.0, 424.54094972544385);
+		// PolygonPoint p3 = new PolygonPoint(218.81850471369796, 144.25415267198147);
+		PolygonPoint p4 = new PolygonPoint(0.0+ EPSILON, 424.54094972544385);
 		points.add(p1);
 		points.add(p2);
-//		points.add(p3);
+		// points.add(p3);
 		points.add(p4);
 
 		Polygon polygon = new Polygon(points);
@@ -314,12 +360,63 @@ public class Poly2TriTest {
 		}
 
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
-//			PaintShapes.paint. = PaintShapes.paint.blueTranslucence;
+			// PaintShapes.paint. = PaintShapes.paint.blueTranslucence;
 			PaintShapes.paint.addPolygon(polygon);
 			PaintShapes.paint.myRepaint();
 		}
 
 		return polygon;
 	}
-	
+
+	private Polygon hole136() {
+		double epsilon = 0.0001;
+		List<PolygonPoint> points = new ArrayList<PolygonPoint>();
+		PolygonPoint p1 = new PolygonPoint(571.2499578357936, 376.5914529912652);
+		PolygonPoint p2 = new PolygonPoint(428.7500421642064, 376.5914529912652);
+		PolygonPoint p3 = new PolygonPoint(357.50008432841275, 500.0);
+		PolygonPoint p4 = new PolygonPoint(428.7500421642064, 623.4085470087348);
+		PolygonPoint p5 = new PolygonPoint(571.2499578357936, 623.4085470087348);
+		PolygonPoint p6 = new PolygonPoint(642.4999156715872, 500.0);
+
+		// maybe add an epsilon
+		PolygonPoint p7 = new PolygonPoint(571.2499578357936 + EPSILON, 376.5914529912652 + EPSILON);
+		PolygonPoint p8 = new PolygonPoint(828.2006326705192, 150.89951487587393);
+		PolygonPoint p9 = new PolygonPoint(802.2744579508885, 0.0 + EPSILON);
+		PolygonPoint p10 = new PolygonPoint(245.22551393964045, 0.0 + EPSILON);
+		PolygonPoint p11 = new PolygonPoint(218.81850471369796, 144.25415267198147);
+
+		//
+		PolygonPoint p12 = new PolygonPoint(0.0 + EPSILON, 0.0 + EPSILON);
+		PolygonPoint p13 = new PolygonPoint(0.0 + EPSILON, 424.54094972544385);
+		PolygonPoint p14 = new PolygonPoint(218.81850471369796 + EPSILON, 144.25415267198147 + EPSILON);
+
+		points.add(p1);
+		points.add(p2);
+		points.add(p3);
+		points.add(p4);
+		points.add(p5);
+		points.add(p6);
+		points.add(p7);
+		points.add(p8);
+		points.add(p9);
+		points.add(p10);
+		points.add(p11);
+		points.add(p12);
+		points.add(p13);
+		points.add(p14);
+
+		Polygon polygon = new Polygon(points);
+		if (logger.isDebugEnabled()) {
+			logger.debug(AlgoDCDT.polygonToString(polygon));
+		}
+
+		if (logger.isDebugEnabled() && PaintShapes.painting) {
+			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			PaintShapes.paint.addPolygon(polygon);
+			PaintShapes.paint.myRepaint();
+		}
+
+		return polygon;
+	}
+
 }

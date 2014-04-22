@@ -25,6 +25,9 @@ public class AlgoDCDT extends Strategy {
 
 	protected static Logger logger = Logger.getLogger(AlgoDCDT.class.getName());
 
+	public double EPSILON = 1e-6/* 1e-12 */;
+
+	
 	public AlgoDCDT() {
 		super();
 		logger.info("------------DCDT Crawler------------");
@@ -154,7 +157,7 @@ public class AlgoDCDT extends Strategy {
 				PaintShapes.paint.addPolygon(inner);
 				PaintShapes.paint.myRepaint();
 			}
-
+			inner = disturb(holeList, inner);
 			holeList.add(inner);
 			polygon = boundary(envelope);
 			addHoles(polygon, holeList);
@@ -182,6 +185,12 @@ public class AlgoDCDT extends Strategy {
 				PaintShapes.paint.myRepaint();
 			}
 		}
+	}
+
+	private Polygon disturb(ArrayList<Polygon> holeList, Polygon inner) {
+		Polygon 
+		
+		return null;
 	}
 
 	private void addHoles(Polygon polygon, ArrayList<Polygon> holeList) {
