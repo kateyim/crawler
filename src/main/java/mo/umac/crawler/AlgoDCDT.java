@@ -1,6 +1,7 @@
 package mo.umac.crawler;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import mo.umac.metadata.AQuery;
@@ -27,7 +28,6 @@ public class AlgoDCDT extends Strategy {
 
 	public double EPSILON = 1e-6/* 1e-12 */;
 
-	
 	public AlgoDCDT() {
 		super();
 		logger.info("------------DCDT Crawler------------");
@@ -187,10 +187,43 @@ public class AlgoDCDT extends Strategy {
 		}
 	}
 
+	/**
+	 * change holeList!
+	 * 
+	 * @param holeList
+	 * @param inner
+	 * @return
+	 */
 	private Polygon disturb(ArrayList<Polygon> holeList, Polygon inner) {
-		Polygon 
+		ArrayList<TriangulationPoint> innerPoints = (ArrayList<TriangulationPoint>) inner.getPoints();
+		ArrayList<PolygonPoint> newInnerPoints = new ArrayList<PolygonPoint>();
+		for (int i = 0; i < innerPoints.size(); i++ ) {
+			TriangulationPoint innerP = innerPoints.get(i);
+			for (Polygon p : holeList) {
+				List<TriangulationPoint> tpList = p.getPoints();
+				for (TriangulationPoint holeP : tpList) {
+					if (equalPoint(innerP, holeP)) {
+						// tag this polygon and disturb this point
+						shrink(p, holeP);
+					}
+				}
+			}
+		}
+
+		Polygon inner2 = new Polygon(newInnerPoints);
+
+		return inner2;
+	}
+
+	public static boolean equalPoint(TriangulationPoint pp, TriangulationPoint tp) {
+		if (pp.getX() == tp.getX() && pp.getY() == tp.getY()) {
+			return true;
+		}
+		return false;
+	}
+	
+	public static void shrink(Polygon polygon, TriangulationPoint point) {
 		
-		return null;
 	}
 
 	private void addHoles(Polygon polygon, ArrayList<Polygon> holeList) {
