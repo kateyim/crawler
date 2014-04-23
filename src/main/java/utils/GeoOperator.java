@@ -13,6 +13,8 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CRSAuthorityFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.poly2tri.geometry.polygon.Polygon;
+import org.poly2tri.triangulation.TriangulationPoint;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -27,6 +29,8 @@ import com.vividsolutions.jts.geomgraph.Position;
 public class GeoOperator {
 
 	protected static Logger logger = Logger.getLogger(GeoOperator.class.getName());
+	public final static double EQUAL_EPSILON = 1e-12;
+
 
 	public final static double RADIUS = 6371007.2;// authalic earth radius of
 
@@ -259,12 +263,100 @@ public class GeoOperator {
 		return 0.0;
 	}
 
+	/**
+	 * check whether point q lies on the edge constructing by p1 and p2.
+	 * 
+	 * @param p1
+	 * @param p2
+	 * @param q
+	 * @return
+	 */
+	public static boolean pointOnEdge(Coordinate p1, Coordinate p2, Coordinate q) {
+		// TODO
+		return false;
+	}
+
+	/**
+	 * check whether point q lies on the edge constructing by p1 and p2. Including the end points.
+	 * 
+	 * @param p1
+	 * @param p2
+	 * @param q
+	 * @return
+	 */
+	public static boolean pointOnEdge(TriangulationPoint p1, TriangulationPoint p2, TriangulationPoint q) {
+		// TODO
+		return false;
+	}
+
+	public static boolean edgeOnEdge(TriangulationPoint p1, TriangulationPoint p2, TriangulationPoint q1, TriangulationPoint q2) {
+		// TODO
+		return false;
+	}
+
+
+	public static boolean equalPoint(TriangulationPoint pp, TriangulationPoint tp) {
+		if (Math.abs(pp.getX() - tp.getX()) < EQUAL_EPSILON && Math.abs(pp.getY() - tp.getY()) < EQUAL_EPSILON) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * check whether point p lies on/inside the polygon
+	 * 
+	 * @param polygon
+	 * @param p
+	 * @return
+	 */
+	public static boolean pointInsidePolygon(Polygon polygon, Coordinate p) {
+		// TODO
+		return false;
+	}
+
+	/**
+	 * {@link http://stackoverflow.com/a/2049593/952022}
+	 * 
+	 * @param pt
+	 * @param v1
+	 * @param v2
+	 * @param v3
+	 * @return
+	 */
+	public static boolean PointInTriangle(Coordinate pt, Coordinate v1, Coordinate v2, Coordinate v3) {
+		boolean b1, b2, b3;
+
+		b1 = sign(pt, v1, v2) < 0.0f;
+		b2 = sign(pt, v2, v3) < 0.0f;
+		b3 = sign(pt, v3, v1) < 0.0f;
+
+		return ((b1 == b2) && (b2 == b3));
+	}
+
+	public static double sign(Coordinate p1, Coordinate p2, Coordinate p3) {
+		return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+	}
+
 	public static void logCoordinate(Coordinate coordinate) {
 		logger.info("coordinate: " + coordinate.x + ", " + coordinate.y);
 	}
 
 	public static void logLineSegment(LineSegment lineSegment) {
 		// logger.info("lineSegment: " + coordinate.x + ", " + coordinate.y);
+	}
+
+	/**
+	 * TODO Compute the intersect point/line segment of two line segments.
+	 * 
+	 * @param pi1
+	 * @param pi2
+	 * @param pj1
+	 * @param pj2
+	 * @return
+	 */
+	public static Coordinate intersect(Coordinate pi1, Coordinate pi2, Coordinate pj1, Coordinate pj2) {
+
+		return null;
 	}
 
 }

@@ -1,8 +1,8 @@
 package mo.umac.crawler;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSetD2;
@@ -17,6 +17,7 @@ import org.poly2tri.triangulation.delaunay.DelaunayTriangle;
 import org.poly2tri.triangulation.point.TPoint;
 
 import paint.PaintShapes;
+import utils.GeoOperator;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -25,8 +26,9 @@ import com.vividsolutions.jts.geom.LineSegment;
 public class AlgoDCDT extends Strategy {
 
 	protected static Logger logger = Logger.getLogger(AlgoDCDT.class.getName());
+	// public final double EQUAL_EPSILON = 1e-12;
 
-	public double EPSILON = 1e-6/* 1e-12 */;
+	public final double EPSILON = 1e-6/* 1e-12 */;
 
 	public AlgoDCDT() {
 		super();
@@ -70,7 +72,6 @@ public class AlgoDCDT extends Strategy {
 			PaintShapes.paint.addPolygon(polygonHexagon);
 			PaintShapes.paint.myRepaint();
 		}
-
 		holeList.add(polygonHexagon);
 		Polygon polygon = boundary(envelope);
 		addHoles(polygon, holeList);
@@ -157,9 +158,9 @@ public class AlgoDCDT extends Strategy {
 				PaintShapes.paint.addPolygon(inner);
 				PaintShapes.paint.myRepaint();
 			}
-			inner = disturb(holeList, inner);
-			holeList.add(inner);
 			polygon = boundary(envelope);
+			disturb(polygon, holeList, inner);
+			holeList.add(inner);
 			addHoles(polygon, holeList);
 			// add at 2014-4-17
 			if (logger.isDebugEnabled()) {
@@ -187,43 +188,168 @@ public class AlgoDCDT extends Strategy {
 		}
 	}
 
+	// /**
+	// *
+	// * Disturb the duplicate point on the original polygons list
+	// *
+	// * @param boundary
+	// * @param holeList
+	// * @param inner
+	// * @return
+	// */
+	// private void disturb(Polygon boundary, ArrayList<Polygon> holeList, Polygon inner) {
+	// ArrayList<TriangulationPoint> innerPoints = (ArrayList<TriangulationPoint>) inner.getPoints();
+	// // first: avoid intersect with the boundary, changing the inner point
+	//
+	//
+	// // second: avoid intersect with other points
+	// for (int i = 0; i < holeList.size(); i++) {
+	// Polygon p = holeList.get(i);
+	// List<TriangulationPoint> tpList = p.getPoints();
+	// for (int j = 0; j < tpList.size(); j++) {
+	// TriangulationPoint holePoint = tpList.get(j);
+	// for (int k = 0; k < innerPoints.size(); k++) {
+	// TriangulationPoint innerP = innerPoints.get(k);
+	// if (equalPoint(innerP, holePoint)) {
+	// // tag this polygon and disturb this point
+	// shrink(p, holePoint, j);
+	// break;
+	// }
+	// }
+	// }
+	//
+	// }
+	// // third: avoid intersect with edges.
+	//
+	// }
+
 	/**
-	 * change holeList!
 	 * 
+	 * Disturb the duplicate point on the original polygons list
+	 * 
+	 * @param boundary
 	 * @param holeList
 	 * @param inner
 	 * @return
 	 */
-	private Polygon disturb(ArrayList<Polygon> holeList, Polygon inner) {
+	private void disturb(Polygon boundary, ArrayList<Polygon> holeList, Polygon inner) {
 		ArrayList<TriangulationPoint> innerPoints = (ArrayList<TriangulationPoint>) inner.getPoints();
-		ArrayList<PolygonPoint> newInnerPoints = new ArrayList<PolygonPoint>();
-		for (int i = 0; i < innerPoints.size(); i++ ) {
-			TriangulationPoint innerP = innerPoints.get(i);
-			for (Polygon p : holeList) {
-				List<TriangulationPoint> tpList = p.getPoints();
-				for (TriangulationPoint holeP : tpList) {
-					if (equalPoint(innerP, holeP)) {
-						// tag this polygon and disturb this point
-						shrink(p, holeP);
+		// first: avoid point intersecting with the boundary. If so, change the inner point
+		List<TriangulationPoint> boundaryPoints = boundary.getPoints();
+		for (int i = 0; i < boundaryPoints.size(); i++) {
+			TriangulationPoint boundaryPoint = boundaryPoints.get(i);
+			TriangulationPoint nextBoundaryPoint;
+			if (i != boundaryPoints.size() - 1) {
+				nextBoundaryPoint = boundaryPoints.get(i + 1);
+			} else {
+				nextBoundaryPoint = boundaryPoints.get(0);
+			}
+			for (int j = 0; j < innerPoints.size(); j++) {
+				TriangulationPoint innerPoint = innerPoints.get(j);
+				boolean poe = GeoOperator.pointOnEdge(boundaryPoint, nextBoundaryPoint, innerPoint);
+				if (poe) {
+					shrink(inner, innerPoint, j);
+				}
+			}
+		}
+		TriangulationPoint nextHolePoint;
+		TriangulationPoint nextInnerPoint;
+		// second: avoid intersecting with other points
+		// third: avoid point intersecting with edges: if point on the edge, shrink point
+		// 4th: avoid edge intersecting with edges: shrink one point of the inner polygon
+		for (int i = 0; i < holeList.size(); i++) {
+			Polygon p = holeList.get(i);
+			List<TriangulationPoint> tpList = p.getPoints();
+			for (int j = 0; j < tpList.size(); j++) {
+				TriangulationPoint holePoint = tpList.get(j);
+				// for an edge
+				if (j != tpList.size() - 1) {
+					nextHolePoint = tpList.get(j + 1);
+				} else {
+					nextHolePoint = tpList.get(0);
+				}
+				for (int k = 0; k < innerPoints.size(); k++) {
+					TriangulationPoint innerPoint = innerPoints.get(k);
+					// for edge
+					if (k != innerPoints.size() - 1) {
+						nextInnerPoint = innerPoints.get(k + 1);
+					} else {
+						nextInnerPoint = innerPoints.get(0);
+					}
+					if (GeoOperator.pointOnEdge(holePoint, nextHolePoint, innerPoint)) {
+						shrink(inner, innerPoint, k);
+					} else if (GeoOperator.pointOnEdge(innerPoint, nextInnerPoint, holePoint)) {
+						shrink(p, holePoint, j);
+					} else if (GeoOperator.edgeOnEdge(holePoint, nextHolePoint, innerPoint, nextInnerPoint)) {
+						shrink(inner, innerPoint, k);
 					}
 				}
 			}
 		}
-
-		Polygon inner2 = new Polygon(newInnerPoints);
-
-		return inner2;
 	}
 
-	public static boolean equalPoint(TriangulationPoint pp, TriangulationPoint tp) {
-		if (pp.getX() == tp.getX() && pp.getY() == tp.getY()) {
-			return true;
+	public void shrink(Polygon polygon, TriangulationPoint point, int j) {
+		List<TriangulationPoint> points = polygon.getPoints();
+		if (logger.isDebugEnabled()) {
+			logger.debug("shrink...");
+			logger.debug("points.size() = " + points.size() + ", j = " + j);
 		}
-		return false;
-	}
-	
-	public static void shrink(Polygon polygon, TriangulationPoint point) {
-		
+		TriangulationPoint pre;
+		TriangulationPoint after;
+
+		if (j == 0) {
+			pre = points.get(points.size() - 1);
+			after = points.get(j + 1);
+		} else if (j == points.size() - 1) {
+			pre = points.get(j - 1);
+			after = points.get(0);
+		} else {
+			pre = points.get(j - 1);
+			after = points.get(j + 1);
+		}
+
+		double xPre = pre.getX();
+		double yPre = pre.getY();
+		double xAfter = after.getX();
+		double yAfter = after.getY();
+		double x = point.getX();
+		double y = point.getY();
+
+		double xDis = x;
+		double yDis = y;
+
+		Coordinate p1 = new Coordinate(xPre, yPre);
+		Coordinate p2 = new Coordinate(x, y);
+		Coordinate p3 = new Coordinate(xAfter, yAfter);
+		//
+		boolean find = false;
+		int factor = 1;
+		while (!find) {
+			for (int i = -1 * factor; i <= factor; i = i + 1) {
+				if (!find) {
+					xDis = x + i;
+					for (int k = -1 * factor; k <= factor; k = k + 1) {
+						if (i == 0 && k == 0) {
+							continue;
+						}
+						yDis = y + k;
+						Coordinate disturbCoor = new Coordinate(xDis, yDis);
+						if (GeoOperator.pointInsidePolygon(polygon, disturbCoor)/* GeoOperator.PointInTriangle(disturbCoor, p1, p2, p3) */) {
+							find = true;
+							break;
+						}
+					}
+				} else {
+					break;
+				}
+			}
+			factor *= 2;
+		}
+
+		// replace the point
+		TriangulationPoint disturbPoint = new TPoint(xDis, yDis);
+		points.set(j, disturbPoint);
+
 	}
 
 	private void addHoles(Polygon polygon, ArrayList<Polygon> holeList) {
@@ -460,7 +586,7 @@ public class AlgoDCDT extends Strategy {
 			return p;
 		} else if (numEqualsTwo == 1) {
 			// case 4.3
-			if (PointInTriangle(circle.getCenter(), p1, p2, p3)) {
+			if (GeoOperator.PointInTriangle(circle.getCenter(), p1, p2, p3)) {
 				// case 4.3a
 				if (intersectPoints12.size() == 2) {
 					Polygon p = case43a(circle, intersectPoints12, p1, p2, p3);
@@ -490,29 +616,6 @@ public class AlgoDCDT extends Strategy {
 		}
 
 		return null;
-	}
-
-	/**
-	 * {@link http://stackoverflow.com/a/2049593/952022}
-	 * 
-	 * @param pt
-	 * @param v1
-	 * @param v2
-	 * @param v3
-	 * @return
-	 */
-	public static boolean PointInTriangle(Coordinate pt, Coordinate v1, Coordinate v2, Coordinate v3) {
-		boolean b1, b2, b3;
-
-		b1 = sign(pt, v1, v2) < 0.0f;
-		b2 = sign(pt, v2, v3) < 0.0f;
-		b3 = sign(pt, v3, v1) < 0.0f;
-
-		return ((b1 == b2) && (b2 == b3));
-	}
-
-	public static double sign(Coordinate p1, Coordinate p2, Coordinate p3) {
-		return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
 	}
 
 	private Polygon case43a(Circle circle, ArrayList<Coordinate> intersectPoints, Coordinate v1, Coordinate v2, Coordinate v3) {
@@ -557,26 +660,26 @@ public class AlgoDCDT extends Strategy {
 		if (intersects.size() > 2) {
 			logger.error("intersects.size()> 2");
 		}
-		if (PointInTriangle(trans(p1), v1, v2, v3)) {
+		if (GeoOperator.PointInTriangle(trans(p1), v1, v2, v3)) {
 			points.add(p1);
 		}
-		if (PointInTriangle(trans(p2), v1, v2, v3)) {
+		if (GeoOperator.PointInTriangle(trans(p2), v1, v2, v3)) {
 			points.add(p2);
 		}
-		if (PointInTriangle(trans(p3), v1, v2, v3)) {
+		if (GeoOperator.PointInTriangle(trans(p3), v1, v2, v3)) {
 			points.add(p3);
 		}
-		if (PointInTriangle(trans(p4), v1, v2, v3)) {
+		if (GeoOperator.PointInTriangle(trans(p4), v1, v2, v3)) {
 			points.add(p4);
 		}
-		if (PointInTriangle(trans(p5), v1, v2, v3)) {
+		if (GeoOperator.PointInTriangle(trans(p5), v1, v2, v3)) {
 			points.add(p5);
 		}
-		if (PointInTriangle(trans(p6), v1, v2, v3)) {
+		if (GeoOperator.PointInTriangle(trans(p6), v1, v2, v3)) {
 			points.add(p6);
 		}
 		for (int i = 0; i < intersects.size(); i++) {
-			if (PointInTriangle(intersects.get(i), v1, v2, v3)) {
+			if (GeoOperator.PointInTriangle(intersects.get(i), v1, v2, v3)) {
 				points.add(trans(intersects.get(i)));
 			}
 		}
@@ -657,9 +760,9 @@ public class AlgoDCDT extends Strategy {
 		Coordinate m1 = new Coordinate(x1, y1);
 		Coordinate m2 = new Coordinate(x2, y2);
 		Coordinate mPrime = null;
-		if (PointInTriangle(m1, v1, v2, v3)) {
+		if (GeoOperator.PointInTriangle(m1, v1, v2, v3)) {
 			mPrime = m1;
-		} else if (PointInTriangle(m2, v1, v2, v3)) {
+		} else if (GeoOperator.PointInTriangle(m2, v1, v2, v3)) {
 			mPrime = m2;
 		} else {
 			logger.error("error in case 4.3b");
