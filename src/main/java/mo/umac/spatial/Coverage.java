@@ -5,7 +5,6 @@ package mo.umac.spatial;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.geotools.referencing.GeodeticCalculator;
 

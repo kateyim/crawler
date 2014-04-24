@@ -28,7 +28,7 @@ public class AlgoDCDT extends Strategy {
 	protected static Logger logger = Logger.getLogger(AlgoDCDT.class.getName());
 	// public final double EQUAL_EPSILON = 1e-12;
 
-	public final double EPSILON = 1e-6/* 1e-12 */;
+	public final double EPSILON_DISTURB = GeoOperator.EPSILON_EQUAL * 1000;
 
 	public AlgoDCDT() {
 		super();
@@ -224,7 +224,6 @@ public class AlgoDCDT extends Strategy {
 	// }
 
 	/**
-	 * 
 	 * Disturb the duplicate point on the original polygons list
 	 * 
 	 * @param boundary
@@ -290,6 +289,7 @@ public class AlgoDCDT extends Strategy {
 
 	public void shrink(Polygon polygon, TriangulationPoint point, int j) {
 		List<TriangulationPoint> points = polygon.getPoints();
+		Coordinate outerPoint = GeoOperator.polygonOuterPoint(polygon);
 		if (logger.isDebugEnabled()) {
 			logger.debug("shrink...");
 			logger.debug("points.size() = " + points.size() + ", j = " + j);
@@ -334,7 +334,7 @@ public class AlgoDCDT extends Strategy {
 						}
 						yDis = y + k;
 						Coordinate disturbCoor = new Coordinate(xDis, yDis);
-						if (GeoOperator.pointInsidePolygon(polygon, disturbCoor)/* GeoOperator.PointInTriangle(disturbCoor, p1, p2, p3) */) {
+						if (GeoOperator.pointInsidePolygon(polygon, outerPoint, disturbCoor)/* GeoOperator.PointInTriangle(disturbCoor, p1, p2, p3) */) {
 							find = true;
 							break;
 						}

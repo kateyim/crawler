@@ -29,8 +29,7 @@ import com.vividsolutions.jts.geomgraph.Position;
 public class GeoOperator {
 
 	protected static Logger logger = Logger.getLogger(GeoOperator.class.getName());
-	public final static double EQUAL_EPSILON = 1e-12;
-
+	public final static double EPSILON_EQUAL = 1e-12;
 
 	public final static double RADIUS = 6371007.2;// authalic earth radius of
 
@@ -264,6 +263,79 @@ public class GeoOperator {
 	}
 
 	/**
+		 *
+		 * @author Li Honglin
+		 * @param point
+		 * @param radius
+		 * @param p1
+		 * @param p2
+		 * @return FIXME return in order
+		 */
+		public static ArrayList<Coordinate> line_intersect_Circle(Coordinate point, double radius, Coordinate p1, Coordinate p2) {
+			ArrayList<Coordinate> intersect = new ArrayList<Coordinate>();
+			if (Math.abs(p2.x - p1.x) < 1e-6) {
+				double x = p1.x;
+				double d = point.y * point.y + (x - point.x) * (x - point.x) - radius * radius;
+				double delt1 = 4 * point.y * point.y - 4 * d;
+				if (delt1 >= 0) {
+					double y3 = (2 * point.y + Math.sqrt(delt1)) / 2;
+					Coordinate q3 = new Coordinate(x, y3);
+					double y4 = (2 * point.y - Math.sqrt(delt1)) / 2;
+					Coordinate q4 = new Coordinate(x, y4);
+					double v3 = (q3.x - p1.x) * (p2.x - q3.x) + (q3.y - p1.y) * (p2.y - q3.y);
+					double v4 = (q4.x - p1.x) * (p2.x - q4.x) + (q4.y - p1.y) * (p2.y - q4.y);
+					if (v3 > 0) {
+						intersect.add(q3);
+					}
+					if (v4 > 0) {
+						intersect.add(q4);
+					}
+				}
+			} else {
+				// if (logger.isDebugEnabled()) {
+				// logger.debug("p1.x!=p2.x");
+				// }
+				double k = (p2.y - p1.y) / (p2.x - p1.x);
+				double c = p1.y - k * p1.x;
+				double delt = 4 * Math.pow(k * c - point.x - k * point.y, 2) - 4 * (1 + k * k) * ((c - point.y) * (c - point.y) + point.x * point.x - radius * radius);
+	//			if (logger.isDebugEnabled()) {
+	//				logger.debug("delt=" + delt + "  k=" + k);
+	//			}
+	
+				if (delt >= 0) {
+					double x1 = (2 * (point.x + k * point.y - k * c) + Math.sqrt(delt)) / (2 * (1 + k * k));
+					double y1 = k * x1 + c;
+					Coordinate q1 = new Coordinate(x1, y1);
+					double x2 = (2 * (point.x + k * point.y - k * c) - Math.sqrt(delt)) / (2 * (1 + k * k));
+					double y2 = k * x2 + c;
+					Coordinate q2 = new Coordinate(x2, y2);
+					double v1 = (q1.x - p1.x) * (p2.x - q1.x) + (q1.y - p1.y) * (p2.y - q1.y);
+					double v2 = (q2.x - p1.x) * (p2.x - q2.x) + (q2.y - p1.y) * (p2.y - q2.y);
+					if (v1 > 0) {
+						intersect.add(q1);
+					}
+					if (v2 > 0) {
+						intersect.add(q2);
+					}
+				}
+			}
+			// in an order
+			if(intersect.size() == 2){
+				Coordinate c1 = intersect.get(0);
+				Coordinate c2 = intersect.get(1);
+				ArrayList<Coordinate> intersect2 = new ArrayList<Coordinate>();
+				// wrong order
+				if(p1.distance(c1) > p1.distance(c2)){
+					intersect2.add(c2);
+					intersect2.add(c1);
+					return intersect2;
+				}
+			}
+			
+			return intersect;
+		}
+
+	/**
 	 * check whether point q lies on the edge constructing by p1 and p2.
 	 * 
 	 * @param p1
@@ -285,23 +357,95 @@ public class GeoOperator {
 	 * @return
 	 */
 	public static boolean pointOnEdge(TriangulationPoint p1, TriangulationPoint p2, TriangulationPoint q) {
-		// TODO
-		return false;
-	}
-
-	public static boolean edgeOnEdge(TriangulationPoint p1, TriangulationPoint p2, TriangulationPoint q1, TriangulationPoint q2) {
-		// TODO
-		return false;
-	}
-
-
-	public static boolean equalPoint(TriangulationPoint pp, TriangulationPoint tp) {
-		if (Math.abs(pp.getX() - tp.getX()) < EQUAL_EPSILON && Math.abs(pp.getY() - tp.getY()) < EQUAL_EPSILON) {
+		double delta = Math.abs((p2.getX() - p1.getX()) * (q.getY() - p1.getY()) - (p2.getY() - p1.getY()) * (q.getX() - p1.getX()));
+		if (delta < EPSILON_EQUAL) {
 			return true;
 		}
 		return false;
 	}
-	
+
+	/**
+	 * check whether an edge contains another edge
+	 * 
+	 * @param p1
+	 * @param p2
+	 * @param q1
+	 * @param q2
+	 * @return
+	 */
+	public static boolean edgeOnEdge(TriangulationPoint p1, TriangulationPoint p2, TriangulationPoint q1, TriangulationPoint q2) {
+		// find the order of points of each edge;
+		double minY1 = p1.getY();
+		double maxY1 = p2.getY();
+		double minY2 = q1.getY();
+		double maxY2 = q2.getY();
+		if (p1.getY() > p2.getY()) {
+			minY1 = p2.getY();
+			maxY2 = p1.getY();
+		}
+		if (q1.getY() > q2.getY()) {
+			minY2 = q2.getY();
+			maxY2 = q1.getY();
+		}
+
+		if (Math.abs(p2.getX() - p1.getX()) < EPSILON_EQUAL) {
+			// k_p == 0
+			if (Math.abs(q2.getX() - q1.getX()) < EPSILON_EQUAL) {
+				// k_q == 0
+				if (minY1 < minY2) {
+					if (maxY1 > maxY2) {
+						return true;
+					} else {
+						return false;
+					}
+				} else {
+					// minY1 > minY2, cannot be equal, else they has already been reported as intersect.
+					if (maxY1 < maxY2) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			} else {
+				return false;
+			}
+		} else {
+			double slope1 = (p2.getY() - p1.getY()) / (p2.getX() - p1.getX());
+			double slope2 = (q2.getY() - q1.getY()) / (q2.getX() - q1.getX());
+			if (Math.abs(slope2 - slope1) < EPSILON_EQUAL) {
+				double b1 = p1.getY() * p2.getX() - p2.getY() * p1.getX();
+				double b2 = q1.getY() * q2.getX() - q2.getY() * q1.getX();
+				if (Math.abs(b2 - b1) < EPSILON_EQUAL) {
+					if (minY1 < minY2) {
+						if (maxY1 > maxY2) {
+							return true;
+						} else {
+							return false;
+						}
+					} else {
+						// minY1 > minY2, cannot be equal, else they has already been reported as intersect.
+						if (maxY1 < maxY2) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+	}
+
+	public static boolean equalPoint(TriangulationPoint pp, TriangulationPoint tp) {
+		if (Math.abs(pp.getX() - tp.getX()) < EPSILON_EQUAL && Math.abs(pp.getY() - tp.getY()) < EPSILON_EQUAL) {
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * check whether point p lies on/inside the polygon
 	 * 
@@ -309,9 +453,49 @@ public class GeoOperator {
 	 * @param p
 	 * @return
 	 */
-	public static boolean pointInsidePolygon(Polygon polygon, Coordinate p) {
-		// TODO
+	public static boolean pointInsidePolygon(Polygon polygon, Coordinate outerPoint, Coordinate p) {
+		int intersection = 0;
+		List<TriangulationPoint> polygonPoints = polygon.getPoints();
+		for (int i = 0; i < polygonPoints.size(); i++) {
+			TriangulationPoint aPoint = polygonPoints.get(i);
+			TriangulationPoint nextPoint;
+			if (i != polygonPoints.size() - 1) {
+				nextPoint = polygonPoints.get(i + 1);
+			} else {
+				nextPoint = polygonPoints.get(0);
+			}
+			if (doIntersect(p, outerPoint, trans(aPoint), trans(nextPoint))) {
+				intersection++;
+			}
+		}
+
+		/*
+		 * If the number of intersections is odd, then the point is inside the polygon
+		 */
+		if (intersection % 2 == 1) {
+			return true;
+		}
 		return false;
+	}
+
+	public static Coordinate trans(TriangulationPoint p) {
+		return new Coordinate(p.getX(), p.getY());
+	}
+
+	public static Coordinate polygonOuterPoint(Polygon polygon) {
+		List<TriangulationPoint> polygonPoints = polygon.getPoints();
+		double minX = Double.MAX_VALUE;
+		double minY = Double.MAX_VALUE;
+		for (int i = 0; i < polygonPoints.size(); i++) {
+			TriangulationPoint aPoint = polygonPoints.get(i);
+			if (aPoint.getX() < minX) {
+				minX = aPoint.getX();
+			}
+			if (aPoint.getY() < minY) {
+				minY = aPoint.getY();
+			}
+		}
+		return new Coordinate(minX, minY);
 	}
 
 	/**
@@ -346,17 +530,66 @@ public class GeoOperator {
 	}
 
 	/**
-	 * TODO Compute the intersect point/line segment of two line segments.
+	 * check whether two line segments intersects {@link http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/} one lineSegment is p1,q1, the
+	 * other is p2, q2
 	 * 
-	 * @param pi1
-	 * @param pi2
-	 * @param pj1
-	 * @param pj2
 	 * @return
 	 */
-	public static Coordinate intersect(Coordinate pi1, Coordinate pi2, Coordinate pj1, Coordinate pj2) {
+	public static boolean doIntersect(Coordinate p1, Coordinate q1, Coordinate p2, Coordinate q2) {
+		// Find the four orientations needed for general and
+		// special cases
+		int o1 = orientation(p1, q1, p2);
+		int o2 = orientation(p1, q1, q2);
+		int o3 = orientation(p2, q2, p1);
+		int o4 = orientation(p2, q2, q1);
 
-		return null;
+		// General case
+		if (o1 != o2 && o3 != o4)
+			return true;
+
+		// Special Cases
+		// p1, q1 and p2 are colinear and p2 lies on segment p1q1
+		if (o1 == 0 && onSegment(p1, p2, q1))
+			return true;
+
+		// p1, q1 and p2 are colinear and q2 lies on segment p1q1
+		if (o2 == 0 && onSegment(p1, q2, q1))
+			return true;
+
+		// p2, q2 and p1 are colinear and p1 lies on segment p2q2
+		if (o3 == 0 && onSegment(p2, p1, q2))
+			return true;
+
+		// p2, q2 and q1 are colinear and q1 lies on segment p2q2
+		if (o4 == 0 && onSegment(p2, q1, q2))
+			return true;
+
+		return false; // Doesn't fall in any of the above cases
+	}
+
+	// Given three colinear points p, q, r, the function checks if
+	// point q lies on line segment 'pr'
+	public static boolean onSegment(Coordinate p, Coordinate q, Coordinate r) {
+		if (q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) && q.y <= Math.max(p.y, r.y) && q.y >= Math.min(p.y, r.y))
+			return true;
+
+		return false;
+	}
+
+	// To find orientation of ordered triplet (p, q, r).
+	// The function returns following values
+	// 0 --> p, q and r are colinear
+	// 1 --> Clockwise
+	// 2 --> Counterclockwise
+	public static int orientation(Coordinate p, Coordinate q, Coordinate r) {
+		// See 10th slides from following link for derivation of the formula
+		// http://www.dcs.gla.ac.uk/~pat/52233/slides/Geometry1x1.pdf
+		double val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+
+		if (Math.abs(val) < EPSILON_EQUAL)
+			return 0; // colinear
+
+		return (val > 0) ? 1 : 2; // clock or counterclock wise
 	}
 
 }
