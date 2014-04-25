@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import mo.umac.crawler.AlgoDCDT;
 
 import org.apache.log4j.Logger;
 import org.poly2tri.triangulation.Triangulatable;
@@ -12,6 +11,8 @@ import org.poly2tri.triangulation.TriangulationContext;
 import org.poly2tri.triangulation.TriangulationMode;
 import org.poly2tri.triangulation.TriangulationPoint;
 import org.poly2tri.triangulation.delaunay.DelaunayTriangle;
+
+import utils.GeoOperator;
 
 public class Polygon implements Triangulatable {
 //	private final static Logger logger = LoggerFactory.getLogger(Polygon.class);
@@ -217,7 +218,7 @@ public class Polygon implements Triangulatable {
 			int j = 0;
 			if (_holes != null) {
 				for (Polygon p : _holes) {
-					logger.debug("_points " + j + ": " + AlgoDCDT.polygonToString(p));
+					logger.debug("_points " + j + ": " + GeoOperator.polygonToString(p));
 					j++;
 				}
 			}

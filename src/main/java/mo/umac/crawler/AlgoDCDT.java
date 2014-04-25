@@ -76,13 +76,13 @@ public class AlgoDCDT extends Strategy {
 		Polygon polygon = boundary(envelope);
 		addHoles(polygon, holeList);
 		if (logger.isDebugEnabled()) {
-			logger.debug(polygonToString(polygon));
+			logger.debug(GeoOperator.polygonToString(polygon));
 			logger.error("--------------------");
-			logger.error(polygonToString(polygon));
+			logger.error(GeoOperator.polygonToString(polygon));
 
 			for (int i = 0; i < holeList.size(); i++) {
-				logger.debug(polygonToString(holeList.get(i)));
-				logger.error(polygonToString(holeList.get(i)));
+				logger.debug(GeoOperator.polygonToString(holeList.get(i)));
+				logger.error(GeoOperator.polygonToString(holeList.get(i)));
 			}
 		}
 		Poly2Tri.triangulate(polygon);
@@ -114,7 +114,7 @@ public class AlgoDCDT extends Strategy {
 				logger.debug("maxIndex = " + maxIndex);
 				for (int i = 0; i < list.size(); i++) {
 					DelaunayTriangle tri = list.get(i);
-					logger.debug(triangleToString(tri));
+					logger.debug(GeoOperator.triangleToString(tri));
 				}
 			}
 			DelaunayTriangle triangle = list.get(maxIndex);
@@ -153,7 +153,7 @@ public class AlgoDCDT extends Strategy {
 			Polygon inner = intersect(aCircle, triangle);
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
 				// logger.debug(polygonToString(inner));
-				logger.error(polygonToString(inner));
+				logger.error(GeoOperator.polygonToString(inner));
 				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
 				PaintShapes.paint.addPolygon(inner);
 				PaintShapes.paint.myRepaint();
@@ -164,13 +164,13 @@ public class AlgoDCDT extends Strategy {
 			addHoles(polygon, holeList);
 			// add at 2014-4-17
 			if (logger.isDebugEnabled()) {
-				logger.debug(polygonToString(polygon));
+				logger.debug(GeoOperator.polygonToString(polygon));
 				logger.error("--------------------");
-				logger.error(polygonToString(polygon));
+				logger.error(GeoOperator.polygonToString(polygon));
 
 				for (int i = 0; i < holeList.size(); i++) {
-					logger.debug(polygonToString(holeList.get(i)));
-					logger.error(polygonToString(holeList.get(i)));
+					logger.debug(GeoOperator.polygonToString(holeList.get(i)));
+					logger.error(GeoOperator.polygonToString(holeList.get(i)));
 
 				}
 			}
@@ -188,43 +188,8 @@ public class AlgoDCDT extends Strategy {
 		}
 	}
 
-	// /**
-	// *
-	// * Disturb the duplicate point on the original polygons list
-	// *
-	// * @param boundary
-	// * @param holeList
-	// * @param inner
-	// * @return
-	// */
-	// private void disturb(Polygon boundary, ArrayList<Polygon> holeList, Polygon inner) {
-	// ArrayList<TriangulationPoint> innerPoints = (ArrayList<TriangulationPoint>) inner.getPoints();
-	// // first: avoid intersect with the boundary, changing the inner point
-	//
-	//
-	// // second: avoid intersect with other points
-	// for (int i = 0; i < holeList.size(); i++) {
-	// Polygon p = holeList.get(i);
-	// List<TriangulationPoint> tpList = p.getPoints();
-	// for (int j = 0; j < tpList.size(); j++) {
-	// TriangulationPoint holePoint = tpList.get(j);
-	// for (int k = 0; k < innerPoints.size(); k++) {
-	// TriangulationPoint innerP = innerPoints.get(k);
-	// if (equalPoint(innerP, holePoint)) {
-	// // tag this polygon and disturb this point
-	// shrink(p, holePoint, j);
-	// break;
-	// }
-	// }
-	// }
-	//
-	// }
-	// // third: avoid intersect with edges.
-	//
-	// }
-
 	/**
-	 * Disturb the duplicate point on the original polygons list
+	 * Disturb the point if it lies on an point/edge exist before
 	 * 
 	 * @param boundary
 	 * @param holeList
@@ -236,6 +201,7 @@ public class AlgoDCDT extends Strategy {
 		// first: avoid point intersecting with the boundary. If so, change the inner point
 		List<TriangulationPoint> boundaryPoints = boundary.getPoints();
 		for (int i = 0; i < boundaryPoints.size(); i++) {
+			// get an edge of from this boundary
 			TriangulationPoint boundaryPoint = boundaryPoints.get(i);
 			TriangulationPoint nextBoundaryPoint;
 			if (i != boundaryPoints.size() - 1) {
@@ -243,6 +209,7 @@ public class AlgoDCDT extends Strategy {
 			} else {
 				nextBoundaryPoint = boundaryPoints.get(0);
 			}
+			//
 			for (int j = 0; j < innerPoints.size(); j++) {
 				TriangulationPoint innerPoint = innerPoints.get(j);
 				boolean poe = GeoOperator.pointOnEdge(boundaryPoint, nextBoundaryPoint, innerPoint);
@@ -251,11 +218,11 @@ public class AlgoDCDT extends Strategy {
 				}
 			}
 		}
+		// 2nd: avoid overlapping points
+		// 3rd: avoid point intersecting with edges: if point on the edge, shrink point
+		// 4th: avoid edge intersecting with edges: shrink one point of the inner polygon
 		TriangulationPoint nextHolePoint;
 		TriangulationPoint nextInnerPoint;
-		// second: avoid intersecting with other points
-		// third: avoid point intersecting with edges: if point on the edge, shrink point
-		// 4th: avoid edge intersecting with edges: shrink one point of the inner polygon
 		for (int i = 0; i < holeList.size(); i++) {
 			Polygon p = holeList.get(i);
 			List<TriangulationPoint> tpList = p.getPoints();
@@ -277,9 +244,11 @@ public class AlgoDCDT extends Strategy {
 					}
 					if (GeoOperator.pointOnEdge(holePoint, nextHolePoint, innerPoint)) {
 						shrink(inner, innerPoint, k);
-					} else if (GeoOperator.pointOnEdge(innerPoint, nextInnerPoint, holePoint)) {
+					}
+					if (GeoOperator.pointOnEdge(innerPoint, nextInnerPoint, holePoint)) {
 						shrink(p, holePoint, j);
-					} else if (GeoOperator.edgeOnEdge(holePoint, nextHolePoint, innerPoint, nextInnerPoint)) {
+					}
+					if (GeoOperator.edgeOnEdge(holePoint, nextHolePoint, innerPoint, nextInnerPoint)) {
 						shrink(inner, innerPoint, k);
 					}
 				}
@@ -287,55 +256,40 @@ public class AlgoDCDT extends Strategy {
 		}
 	}
 
-	public void shrink(Polygon polygon, TriangulationPoint point, int j) {
+	/**
+	 * @param polygon
+	 * @param point: shrink this point
+	 * @param j: point is the j-th point in the polygon
+	 */
+	private void shrink(Polygon polygon, TriangulationPoint point, int j) {
 		List<TriangulationPoint> points = polygon.getPoints();
-		Coordinate outerPoint = GeoOperator.polygonOuterPoint(polygon);
+		Coordinate outerPoint = GeoOperator.outOfMinBoundPoint(polygon);
 		if (logger.isDebugEnabled()) {
 			logger.debug("shrink...");
 			logger.debug("points.size() = " + points.size() + ", j = " + j);
 		}
-		TriangulationPoint pre;
-		TriangulationPoint after;
-
-		if (j == 0) {
-			pre = points.get(points.size() - 1);
-			after = points.get(j + 1);
-		} else if (j == points.size() - 1) {
-			pre = points.get(j - 1);
-			after = points.get(0);
-		} else {
-			pre = points.get(j - 1);
-			after = points.get(j + 1);
-		}
-
-		double xPre = pre.getX();
-		double yPre = pre.getY();
-		double xAfter = after.getX();
-		double yAfter = after.getY();
 		double x = point.getX();
 		double y = point.getY();
 
 		double xDis = x;
 		double yDis = y;
 
-		Coordinate p1 = new Coordinate(xPre, yPre);
-		Coordinate p2 = new Coordinate(x, y);
-		Coordinate p3 = new Coordinate(xAfter, yAfter);
-		//
 		boolean find = false;
-		int factor = 1;
+		double factor = EPSILON_DISTURB;
 		while (!find) {
-			for (int i = -1 * factor; i <= factor; i = i + 1) {
+			for (double i = -1 * factor; i <= factor; i = i + factor) {
 				if (!find) {
 					xDis = x + i;
-					for (int k = -1 * factor; k <= factor; k = k + 1) {
-						if (i == 0 && k == 0) {
+					for (double k = -1 * factor; k <= factor; k = k + factor) {
+						if (i < GeoOperator.EPSILON_EQUAL && k < GeoOperator.EPSILON_EQUAL) {
+							// xDis == x && yDis == y
 							continue;
 						}
 						yDis = y + k;
 						Coordinate disturbCoor = new Coordinate(xDis, yDis);
-						if (GeoOperator.pointInsidePolygon(polygon, outerPoint, disturbCoor)/* GeoOperator.PointInTriangle(disturbCoor, p1, p2, p3) */) {
+						if (GeoOperator.pointInsidePolygon(polygon, outerPoint, disturbCoor)) {
 							find = true;
+							// TODO check whether jump out of the while loop
 							break;
 						}
 					}
@@ -348,36 +302,16 @@ public class AlgoDCDT extends Strategy {
 
 		// replace the point
 		TriangulationPoint disturbPoint = new TPoint(xDis, yDis);
+		// TODO check whether replaced it properly.
 		points.set(j, disturbPoint);
 
 	}
 
 	private void addHoles(Polygon polygon, ArrayList<Polygon> holeList) {
 		for (int i = 0; i < holeList.size(); i++) {
-			Polygon hole = clone(holeList.get(i));
+			Polygon hole = GeoOperator.clone(holeList.get(i));
 			polygon.addHole(hole);
 		}
-	}
-
-	/**
-	 * only preserve the basic latitude and longitude informations
-	 * 
-	 * @param p
-	 * @return
-	 */
-	public static Polygon clone(Polygon p) {
-		List<TriangulationPoint> points = p.getPoints();
-		List<PolygonPoint> pointsc = new ArrayList<PolygonPoint>();
-		for (int i = 0; i < points.size(); i++) {
-			TriangulationPoint pi = points.get(i);
-			double x = pi.getX();
-			double y = pi.getY();
-			PolygonPoint pic = new PolygonPoint(x, y);
-			pointsc.add(pic);
-
-		}
-		Polygon c = new Polygon(pointsc);
-		return c;
 	}
 
 	/**
@@ -427,7 +361,7 @@ public class AlgoDCDT extends Strategy {
 		boolean[] verticesInsideCircle = { false, false, false };
 		int numVerticesInsideCircle = 0;
 		for (int i = 0; i < tp.length; i++) {
-			Coordinate p = trans(tp[i]);
+			Coordinate p = GeoOperator.trans(tp[i]);
 			// new Coordinate(tp[i].getX(), tp[i].getY());
 			if (circle.inner(p)) {
 				verticesInsideCircle[i] = true;
@@ -462,9 +396,11 @@ public class AlgoDCDT extends Strategy {
 			}
 		}
 		TriangulationPoint[] tp = triangle.points;
-		Coordinate outerPoint = trans(tp[numOutside]);// new Coordinate(tp[numOutside].getX(), tp[numOutside].getY());
-		Coordinate innerPoint1 = trans(tp[(numOutside + 1) % 3]);// new Coordinate(tp[(numOutside + 1) % 3].getX(), tp[(numOutside + 1) % 3].getY());
-		Coordinate innerPoint2 = trans(tp[(numOutside + 2) % 3]);// new Coordinate(tp[(numOutside + 2) % 3].getX(), tp[(numOutside + 2) % 3].getY());
+		Coordinate outerPoint = GeoOperator.trans(tp[numOutside]);// new Coordinate(tp[numOutside].getX(), tp[numOutside].getY());
+		Coordinate innerPoint1 = GeoOperator.trans(tp[(numOutside + 1) % 3]);// new Coordinate(tp[(numOutside + 1) % 3].getX(), tp[(numOutside + 1) %
+																				// 3].getY());
+		Coordinate innerPoint2 = GeoOperator.trans(tp[(numOutside + 2) % 3]);// new Coordinate(tp[(numOutside + 2) % 3].getX(), tp[(numOutside + 2) %
+																				// 3].getY());
 		Coordinate intersectPoint1 = circle.intersectOneOuter(innerPoint1, outerPoint);
 		Coordinate intersectPoint2 = circle.intersectOneOuter(innerPoint2, outerPoint);
 		List<PolygonPoint> points = new ArrayList<PolygonPoint>();
@@ -489,9 +425,9 @@ public class AlgoDCDT extends Strategy {
 			}
 		}
 		TriangulationPoint[] tp = triangle.points;
-		Coordinate innerPoint = trans(tp[numInner]);// new Coordinate(tp[numInner].getX(), tp[numInner].getY());
-		Coordinate outerPoint1 = trans(tp[(numInner + 1) % 3]);// new Coordinate(tp[(numInner + 1) % 3].getX(), tp[(numInner + 1) % 3].getY());
-		Coordinate outerPoint2 = trans(tp[(numInner + 2) % 3]);// new Coordinate(tp[(numInner + 2) % 3].getX(), tp[(numInner + 2) % 3].getY());
+		Coordinate innerPoint = GeoOperator.trans(tp[numInner]);// new Coordinate(tp[numInner].getX(), tp[numInner].getY());
+		Coordinate outerPoint1 = GeoOperator.trans(tp[(numInner + 1) % 3]);// new Coordinate(tp[(numInner + 1) % 3].getX(), tp[(numInner + 1) % 3].getY());
+		Coordinate outerPoint2 = GeoOperator.trans(tp[(numInner + 2) % 3]);// new Coordinate(tp[(numInner + 2) % 3].getX(), tp[(numInner + 2) % 3].getY());
 		// b, c
 		Coordinate intersectPoint1 = circle.intersectOneOuter(innerPoint, outerPoint1);
 		Coordinate intersectPoint2 = circle.intersectOneOuter(innerPoint, outerPoint2);
@@ -517,9 +453,9 @@ public class AlgoDCDT extends Strategy {
 	private Polygon case4(Circle circle, DelaunayTriangle triangle) {
 		TriangulationPoint[] tp = triangle.points;
 
-		Coordinate p1 = trans(tp[0]);// new Coordinate(tp[0].getX(), tp[0].getY());
-		Coordinate p2 = trans(tp[1]);// new Coordinate(tp[1].getX(), tp[1].getY());
-		Coordinate p3 = trans(tp[2]);// new Coordinate(tp[2].getX(), tp[2].getY());
+		Coordinate p1 = GeoOperator.trans(tp[0]);// new Coordinate(tp[0].getX(), tp[0].getY());
+		Coordinate p2 = GeoOperator.trans(tp[1]);// new Coordinate(tp[1].getX(), tp[1].getY());
+		Coordinate p3 = GeoOperator.trans(tp[2]);// new Coordinate(tp[2].getX(), tp[2].getY());
 		ArrayList<Coordinate> intersectPoints12 = circle.intersectTwoOuter(p1, p2);
 		ArrayList<Coordinate> intersectPoints13 = circle.intersectTwoOuter(p1, p3);
 		ArrayList<Coordinate> intersectPoints23 = circle.intersectTwoOuter(p2, p3);
@@ -537,28 +473,28 @@ public class AlgoDCDT extends Strategy {
 		} else if (numEqualsTwo == 2) {
 			// case 4.2
 			if (intersectPoints12.size() == 2 && intersectPoints13.size() == 2) {
-				PolygonPoint pp1 = trans(intersectPoints12.get(0));// new PolygonPoint(intersectPoints12.get(0).x, intersectPoints12.get(0).y);
-				PolygonPoint pp2 = trans(intersectPoints12.get(1));// new PolygonPoint(intersectPoints12.get(1).x, intersectPoints12.get(1).y);
-				PolygonPoint pp3 = trans(intersectPoints13.get(1));// new PolygonPoint(intersectPoints13.get(1).x, intersectPoints13.get(1).y);
-				PolygonPoint pp4 = trans(intersectPoints13.get(0));// new PolygonPoint(intersectPoints13.get(0).x, intersectPoints13.get(0).y);
+				PolygonPoint pp1 = GeoOperator.trans(intersectPoints12.get(0));// new PolygonPoint(intersectPoints12.get(0).x, intersectPoints12.get(0).y);
+				PolygonPoint pp2 = GeoOperator.trans(intersectPoints12.get(1));// new PolygonPoint(intersectPoints12.get(1).x, intersectPoints12.get(1).y);
+				PolygonPoint pp3 = GeoOperator.trans(intersectPoints13.get(1));// new PolygonPoint(intersectPoints13.get(1).x, intersectPoints13.get(1).y);
+				PolygonPoint pp4 = GeoOperator.trans(intersectPoints13.get(0));// new PolygonPoint(intersectPoints13.get(0).x, intersectPoints13.get(0).y);
 				points.add(pp1);
 				points.add(pp2);
 				points.add(pp3);
 				points.add(pp4);
 			} else if (intersectPoints12.size() == 2 && intersectPoints23.size() == 2) {
-				PolygonPoint pp1 = trans(intersectPoints12.get(0));// new PolygonPoint(intersectPoints12.get(0).x, intersectPoints12.get(0).y);
-				PolygonPoint pp2 = trans(intersectPoints12.get(1));// new PolygonPoint(intersectPoints12.get(1).x, intersectPoints12.get(1).y);
-				PolygonPoint pp3 = trans(intersectPoints23.get(1));// new PolygonPoint(intersectPoints13.get(1).x, intersectPoints13.get(1).y);
-				PolygonPoint pp4 = trans(intersectPoints23.get(0));// new PolygonPoint(intersectPoints13.get(0).x, intersectPoints13.get(0).y);
+				PolygonPoint pp1 = GeoOperator.trans(intersectPoints12.get(0));// new PolygonPoint(intersectPoints12.get(0).x, intersectPoints12.get(0).y);
+				PolygonPoint pp2 = GeoOperator.trans(intersectPoints12.get(1));// new PolygonPoint(intersectPoints12.get(1).x, intersectPoints12.get(1).y);
+				PolygonPoint pp3 = GeoOperator.trans(intersectPoints23.get(1));// new PolygonPoint(intersectPoints13.get(1).x, intersectPoints13.get(1).y);
+				PolygonPoint pp4 = GeoOperator.trans(intersectPoints23.get(0));// new PolygonPoint(intersectPoints13.get(0).x, intersectPoints13.get(0).y);
 				points.add(pp1);
 				points.add(pp2);
 				points.add(pp3);
 				points.add(pp4);
 			} else if (intersectPoints13.size() == 2 && intersectPoints23.size() == 2) {
-				PolygonPoint pp1 = trans(intersectPoints13.get(0));// new PolygonPoint(intersectPoints12.get(0).x, intersectPoints12.get(0).y);
-				PolygonPoint pp2 = trans(intersectPoints13.get(1));// new PolygonPoint(intersectPoints12.get(1).x, intersectPoints12.get(1).y);
-				PolygonPoint pp3 = trans(intersectPoints23.get(1));// new PolygonPoint(intersectPoints13.get(1).x, intersectPoints13.get(1).y);
-				PolygonPoint pp4 = trans(intersectPoints23.get(0));// new PolygonPoint(intersectPoints13.get(0).x, intersectPoints13.get(0).y);
+				PolygonPoint pp1 = GeoOperator.trans(intersectPoints13.get(0));// new PolygonPoint(intersectPoints12.get(0).x, intersectPoints12.get(0).y);
+				PolygonPoint pp2 = GeoOperator.trans(intersectPoints13.get(1));// new PolygonPoint(intersectPoints12.get(1).x, intersectPoints12.get(1).y);
+				PolygonPoint pp3 = GeoOperator.trans(intersectPoints23.get(1));// new PolygonPoint(intersectPoints13.get(1).x, intersectPoints13.get(1).y);
+				PolygonPoint pp4 = GeoOperator.trans(intersectPoints23.get(0));// new PolygonPoint(intersectPoints13.get(0).x, intersectPoints13.get(0).y);
 				points.add(pp1);
 				points.add(pp2);
 				points.add(pp3);
@@ -570,12 +506,12 @@ public class AlgoDCDT extends Strategy {
 		} else if (numEqualsTwo == 3) {
 			// case 4.2: 3 edges
 			// TODO check order
-			PolygonPoint pp1 = trans(intersectPoints12.get(0));// new PolygonPoint(intersectPoints12.get(0).x, intersectPoints12.get(0).y);
-			PolygonPoint pp2 = trans(intersectPoints12.get(1));// new PolygonPoint(intersectPoints12.get(1).x, intersectPoints12.get(1).y);
-			PolygonPoint pp3 = trans(intersectPoints23.get(0));// new PolygonPoint(intersectPoints13.get(1).x, intersectPoints13.get(1).y);
-			PolygonPoint pp4 = trans(intersectPoints23.get(1));// new PolygonPoint(intersectPoints13.get(0).x, intersectPoints13.get(0).y);
-			PolygonPoint pp5 = trans(intersectPoints13.get(1));// new PolygonPoint(intersectPoints13.get(1).x, intersectPoints13.get(1).y);
-			PolygonPoint pp6 = trans(intersectPoints13.get(0));
+			PolygonPoint pp1 = GeoOperator.trans(intersectPoints12.get(0));// new PolygonPoint(intersectPoints12.get(0).x, intersectPoints12.get(0).y);
+			PolygonPoint pp2 = GeoOperator.trans(intersectPoints12.get(1));// new PolygonPoint(intersectPoints12.get(1).x, intersectPoints12.get(1).y);
+			PolygonPoint pp3 = GeoOperator.trans(intersectPoints23.get(0));// new PolygonPoint(intersectPoints13.get(1).x, intersectPoints13.get(1).y);
+			PolygonPoint pp4 = GeoOperator.trans(intersectPoints23.get(1));// new PolygonPoint(intersectPoints13.get(0).x, intersectPoints13.get(0).y);
+			PolygonPoint pp5 = GeoOperator.trans(intersectPoints13.get(1));// new PolygonPoint(intersectPoints13.get(1).x, intersectPoints13.get(1).y);
+			PolygonPoint pp6 = GeoOperator.trans(intersectPoints13.get(0));
 			points.add(pp1);
 			points.add(pp2);
 			points.add(pp3);
@@ -635,12 +571,12 @@ public class AlgoDCDT extends Strategy {
 
 		LineSegment l0 = new LineSegment(intersectPoints.get(0), intersectPoints.get(1));
 		ArrayList<LineSegment> lines = new ArrayList<LineSegment>();
-		LineSegment l12 = new LineSegment(trans(p1), trans(p2));
-		LineSegment l23 = new LineSegment(trans(p2), trans(p3));
-		LineSegment l34 = new LineSegment(trans(p3), trans(p4));
-		LineSegment l45 = new LineSegment(trans(p4), trans(p5));
-		LineSegment l56 = new LineSegment(trans(p5), trans(p6));
-		LineSegment l61 = new LineSegment(trans(p6), trans(p1));
+		LineSegment l12 = new LineSegment(GeoOperator.trans(p1), GeoOperator.trans(p2));
+		LineSegment l23 = new LineSegment(GeoOperator.trans(p2), GeoOperator.trans(p3));
+		LineSegment l34 = new LineSegment(GeoOperator.trans(p3), GeoOperator.trans(p4));
+		LineSegment l45 = new LineSegment(GeoOperator.trans(p4), GeoOperator.trans(p5));
+		LineSegment l56 = new LineSegment(GeoOperator.trans(p5), GeoOperator.trans(p6));
+		LineSegment l61 = new LineSegment(GeoOperator.trans(p6), GeoOperator.trans(p1));
 		lines.add(l12);
 		lines.add(l23);
 		lines.add(l34);
@@ -660,46 +596,31 @@ public class AlgoDCDT extends Strategy {
 		if (intersects.size() > 2) {
 			logger.error("intersects.size()> 2");
 		}
-		if (GeoOperator.PointInTriangle(trans(p1), v1, v2, v3)) {
+		if (GeoOperator.PointInTriangle(GeoOperator.trans(p1), v1, v2, v3)) {
 			points.add(p1);
 		}
-		if (GeoOperator.PointInTriangle(trans(p2), v1, v2, v3)) {
+		if (GeoOperator.PointInTriangle(GeoOperator.trans(p2), v1, v2, v3)) {
 			points.add(p2);
 		}
-		if (GeoOperator.PointInTriangle(trans(p3), v1, v2, v3)) {
+		if (GeoOperator.PointInTriangle(GeoOperator.trans(p3), v1, v2, v3)) {
 			points.add(p3);
 		}
-		if (GeoOperator.PointInTriangle(trans(p4), v1, v2, v3)) {
+		if (GeoOperator.PointInTriangle(GeoOperator.trans(p4), v1, v2, v3)) {
 			points.add(p4);
 		}
-		if (GeoOperator.PointInTriangle(trans(p5), v1, v2, v3)) {
+		if (GeoOperator.PointInTriangle(GeoOperator.trans(p5), v1, v2, v3)) {
 			points.add(p5);
 		}
-		if (GeoOperator.PointInTriangle(trans(p6), v1, v2, v3)) {
+		if (GeoOperator.PointInTriangle(GeoOperator.trans(p6), v1, v2, v3)) {
 			points.add(p6);
 		}
 		for (int i = 0; i < intersects.size(); i++) {
 			if (GeoOperator.PointInTriangle(intersects.get(i), v1, v2, v3)) {
-				points.add(trans(intersects.get(i)));
+				points.add(GeoOperator.trans(intersects.get(i)));
 			}
 		}
 		Polygon polygon = new Polygon(points);
 		return polygon;
-	}
-
-	public static Coordinate trans(PolygonPoint p) {
-		Coordinate c = new Coordinate(p.getX(), p.getY());
-		return c;
-	}
-
-	public static Coordinate trans(TriangulationPoint p) {
-		Coordinate c = new Coordinate(p.getX(), p.getY());
-		return c;
-	}
-
-	public static PolygonPoint trans(Coordinate c) {
-		PolygonPoint p = new PolygonPoint(c.x, c.y);
-		return p;
 	}
 
 	private Polygon case43b(Circle circle, ArrayList<Coordinate> intersectPoints, Coordinate v1, Coordinate v2, Coordinate v3) {
@@ -776,26 +697,6 @@ public class AlgoDCDT extends Strategy {
 		points.add(ppmPrime);
 		Polygon p = new Polygon(points);
 		return p;
-	}
-
-	private String triangleToString(DelaunayTriangle dt) {
-		StringBuffer sb = new StringBuffer("triangle: ");
-		TriangulationPoint[] tp = dt.points;
-		for (int i = 0; i < tp.length; i++) {
-			TriangulationPoint p = tp[i];
-			sb.append("[" + p.getX() + ", " + p.getY() + "]; ");
-		}
-		return sb.toString();
-	}
-
-	public static String polygonToString(Polygon inner) {
-		StringBuffer sb = new StringBuffer("Polygon: ");
-		List<TriangulationPoint> list = inner.getPoints();
-		for (int i = 0; i < list.size(); i++) {
-			TriangulationPoint p = list.get(i);
-			sb.append("[" + p.getX() + ", " + p.getY() + "]; ");
-		}
-		return sb.toString();
 	}
 
 }

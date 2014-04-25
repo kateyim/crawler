@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
 
-import mo.umac.crawler.AlgoDCDT;
 import mo.umac.crawler.MainYahoo;
 
 import org.apache.log4j.Logger;
@@ -13,6 +12,7 @@ import org.poly2tri.triangulation.delaunay.DelaunayTriangle;
 
 import paint.PaintShapes;
 import paint.WindowUtilities;
+import utils.GeoOperator;
 
 public class Poly2TriTest {
 
@@ -155,7 +155,7 @@ public class Poly2TriTest {
 
 		Polygon polygon = new Polygon(points);
 		if (logger.isDebugEnabled()) {
-			logger.debug(AlgoDCDT.polygonToString(polygon));
+			logger.debug(GeoOperator.polygonToString(polygon));
 		}
 
 		// if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -183,7 +183,7 @@ public class Poly2TriTest {
 
 		Polygon polygon = new Polygon(points);
 		if (logger.isDebugEnabled()) {
-			logger.debug(AlgoDCDT.polygonToString(polygon));
+			logger.debug(GeoOperator.polygonToString(polygon));
 		}
 
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -212,7 +212,7 @@ public class Poly2TriTest {
 
 		Polygon polygon = new Polygon(points);
 		if (logger.isDebugEnabled()) {
-			logger.debug(AlgoDCDT.polygonToString(polygon));
+			logger.debug(GeoOperator.polygonToString(polygon));
 		}
 
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -239,7 +239,7 @@ public class Poly2TriTest {
 
 		Polygon polygon = new Polygon(points);
 		if (logger.isDebugEnabled()) {
-			logger.debug(AlgoDCDT.polygonToString(polygon));
+			logger.debug(GeoOperator.polygonToString(polygon));
 		}
 
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -281,7 +281,7 @@ public class Poly2TriTest {
 
 		Polygon polygon = new Polygon(points);
 		if (logger.isDebugEnabled()) {
-			logger.debug(AlgoDCDT.polygonToString(polygon));
+			logger.debug(GeoOperator.polygonToString(polygon));
 		}
 
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -306,7 +306,7 @@ public class Poly2TriTest {
 
 		Polygon polygon = new Polygon(points);
 		if (logger.isDebugEnabled()) {
-			logger.debug(AlgoDCDT.polygonToString(polygon));
+			logger.debug(GeoOperator.polygonToString(polygon));
 		}
 
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -331,7 +331,7 @@ public class Poly2TriTest {
 
 		Polygon polygon = new Polygon(points);
 		if (logger.isDebugEnabled()) {
-			logger.debug(AlgoDCDT.polygonToString(polygon));
+			logger.debug(GeoOperator.polygonToString(polygon));
 		}
 
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -356,7 +356,7 @@ public class Poly2TriTest {
 
 		Polygon polygon = new Polygon(points);
 		if (logger.isDebugEnabled()) {
-			logger.debug(AlgoDCDT.polygonToString(polygon));
+			logger.debug(GeoOperator.polygonToString(polygon));
 		}
 
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -407,7 +407,7 @@ public class Poly2TriTest {
 
 		Polygon polygon = new Polygon(points);
 		if (logger.isDebugEnabled()) {
-			logger.debug(AlgoDCDT.polygonToString(polygon));
+			logger.debug(GeoOperator.polygonToString(polygon));
 		}
 
 		if (logger.isDebugEnabled() && PaintShapes.painting) {

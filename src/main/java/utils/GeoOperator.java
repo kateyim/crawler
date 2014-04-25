@@ -14,7 +14,9 @@ import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CRSAuthorityFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.poly2tri.geometry.polygon.Polygon;
+import org.poly2tri.geometry.polygon.PolygonPoint;
 import org.poly2tri.triangulation.TriangulationPoint;
+import org.poly2tri.triangulation.delaunay.DelaunayTriangle;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -30,6 +32,7 @@ public class GeoOperator {
 
 	protected static Logger logger = Logger.getLogger(GeoOperator.class.getName());
 	public final static double EPSILON_EQUAL = 1e-12;
+	public final static double EPSILON_LITTLE = 0.1;
 
 	public final static double RADIUS = 6371007.2;// authalic earth radius of
 
@@ -263,77 +266,132 @@ public class GeoOperator {
 	}
 
 	/**
-		 *
-		 * @author Li Honglin
-		 * @param point
-		 * @param radius
-		 * @param p1
-		 * @param p2
-		 * @return FIXME return in order
-		 */
-		public static ArrayList<Coordinate> line_intersect_Circle(Coordinate point, double radius, Coordinate p1, Coordinate p2) {
-			ArrayList<Coordinate> intersect = new ArrayList<Coordinate>();
-			if (Math.abs(p2.x - p1.x) < 1e-6) {
-				double x = p1.x;
-				double d = point.y * point.y + (x - point.x) * (x - point.x) - radius * radius;
-				double delt1 = 4 * point.y * point.y - 4 * d;
-				if (delt1 >= 0) {
-					double y3 = (2 * point.y + Math.sqrt(delt1)) / 2;
-					Coordinate q3 = new Coordinate(x, y3);
-					double y4 = (2 * point.y - Math.sqrt(delt1)) / 2;
-					Coordinate q4 = new Coordinate(x, y4);
-					double v3 = (q3.x - p1.x) * (p2.x - q3.x) + (q3.y - p1.y) * (p2.y - q3.y);
-					double v4 = (q4.x - p1.x) * (p2.x - q4.x) + (q4.y - p1.y) * (p2.y - q4.y);
-					if (v3 > 0) {
-						intersect.add(q3);
-					}
-					if (v4 > 0) {
-						intersect.add(q4);
-					}
-				}
-			} else {
-				// if (logger.isDebugEnabled()) {
-				// logger.debug("p1.x!=p2.x");
-				// }
-				double k = (p2.y - p1.y) / (p2.x - p1.x);
-				double c = p1.y - k * p1.x;
-				double delt = 4 * Math.pow(k * c - point.x - k * point.y, 2) - 4 * (1 + k * k) * ((c - point.y) * (c - point.y) + point.x * point.x - radius * radius);
-	//			if (logger.isDebugEnabled()) {
-	//				logger.debug("delt=" + delt + "  k=" + k);
-	//			}
-	
-				if (delt >= 0) {
-					double x1 = (2 * (point.x + k * point.y - k * c) + Math.sqrt(delt)) / (2 * (1 + k * k));
-					double y1 = k * x1 + c;
-					Coordinate q1 = new Coordinate(x1, y1);
-					double x2 = (2 * (point.x + k * point.y - k * c) - Math.sqrt(delt)) / (2 * (1 + k * k));
-					double y2 = k * x2 + c;
-					Coordinate q2 = new Coordinate(x2, y2);
-					double v1 = (q1.x - p1.x) * (p2.x - q1.x) + (q1.y - p1.y) * (p2.y - q1.y);
-					double v2 = (q2.x - p1.x) * (p2.x - q2.x) + (q2.y - p1.y) * (p2.y - q2.y);
-					if (v1 > 0) {
-						intersect.add(q1);
-					}
-					if (v2 > 0) {
-						intersect.add(q2);
-					}
-				}
-			}
-			// in an order
-			if(intersect.size() == 2){
-				Coordinate c1 = intersect.get(0);
-				Coordinate c2 = intersect.get(1);
-				ArrayList<Coordinate> intersect2 = new ArrayList<Coordinate>();
-				// wrong order
-				if(p1.distance(c1) > p1.distance(c2)){
-					intersect2.add(c2);
-					intersect2.add(c1);
-					return intersect2;
-				}
-			}
-			
-			return intersect;
+	 * only preserve the basic latitude and longitude informations
+	 * 
+	 * @param p
+	 * @return
+	 */
+	public static Polygon clone(Polygon p) {
+		List<TriangulationPoint> points = p.getPoints();
+		List<PolygonPoint> pointsc = new ArrayList<PolygonPoint>();
+		for (int i = 0; i < points.size(); i++) {
+			TriangulationPoint pi = points.get(i);
+			double x = pi.getX();
+			double y = pi.getY();
+			PolygonPoint pic = new PolygonPoint(x, y);
+			pointsc.add(pic);
+
 		}
+		Polygon c = new Polygon(pointsc);
+		return c;
+	}
+
+	public static String polygonToString(Polygon inner) {
+		StringBuffer sb = new StringBuffer("Polygon: ");
+		List<TriangulationPoint> list = inner.getPoints();
+		for (int i = 0; i < list.size(); i++) {
+			TriangulationPoint p = list.get(i);
+			sb.append("[" + p.getX() + ", " + p.getY() + "]; ");
+		}
+		return sb.toString();
+	}
+
+	public static String triangleToString(DelaunayTriangle dt) {
+		StringBuffer sb = new StringBuffer("triangle: ");
+		TriangulationPoint[] tp = dt.points;
+		for (int i = 0; i < tp.length; i++) {
+			TriangulationPoint p = tp[i];
+			sb.append("[" + p.getX() + ", " + p.getY() + "]; ");
+		}
+		return sb.toString();
+	}
+
+	public static PolygonPoint trans(Coordinate c) {
+		PolygonPoint p = new PolygonPoint(c.x, c.y);
+		return p;
+	}
+
+	public static Coordinate trans(TriangulationPoint p) {
+		Coordinate c = new Coordinate(p.getX(), p.getY());
+		return c;
+	}
+
+	public static Coordinate trans(PolygonPoint p) {
+		Coordinate c = new Coordinate(p.getX(), p.getY());
+		return c;
+	}
+
+	/**
+	 * @author Li Honglin
+	 * @param point
+	 * @param radius
+	 * @param p1
+	 * @param p2
+	 * @return FIXME return in order
+	 */
+	public static ArrayList<Coordinate> line_intersect_Circle(Coordinate point, double radius, Coordinate p1, Coordinate p2) {
+		ArrayList<Coordinate> intersect = new ArrayList<Coordinate>();
+		if (Math.abs(p2.x - p1.x) < 1e-6) {
+			double x = p1.x;
+			double d = point.y * point.y + (x - point.x) * (x - point.x) - radius * radius;
+			double delt1 = 4 * point.y * point.y - 4 * d;
+			if (delt1 >= 0) {
+				double y3 = (2 * point.y + Math.sqrt(delt1)) / 2;
+				Coordinate q3 = new Coordinate(x, y3);
+				double y4 = (2 * point.y - Math.sqrt(delt1)) / 2;
+				Coordinate q4 = new Coordinate(x, y4);
+				double v3 = (q3.x - p1.x) * (p2.x - q3.x) + (q3.y - p1.y) * (p2.y - q3.y);
+				double v4 = (q4.x - p1.x) * (p2.x - q4.x) + (q4.y - p1.y) * (p2.y - q4.y);
+				if (v3 > 0) {
+					intersect.add(q3);
+				}
+				if (v4 > 0) {
+					intersect.add(q4);
+				}
+			}
+		} else {
+			// if (logger.isDebugEnabled()) {
+			// logger.debug("p1.x!=p2.x");
+			// }
+			double k = (p2.y - p1.y) / (p2.x - p1.x);
+			double c = p1.y - k * p1.x;
+			double delt = 4 * Math.pow(k * c - point.x - k * point.y, 2) - 4 * (1 + k * k) * ((c - point.y) * (c - point.y) + point.x * point.x - radius * radius);
+			// if (logger.isDebugEnabled()) {
+			// logger.debug("delt=" + delt + "  k=" + k);
+			// }
+
+			if (delt >= 0) {
+				double x1 = (2 * (point.x + k * point.y - k * c) + Math.sqrt(delt)) / (2 * (1 + k * k));
+				double y1 = k * x1 + c;
+				Coordinate q1 = new Coordinate(x1, y1);
+				double x2 = (2 * (point.x + k * point.y - k * c) - Math.sqrt(delt)) / (2 * (1 + k * k));
+				double y2 = k * x2 + c;
+				Coordinate q2 = new Coordinate(x2, y2);
+				double v1 = (q1.x - p1.x) * (p2.x - q1.x) + (q1.y - p1.y) * (p2.y - q1.y);
+				double v2 = (q2.x - p1.x) * (p2.x - q2.x) + (q2.y - p1.y) * (p2.y - q2.y);
+				if (v1 > 0) {
+					intersect.add(q1);
+				}
+				if (v2 > 0) {
+					intersect.add(q2);
+				}
+			}
+		}
+		// in an order
+		if (intersect.size() == 2) {
+			Coordinate c1 = intersect.get(0);
+			Coordinate c2 = intersect.get(1);
+			ArrayList<Coordinate> intersect2 = new ArrayList<Coordinate>();
+			// wrong order
+			if (p1.distance(c1) > p1.distance(c2)) {
+				intersect2.add(c2);
+				intersect2.add(c1);
+				return intersect2;
+			}
+		}
+
+		return intersect;
+	}
 
 	/**
 	 * check whether point q lies on the edge constructing by p1 and p2.
@@ -478,11 +536,13 @@ public class GeoOperator {
 		return false;
 	}
 
-	public static Coordinate trans(TriangulationPoint p) {
-		return new Coordinate(p.getX(), p.getY());
-	}
-
-	public static Coordinate polygonOuterPoint(Polygon polygon) {
+	/**
+	 * Find a point out of the polygon, which is small than the point with the minX and minY among all points.
+	 * 
+	 * @param polygon
+	 * @return
+	 */
+	public static Coordinate outOfMinBoundPoint(Polygon polygon) {
 		List<TriangulationPoint> polygonPoints = polygon.getPoints();
 		double minX = Double.MAX_VALUE;
 		double minY = Double.MAX_VALUE;
@@ -495,7 +555,7 @@ public class GeoOperator {
 				minY = aPoint.getY();
 			}
 		}
-		return new Coordinate(minX, minY);
+		return new Coordinate(minX - EPSILON_LITTLE, minY - EPSILON_LITTLE);
 	}
 
 	/**
@@ -526,7 +586,7 @@ public class GeoOperator {
 	}
 
 	public static void logLineSegment(LineSegment lineSegment) {
-		// logger.info("lineSegment: " + coordinate.x + ", " + coordinate.y);
+//		logger.info("lineSegment: " + coordinate.x + ", " + coordinate.y);
 	}
 
 	/**
