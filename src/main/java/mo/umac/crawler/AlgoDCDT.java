@@ -212,7 +212,7 @@ public class AlgoDCDT extends Strategy {
 			//
 			for (int j = 0; j < innerPoints.size(); j++) {
 				TriangulationPoint innerPoint = innerPoints.get(j);
-				boolean poe = GeoOperator.pointOnEdge(boundaryPoint, nextBoundaryPoint, innerPoint);
+				boolean poe = GeoOperator.pointOnLineSegment(boundaryPoint, nextBoundaryPoint, innerPoint);
 				if (poe) {
 					shrink(inner, innerPoint, j);
 				}
@@ -242,10 +242,10 @@ public class AlgoDCDT extends Strategy {
 					} else {
 						nextInnerPoint = innerPoints.get(0);
 					}
-					if (GeoOperator.pointOnEdge(holePoint, nextHolePoint, innerPoint)) {
+					if (GeoOperator.pointOnLineSegment(holePoint, nextHolePoint, innerPoint)) {
 						shrink(inner, innerPoint, k);
 					}
-					if (GeoOperator.pointOnEdge(innerPoint, nextInnerPoint, holePoint)) {
+					if (GeoOperator.pointOnLineSegment(innerPoint, nextInnerPoint, holePoint)) {
 						shrink(p, holePoint, j);
 					}
 					if (GeoOperator.edgeOnEdge(holePoint, nextHolePoint, innerPoint, nextInnerPoint)) {
@@ -522,7 +522,7 @@ public class AlgoDCDT extends Strategy {
 			return p;
 		} else if (numEqualsTwo == 1) {
 			// case 4.3
-			if (GeoOperator.PointInTriangle(circle.getCenter(), p1, p2, p3)) {
+			if (GeoOperator.pointInTriangle(circle.getCenter(), p1, p2, p3)) {
 				// case 4.3a
 				if (intersectPoints12.size() == 2) {
 					Polygon p = case43a(circle, intersectPoints12, p1, p2, p3);
@@ -596,26 +596,26 @@ public class AlgoDCDT extends Strategy {
 		if (intersects.size() > 2) {
 			logger.error("intersects.size()> 2");
 		}
-		if (GeoOperator.PointInTriangle(GeoOperator.trans(p1), v1, v2, v3)) {
+		if (GeoOperator.pointInTriangle(GeoOperator.trans(p1), v1, v2, v3)) {
 			points.add(p1);
 		}
-		if (GeoOperator.PointInTriangle(GeoOperator.trans(p2), v1, v2, v3)) {
+		if (GeoOperator.pointInTriangle(GeoOperator.trans(p2), v1, v2, v3)) {
 			points.add(p2);
 		}
-		if (GeoOperator.PointInTriangle(GeoOperator.trans(p3), v1, v2, v3)) {
+		if (GeoOperator.pointInTriangle(GeoOperator.trans(p3), v1, v2, v3)) {
 			points.add(p3);
 		}
-		if (GeoOperator.PointInTriangle(GeoOperator.trans(p4), v1, v2, v3)) {
+		if (GeoOperator.pointInTriangle(GeoOperator.trans(p4), v1, v2, v3)) {
 			points.add(p4);
 		}
-		if (GeoOperator.PointInTriangle(GeoOperator.trans(p5), v1, v2, v3)) {
+		if (GeoOperator.pointInTriangle(GeoOperator.trans(p5), v1, v2, v3)) {
 			points.add(p5);
 		}
-		if (GeoOperator.PointInTriangle(GeoOperator.trans(p6), v1, v2, v3)) {
+		if (GeoOperator.pointInTriangle(GeoOperator.trans(p6), v1, v2, v3)) {
 			points.add(p6);
 		}
 		for (int i = 0; i < intersects.size(); i++) {
-			if (GeoOperator.PointInTriangle(intersects.get(i), v1, v2, v3)) {
+			if (GeoOperator.pointInTriangle(intersects.get(i), v1, v2, v3)) {
 				points.add(GeoOperator.trans(intersects.get(i)));
 			}
 		}
@@ -681,9 +681,9 @@ public class AlgoDCDT extends Strategy {
 		Coordinate m1 = new Coordinate(x1, y1);
 		Coordinate m2 = new Coordinate(x2, y2);
 		Coordinate mPrime = null;
-		if (GeoOperator.PointInTriangle(m1, v1, v2, v3)) {
+		if (GeoOperator.pointInTriangle(m1, v1, v2, v3)) {
 			mPrime = m1;
-		} else if (GeoOperator.PointInTriangle(m2, v1, v2, v3)) {
+		} else if (GeoOperator.pointInTriangle(m2, v1, v2, v3)) {
 			mPrime = m2;
 		} else {
 			logger.error("error in case 4.3b");

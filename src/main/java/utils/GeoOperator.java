@@ -32,7 +32,7 @@ public class GeoOperator {
 
 	protected static Logger logger = Logger.getLogger(GeoOperator.class.getName());
 	public final static double EPSILON_EQUAL = 1e-12;
-	public final static double EPSILON_LITTLE = 0.1;
+	public final static double EPSILON_LITTLE = 1;
 
 	public final static double RADIUS = 6371007.2;// authalic earth radius of
 
@@ -257,71 +257,9 @@ public class GeoOperator {
 		return list;
 	}
 
-	public void geoPoint() {
-
-	}
-
-	public double distance() {
-		return 0.0;
-	}
-
 	/**
-	 * only preserve the basic latitude and longitude informations
+	 * Find the intersect point, then sort the order by the distance to the coordinate p1
 	 * 
-	 * @param p
-	 * @return
-	 */
-	public static Polygon clone(Polygon p) {
-		List<TriangulationPoint> points = p.getPoints();
-		List<PolygonPoint> pointsc = new ArrayList<PolygonPoint>();
-		for (int i = 0; i < points.size(); i++) {
-			TriangulationPoint pi = points.get(i);
-			double x = pi.getX();
-			double y = pi.getY();
-			PolygonPoint pic = new PolygonPoint(x, y);
-			pointsc.add(pic);
-
-		}
-		Polygon c = new Polygon(pointsc);
-		return c;
-	}
-
-	public static String polygonToString(Polygon inner) {
-		StringBuffer sb = new StringBuffer("Polygon: ");
-		List<TriangulationPoint> list = inner.getPoints();
-		for (int i = 0; i < list.size(); i++) {
-			TriangulationPoint p = list.get(i);
-			sb.append("[" + p.getX() + ", " + p.getY() + "]; ");
-		}
-		return sb.toString();
-	}
-
-	public static String triangleToString(DelaunayTriangle dt) {
-		StringBuffer sb = new StringBuffer("triangle: ");
-		TriangulationPoint[] tp = dt.points;
-		for (int i = 0; i < tp.length; i++) {
-			TriangulationPoint p = tp[i];
-			sb.append("[" + p.getX() + ", " + p.getY() + "]; ");
-		}
-		return sb.toString();
-	}
-
-	public static PolygonPoint trans(Coordinate c) {
-		PolygonPoint p = new PolygonPoint(c.x, c.y);
-		return p;
-	}
-
-	public static Coordinate trans(TriangulationPoint p) {
-		Coordinate c = new Coordinate(p.getX(), p.getY());
-		return c;
-	}
-
-	public static Coordinate trans(PolygonPoint p) {
-		Coordinate c = new Coordinate(p.getX(), p.getY());
-		return c;
-	}
-
-	/**
 	 * @author Li Honglin
 	 * @param point
 	 * @param radius
@@ -394,27 +332,30 @@ public class GeoOperator {
 	}
 
 	/**
-	 * check whether point q lies on the edge constructing by p1 and p2.
+	 * only preserve the basic latitude and longitude informations
 	 * 
-	 * @param p1
-	 * @param p2
-	 * @param q
+	 * @param p
 	 * @return
 	 */
-	public static boolean pointOnEdge(Coordinate p1, Coordinate p2, Coordinate q) {
-		// TODO
-		return false;
+	public static Polygon clone(Polygon p) {
+		// check done
+		List<TriangulationPoint> points = p.getPoints();
+		List<PolygonPoint> pointsc = new ArrayList<PolygonPoint>();
+		for (int i = 0; i < points.size(); i++) {
+			TriangulationPoint pi = points.get(i);
+			double x = pi.getX();
+			double y = pi.getY();
+			PolygonPoint pic = new PolygonPoint(x, y);
+			pointsc.add(pic);
+
+		}
+		// TODO clone holes
+		Polygon c = new Polygon(pointsc);
+		return c;
 	}
 
-	/**
-	 * check whether point q lies on the edge constructing by p1 and p2. Including the end points.
-	 * 
-	 * @param p1
-	 * @param p2
-	 * @param q
-	 * @return
-	 */
-	public static boolean pointOnEdge(TriangulationPoint p1, TriangulationPoint p2, TriangulationPoint q) {
+	public static boolean pointOnLine(TriangulationPoint p1, TriangulationPoint p2, TriangulationPoint q) {
+		// check done
 		double delta = Math.abs((p2.getX() - p1.getX()) * (q.getY() - p1.getY()) - (p2.getY() - p1.getY()) * (q.getX() - p1.getX()));
 		if (delta < EPSILON_EQUAL) {
 			return true;
@@ -423,7 +364,57 @@ public class GeoOperator {
 	}
 
 	/**
-	 * check whether an edge contains another edge
+	 * check whether point q lies on the edge constructing by p1 and p2. Including the end points. {@link http
+	 * ://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment}
+	 * 
+	 * @param p1
+	 * @param p2
+	 * @param q
+	 * @return
+	 */
+	public static boolean pointOnLineSegment(TriangulationPoint p1, TriangulationPoint p2, TriangulationPoint q) {
+		// check done
+		double minY = p1.getY();
+		double maxY = p1.getY();
+		double minX = p1.getX();
+		double maxX = p1.getX();
+		// Y
+		if (p1.getY() > p2.getY()) {
+			minY = p2.getY();
+			maxY = p1.getY();
+		} else {
+			minY = p1.getY();
+			maxY = p2.getY();
+		}
+		// X
+		if (p1.getX() > p2.getX()) {
+			minX = p2.getX();
+			maxX = p1.getX();
+		} else {
+			minX = p1.getX();
+			maxX = p2.getX();
+		}
+
+		if (q.getX() >= minX && q.getX() <= maxX && q.getY() >= minY && q.getY() <= maxY) {
+			double delta = Math.abs((p2.getX() - p1.getX()) * (q.getY() - p1.getY()) - (p2.getY() - p1.getY()) * (q.getX() - p1.getX()));
+			if (delta < EPSILON_EQUAL) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	// Given three collinear points p, q, r, the function checks if point q lies on line segment 'pr'
+	public static boolean onSegment(Coordinate p, Coordinate q, Coordinate r) {
+		if (q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) && q.y <= Math.max(p.y, r.y) && q.y >= Math.min(p.y, r.y))
+			return true;
+
+		return false;
+	}
+
+	/**
+	 * check whether an edge contains another edge, exclude the case in which one point in an edge is located on the other edge
 	 * 
 	 * @param p1
 	 * @param p2
@@ -432,18 +423,45 @@ public class GeoOperator {
 	 * @return
 	 */
 	public static boolean edgeOnEdge(TriangulationPoint p1, TriangulationPoint p2, TriangulationPoint q1, TriangulationPoint q2) {
+		// check done
 		// find the order of points of each edge;
 		double minY1 = p1.getY();
 		double maxY1 = p2.getY();
 		double minY2 = q1.getY();
 		double maxY2 = q2.getY();
+		double minX1 = p1.getX();
+		double maxX1 = p2.getX();
+		double minX2 = q1.getX();
+		double maxX2 = q2.getX();
+		// Y
 		if (p1.getY() > p2.getY()) {
 			minY1 = p2.getY();
-			maxY2 = p1.getY();
+			maxY1 = p1.getY();
+		} else {
+			minY1 = p1.getY();
+			maxY1 = p2.getY();
 		}
 		if (q1.getY() > q2.getY()) {
 			minY2 = q2.getY();
 			maxY2 = q1.getY();
+		} else {
+			minY2 = q1.getY();
+			maxY2 = q2.getY();
+		}
+		// X
+		if (p1.getX() > p2.getX()) {
+			minX1 = p2.getX();
+			maxX1 = p1.getX();
+		} else {
+			minX1 = p1.getX();
+			maxX1 = p2.getX();
+		}
+		if (q1.getX() > q2.getX()) {
+			minX2 = q2.getX();
+			maxX2 = q1.getX();
+		} else {
+			minX2 = q1.getX();
+			maxX2 = q2.getX();
 		}
 
 		if (Math.abs(p2.getX() - p1.getX()) < EPSILON_EQUAL) {
@@ -467,6 +485,25 @@ public class GeoOperator {
 			} else {
 				return false;
 			}
+		} else if (Math.abs(p1.getY() - p2.getY()) < EPSILON_EQUAL) {
+			if (Math.abs(q1.getY() - q2.getY()) < EPSILON_EQUAL) {
+				if (minX1 < minX2) {
+					if (maxX1 > maxX2) {
+						return true;
+					} else {
+						return false;
+					}
+				} else {
+					if (maxX1 < maxX2) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			} else {
+				return false;
+			}
+
 		} else {
 			double slope1 = (p2.getY() - p1.getY()) / (p2.getX() - p1.getX());
 			double slope2 = (q2.getY() - q1.getY()) / (q2.getX() - q1.getX());
@@ -497,23 +534,19 @@ public class GeoOperator {
 		}
 	}
 
-	public static boolean equalPoint(TriangulationPoint pp, TriangulationPoint tp) {
-		if (Math.abs(pp.getX() - tp.getX()) < EPSILON_EQUAL && Math.abs(pp.getY() - tp.getY()) < EPSILON_EQUAL) {
-			return true;
-		}
-		return false;
-	}
-
 	/**
 	 * check whether point p lies on/inside the polygon
+	 * XXX the line between p and outPoint gets through the corner of two lines, then the number of intersection points will be count twice.
 	 * 
 	 * @param polygon
 	 * @param p
 	 * @return
 	 */
 	public static boolean pointInsidePolygon(Polygon polygon, Coordinate outerPoint, Coordinate p) {
+		// check done
 		int intersection = 0;
 		List<TriangulationPoint> polygonPoints = polygon.getPoints();
+		int numCornerPoints = 0;
 		for (int i = 0; i < polygonPoints.size(); i++) {
 			TriangulationPoint aPoint = polygonPoints.get(i);
 			TriangulationPoint nextPoint;
@@ -522,11 +555,15 @@ public class GeoOperator {
 			} else {
 				nextPoint = polygonPoints.get(0);
 			}
-			if (doIntersect(p, outerPoint, trans(aPoint), trans(nextPoint))) {
+			int num = intersectLineLine(p, outerPoint, trans(aPoint), trans(nextPoint));
+			if (num == 1) {
 				intersection++;
+			} else if (num == 2) {
+				intersection++;
+				numCornerPoints++;
 			}
 		}
-
+		intersection -= numCornerPoints / 2;
 		/*
 		 * If the number of intersections is odd, then the point is inside the polygon
 		 */
@@ -537,12 +574,84 @@ public class GeoOperator {
 	}
 
 	/**
-	 * Find a point out of the polygon, which is small than the point with the minX and minY among all points.
+	 * check whether two line segments intersects {@link http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/} one lineSegment is p1,q1, the
+	 * other is p2, q2
+	 * 
+	 * @return 0: not intersection; 1: intersect; 2: intersection at the corner point
+	 */
+	public static int intersectLineLine(Coordinate p1, Coordinate q1, Coordinate p2, Coordinate q2) {
+		// check done
+		// add by kate 2014-5-5
+		if (p1.distance(p2) < EPSILON_EQUAL || p1.distance(q2) < EPSILON_EQUAL || q1.distance(p2) < EPSILON_EQUAL || q1.distance(q2) < EPSILON_EQUAL) {
+			return 2;
+		}
+		if (pointOnLineSegment(trans(p1), trans(q1), trans(p2))) {
+			return 2;
+		}
+		if (pointOnLineSegment(trans(p1), trans(q1), trans(q2))) {
+			return 2;
+		}
+		if (pointOnLineSegment(trans(p2), trans(q2), trans(p1))) {
+			return 2;
+		}
+		if (pointOnLineSegment(trans(p2), trans(q2), trans(q1))) {
+			return 2;
+		}
+
+		// Find the four orientations needed for general and special cases
+		int o1 = orientation(p1, q1, p2);
+		int o2 = orientation(p1, q1, q2);
+		int o3 = orientation(p2, q2, p1);
+		int o4 = orientation(p2, q2, q1);
+
+		// General case
+		if (o1 != o2 && o3 != o4)
+			return 1;
+
+		// Special Cases
+		// p1, q1 and p2 are colinear and p2 lies on segment p1q1
+		if (o1 == 0 && onSegment(p1, p2, q1))
+			return 1;
+
+		// p1, q1 and p2 are colinear and q2 lies on segment p1q1
+		if (o2 == 0 && onSegment(p1, q2, q1))
+			return 1;
+
+		// p2, q2 and p1 are colinear and p1 lies on segment p2q2
+		if (o3 == 0 && onSegment(p2, p1, q2))
+			return 1;
+
+		// p2, q2 and q1 are colinear and q1 lies on segment p2q2
+		if (o4 == 0 && onSegment(p2, q1, q2))
+			return 1;
+
+		return 0; // Doesn't fall in any of the above cases
+	}
+
+	// To find orientation of ordered triplet (p, q, r).
+	// The function returns following values
+	// 0 --> p, q and r are colinear
+	// 1 --> Clockwise
+	// 2 --> Counterclockwise
+	public static int orientation(Coordinate p, Coordinate q, Coordinate r) {
+		// See 10th slides from following link for derivation of the formula
+		// http://www.dcs.gla.ac.uk/~pat/52233/slides/Geometry1x1.pdf
+		double val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+
+		if (Math.abs(val) < EPSILON_EQUAL)
+			return 0; // colinear
+
+		return (val > 0) ? 1 : 2; // clock or counterclock wise
+	}
+
+	/**
+	 * Find a point out of the polygon, which is smaller than the point with the minX and minY among all points.
 	 * 
 	 * @param polygon
 	 * @return
 	 */
 	public static Coordinate outOfMinBoundPoint(Polygon polygon) {
+		// check done
 		List<TriangulationPoint> polygonPoints = polygon.getPoints();
 		double minX = Double.MAX_VALUE;
 		double minY = Double.MAX_VALUE;
@@ -567,13 +676,12 @@ public class GeoOperator {
 	 * @param v3
 	 * @return
 	 */
-	public static boolean PointInTriangle(Coordinate pt, Coordinate v1, Coordinate v2, Coordinate v3) {
+	public static boolean pointInTriangle(Coordinate pt, Coordinate v1, Coordinate v2, Coordinate v3) {
+		// check done
 		boolean b1, b2, b3;
-
 		b1 = sign(pt, v1, v2) < 0.0f;
 		b2 = sign(pt, v2, v3) < 0.0f;
 		b3 = sign(pt, v3, v1) < 0.0f;
-
 		return ((b1 == b2) && (b2 == b3));
 	}
 
@@ -585,71 +693,47 @@ public class GeoOperator {
 		logger.info("coordinate: " + coordinate.x + ", " + coordinate.y);
 	}
 
-	public static void logLineSegment(LineSegment lineSegment) {
-//		logger.info("lineSegment: " + coordinate.x + ", " + coordinate.y);
-	}
-
-	/**
-	 * check whether two line segments intersects {@link http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/} one lineSegment is p1,q1, the
-	 * other is p2, q2
-	 * 
-	 * @return
-	 */
-	public static boolean doIntersect(Coordinate p1, Coordinate q1, Coordinate p2, Coordinate q2) {
-		// Find the four orientations needed for general and
-		// special cases
-		int o1 = orientation(p1, q1, p2);
-		int o2 = orientation(p1, q1, q2);
-		int o3 = orientation(p2, q2, p1);
-		int o4 = orientation(p2, q2, q1);
-
-		// General case
-		if (o1 != o2 && o3 != o4)
+	public static boolean equalPoint(TriangulationPoint pp, TriangulationPoint tp) {
+		if (Math.abs(pp.getX() - tp.getX()) < EPSILON_EQUAL && Math.abs(pp.getY() - tp.getY()) < EPSILON_EQUAL) {
 			return true;
-
-		// Special Cases
-		// p1, q1 and p2 are colinear and p2 lies on segment p1q1
-		if (o1 == 0 && onSegment(p1, p2, q1))
-			return true;
-
-		// p1, q1 and p2 are colinear and q2 lies on segment p1q1
-		if (o2 == 0 && onSegment(p1, q2, q1))
-			return true;
-
-		// p2, q2 and p1 are colinear and p1 lies on segment p2q2
-		if (o3 == 0 && onSegment(p2, p1, q2))
-			return true;
-
-		// p2, q2 and q1 are colinear and q1 lies on segment p2q2
-		if (o4 == 0 && onSegment(p2, q1, q2))
-			return true;
-
-		return false; // Doesn't fall in any of the above cases
-	}
-
-	// Given three colinear points p, q, r, the function checks if
-	// point q lies on line segment 'pr'
-	public static boolean onSegment(Coordinate p, Coordinate q, Coordinate r) {
-		if (q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) && q.y <= Math.max(p.y, r.y) && q.y >= Math.min(p.y, r.y))
-			return true;
-
+		}
 		return false;
 	}
 
-	// To find orientation of ordered triplet (p, q, r).
-	// The function returns following values
-	// 0 --> p, q and r are colinear
-	// 1 --> Clockwise
-	// 2 --> Counterclockwise
-	public static int orientation(Coordinate p, Coordinate q, Coordinate r) {
-		// See 10th slides from following link for derivation of the formula
-		// http://www.dcs.gla.ac.uk/~pat/52233/slides/Geometry1x1.pdf
-		double val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+	public static String polygonToString(Polygon inner) {
+		StringBuffer sb = new StringBuffer("Polygon: ");
+		List<TriangulationPoint> list = inner.getPoints();
+		for (int i = 0; i < list.size(); i++) {
+			TriangulationPoint p = list.get(i);
+			sb.append("[" + p.getX() + ", " + p.getY() + "]; ");
+		}
+		// TODO add information for holes
+		return sb.toString();
+	}
 
-		if (Math.abs(val) < EPSILON_EQUAL)
-			return 0; // colinear
+	public static String triangleToString(DelaunayTriangle dt) {
+		StringBuffer sb = new StringBuffer("triangle: ");
+		TriangulationPoint[] tp = dt.points;
+		for (int i = 0; i < tp.length; i++) {
+			TriangulationPoint p = tp[i];
+			sb.append("[" + p.getX() + ", " + p.getY() + "]; ");
+		}
+		return sb.toString();
+	}
 
-		return (val > 0) ? 1 : 2; // clock or counterclock wise
+	public static PolygonPoint trans(Coordinate c) {
+		PolygonPoint p = new PolygonPoint(c.x, c.y);
+		return p;
+	}
+
+	public static Coordinate trans(TriangulationPoint p) {
+		Coordinate c = new Coordinate(p.getX(), p.getY());
+		return c;
+	}
+
+	public static Coordinate trans(PolygonPoint p) {
+		Coordinate c = new Coordinate(p.getX(), p.getY());
+		return c;
 	}
 
 }
