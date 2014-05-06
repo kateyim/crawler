@@ -55,8 +55,8 @@ public class MainSynthetic extends Strategy {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		boolean debug = false;
-		PaintShapes.painting = false;
+		boolean debug = true;
+		PaintShapes.painting = true;
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		MainSynthetic test = new MainSynthetic();
@@ -75,7 +75,7 @@ public class MainSynthetic extends Strategy {
 		// }
 
 		// for testing
-//		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
+		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		
 		test.crawling();
 		Strategy.endData();

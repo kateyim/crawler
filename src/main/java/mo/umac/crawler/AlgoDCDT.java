@@ -170,17 +170,31 @@ public class AlgoDCDT extends Strategy {
 			logger.info("aCircle = " + aCircle.toString());
 			logger.info("triangle = " + triangle.toString());
 			logger.info("inner = " + GeoOperator.polygonToString(inner));
-//			if (holeList.size() == 208) {
-//				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-//				PaintShapes.paint.addTriangle(triangle);
+			if (holeList.size() == 208) {
+				logger.info("holeList.size() = 208");
+				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+				PaintShapes.paint.addTriangle(triangle);
+				PaintShapes.paint.myRepaint();
+
 //				PaintShapes.paint.color = PaintShapes.paint.color.red;
 //				PaintShapes.paint.addPoint(center);
 //				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
 //				PaintShapes.paint.addCircle(aCircle);
-//				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-//				PaintShapes.paint.addPolygon(inner);
-//				PaintShapes.paint.myRepaint();
-//			}
+				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+				PaintShapes.paint.addPolygon(inner);
+				PaintShapes.paint.myRepaint();
+
+				// 
+				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+				PaintShapes.paint.addPolygon(holeList.get(131));
+				PaintShapes.paint.myRepaint();
+
+				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+				PaintShapes.paint.addPolygon(holeList.get(173));
+				PaintShapes.paint.myRepaint();
+
+				//
+			}
 			// end testing
 			
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
