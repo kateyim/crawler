@@ -31,7 +31,7 @@ import com.vividsolutions.jts.geomgraph.Position;
 public class GeoOperator {
 
 	protected static Logger logger = Logger.getLogger(GeoOperator.class.getName());
-	public final static double EPSILON_EQUAL = 1e-12;
+	public final static double EPSILON_EQUAL = 1e-10;
 	public final static double EPSILON_LITTLE = 1;
 
 	public final static double RADIUS = 6371007.2;// authalic earth radius of
@@ -397,6 +397,8 @@ public class GeoOperator {
 
 		if (q.getX() >= minX && q.getX() <= maxX && q.getY() >= minY && q.getY() <= maxY) {
 			double delta = Math.abs((p2.getX() - p1.getX()) * (q.getY() - p1.getY()) - (p2.getY() - p1.getY()) * (q.getX() - p1.getX()));
+			// for testing
+			logger.info("delta = " + delta);
 			if (delta < EPSILON_EQUAL) {
 				return true;
 			}
@@ -468,37 +470,46 @@ public class GeoOperator {
 			// k_p == 0
 			if (Math.abs(q2.getX() - q1.getX()) < EPSILON_EQUAL) {
 				// k_q == 0
-				if (minY1 < minY2) {
-					if (maxY1 > maxY2) {
-						return true;
+				if (Math.abs(p1.getX() - q1.getX()) < EPSILON_EQUAL) {
+					if (minY1 < minY2) {
+						if (maxY1 > maxY2) {
+							return true;
+						} else {
+							return false;
+						}
 					} else {
-						return false;
+						// minY1 > minY2, cannot be equal, else they has already been reported as intersect.
+						if (maxY1 < maxY2) {
+							return true;
+						} else {
+							return false;
+						}
 					}
 				} else {
-					// minY1 > minY2, cannot be equal, else they has already been reported as intersect.
-					if (maxY1 < maxY2) {
-						return true;
-					} else {
-						return false;
-					}
+					return false;
 				}
 			} else {
 				return false;
 			}
 		} else if (Math.abs(p1.getY() - p2.getY()) < EPSILON_EQUAL) {
 			if (Math.abs(q1.getY() - q2.getY()) < EPSILON_EQUAL) {
-				if (minX1 < minX2) {
-					if (maxX1 > maxX2) {
-						return true;
+				if (Math.abs(p1.getY() - q1.getY()) < EPSILON_EQUAL) {
+
+					if (minX1 < minX2) {
+						if (maxX1 > maxX2) {
+							return true;
+						} else {
+							return false;
+						}
 					} else {
-						return false;
+						if (maxX1 < maxX2) {
+							return true;
+						} else {
+							return false;
+						}
 					}
 				} else {
-					if (maxX1 < maxX2) {
-						return true;
-					} else {
-						return false;
-					}
+					return false;
 				}
 			} else {
 				return false;
@@ -536,7 +547,7 @@ public class GeoOperator {
 
 	/**
 	 * check whether point p lies on/inside the polygon
-	 * XXX the line between p and outPoint gets through the corner of two lines, then the number of intersection points will be count twice.
+	 * the line between p and outPoint gets through the corner of two lines, then the number of intersection points will be count twice.
 	 * 
 	 * @param polygon
 	 * @param p

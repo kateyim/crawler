@@ -62,10 +62,14 @@ public class AlgoDCDTTest {
 		// TPoint p1 = new TPoint(0, 0);
 		// TPoint p2 = new TPoint(200, 60);
 		// TPoint p3 = new TPoint(100, 180);
+		// case 4.3a-2
+		TPoint p1 = new TPoint(60, 0);
+		TPoint p2 = new TPoint(60, 200);
+		TPoint p3 = new TPoint(300, 100);
 		// case: 4.3b
-		TPoint p1 = new TPoint(10, 40);
-		TPoint p2 = new TPoint(50, 130);
-		TPoint p3 = new TPoint(90, 40);
+//		TPoint p1 = new TPoint(10, 40);
+//		TPoint p2 = new TPoint(50, 130);
+//		TPoint p3 = new TPoint(90, 40);
 
 		DelaunayTriangle triangle = new DelaunayTriangle(p1, p2, p3);
 		if (logger.isDebugEnabled() && PaintShapes.painting) {

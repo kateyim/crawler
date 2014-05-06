@@ -66,4 +66,10 @@ public class Circle {
 		return GeoOperator.line_intersect_Circle(center, radius, p1, p2);
 	}
 
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("center: " + center.toString() + ", radius = " + radius);
+		return sb.toString();
+	}
+
 }

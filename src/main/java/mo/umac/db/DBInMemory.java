@@ -157,8 +157,8 @@ public class DBInMemory {
 			logger.info("countCrawledPoints = " + numCrawlerPoints());
 		}
 		// another drawing method
-		logger.info("countCrawledPoints2 = " + numCrawlerPoints());
-		logger.info("countNumQueries2 = " + Strategy.countNumQueries);
+		// logger.info("countCrawledPoints2 = " + numCrawlerPoints());
+		// logger.info("countNumQueries2 = " + Strategy.countNumQueries);
 
 		Strategy.countNumQueries++;
 		return resultSet;
