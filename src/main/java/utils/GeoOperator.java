@@ -31,7 +31,7 @@ import com.vividsolutions.jts.geomgraph.Position;
 public class GeoOperator {
 
 	protected static Logger logger = Logger.getLogger(GeoOperator.class.getName());
-	public final static double EPSILON_EQUAL = 1e-10;
+	public final static double EPSILON_EQUAL = 1e-10; // 1e-12 in Poly2Tri
 	public final static double EPSILON_LITTLE = 1;
 
 	public final static double RADIUS = 6371007.2;// authalic earth radius of
@@ -398,7 +398,7 @@ public class GeoOperator {
 		if (q.getX() >= minX && q.getX() <= maxX && q.getY() >= minY && q.getY() <= maxY) {
 			double delta = Math.abs((p2.getX() - p1.getX()) * (q.getY() - p1.getY()) - (p2.getY() - p1.getY()) * (q.getX() - p1.getX()));
 			// for testing
-			logger.info("delta = " + delta);
+//			logger.info("delta = " + delta);		System.out.println(delta);
 			if (delta < EPSILON_EQUAL) {
 				return true;
 			}
@@ -591,7 +591,7 @@ public class GeoOperator {
 	 * @return 0: not intersection; 1: intersect; 2: intersection at the corner point
 	 */
 	public static int intersectLineLine(Coordinate p1, Coordinate q1, Coordinate p2, Coordinate q2) {
-		// check done
+		// TODO check 
 		// add by kate 2014-5-5
 		if (p1.distance(p2) < EPSILON_EQUAL || p1.distance(q2) < EPSILON_EQUAL || q1.distance(p2) < EPSILON_EQUAL || q1.distance(q2) < EPSILON_EQUAL) {
 			return 2;

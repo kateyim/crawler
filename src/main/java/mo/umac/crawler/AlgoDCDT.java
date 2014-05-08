@@ -2,7 +2,6 @@ package mo.umac.crawler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSetD2;
@@ -26,9 +25,8 @@ import com.vividsolutions.jts.geom.LineSegment;
 public class AlgoDCDT extends Strategy {
 
 	protected static Logger logger = Logger.getLogger(AlgoDCDT.class.getName());
-	// public final double EQUAL_EPSILON = 1e-12;
 
-	public final double EPSILON_DISTURB = GeoOperator.EPSILON_EQUAL * 1000;
+	public final double EPSILON_DISTURB = GeoOperator.EPSILON_EQUAL * 1000; // 1e-7
 	public double epsilonMinArea;
 
 	public AlgoDCDT() {
@@ -157,46 +155,71 @@ public class AlgoDCDT extends Strategy {
 				PaintShapes.paint.addCircle(aCircle);
 				PaintShapes.paint.myRepaint();
 			}
-//			if (holeList.size() == 25) {
-//				logger.debug("holeList.size() = 25");
-//			}
-//			if (holeList.size() == 26) {
-//				logger.debug("holeList.size() = 26");
-//			}
+			// if (holeList.size() == 25) {
+			// logger.debug("holeList.size() = 25");
+			// }
+			// if (holeList.size() == 26) {
+			// logger.debug("holeList.size() = 26");
+			// }
 			//
 			Polygon inner = intersect(aCircle, triangle);
 			// for testing
-			logger.info("holeList.size() = " + holeList.size());
-			logger.info("aCircle = " + aCircle.toString());
-			logger.info("triangle = " + triangle.toString());
-			logger.info("inner = " + GeoOperator.polygonToString(inner));
-			if (holeList.size() == 208) {
-				logger.info("holeList.size() = 208");
+			// if (logger.isDebugEnabled()) {
+			// logger.debug("holeList.size() = " + holeList.size());
+			// logger.debug("aCircle = " + aCircle.toString());
+			// logger.debug("triangle = " + triangle.toString());
+			// logger.debug("inner = " + GeoOperator.polygonToString(inner));
+			// }
+			// for testing print all triangles: whether this triangle overlapped with a previous one
+
+			// add at 2014-4-17
+			if (logger.isDebugEnabled()) {
+				logger.debug("before disturb--------------------");
+				logger.debug("inner: " + GeoOperator.polygonToString(inner));
+				for (int i = 0; i < holeList.size(); i++) {
+					logger.debug(i + ": " + GeoOperator.polygonToString(holeList.get(i)));
+				}
+			}
+
+			if (holeList.size() == 184) {
+				//
+				for (int i = 0; i < holeList.size(); i++) {
+					Polygon polygon2 = holeList.get(i);
+					PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+					PaintShapes.paint.addPolygon(polygon2);
+				}
+				PaintShapes.paint.myRepaint();
+
+				logger.info("waiting");
+
 				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
 				PaintShapes.paint.addTriangle(triangle);
 				PaintShapes.paint.myRepaint();
 
-//				PaintShapes.paint.color = PaintShapes.paint.color.red;
-//				PaintShapes.paint.addPoint(center);
-//				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-//				PaintShapes.paint.addCircle(aCircle);
+				PaintShapes.paint.color = PaintShapes.paint.color.red;
+				PaintShapes.paint.addPoint(center);
+				PaintShapes.paint.myRepaint();
+
+				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+				PaintShapes.paint.addCircle(aCircle);
+				PaintShapes.paint.myRepaint();
+
 				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
 				PaintShapes.paint.addPolygon(inner);
 				PaintShapes.paint.myRepaint();
-
-				// 
-				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-				PaintShapes.paint.addPolygon(holeList.get(131));
-				PaintShapes.paint.myRepaint();
-
-				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-				PaintShapes.paint.addPolygon(holeList.get(173));
-				PaintShapes.paint.myRepaint();
+				//
+				// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+				// PaintShapes.paint.addPolygon(holeList.get(131));
+				// PaintShapes.paint.myRepaint();
+				//
+				// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+				// PaintShapes.paint.addPolygon(holeList.get(173));
+				// PaintShapes.paint.myRepaint();
 
 				//
 			}
 			// end testing
-			
+
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
 				// logger.debug(polygonToString(inner));
 				// logger.error(GeoOperator.polygonToString(inner));
@@ -208,19 +231,15 @@ public class AlgoDCDT extends Strategy {
 			disturb(polygon, holeList, inner);
 			holeList.add(inner);
 			addHoles(polygon, holeList);
-			// add at 2014-4-17
+
 			if (logger.isDebugEnabled()) {
-				logger.debug("before triangulate--------------------");
-				logger.debug(GeoOperator.polygonToString(polygon));
-				// logger.error("before triangulate--------------------");
-				// logger.error(GeoOperator.polygonToString(polygon));
-
+				logger.debug("after disturb, but before triangulate--------------------");
 				for (int i = 0; i < holeList.size(); i++) {
-					logger.debug(GeoOperator.polygonToString(holeList.get(i)));
-					// logger.error(GeoOperator.polygonToString(holeList.get(i)));
-
+					logger.debug(i + ": " + GeoOperator.polygonToString(holeList.get(i)));
 				}
+				logger.debug("--------------------");
 			}
+			
 			Poly2Tri.triangulate(polygon);
 			//
 			list = polygon.getTriangles();
@@ -350,19 +369,33 @@ public class AlgoDCDT extends Strategy {
 			if (factorC >= 1000) {
 				logger.error("factorC >= 1000: factorC = " + factorC);
 			}
-			// TODO duplicate when factor = 2 * EPSILON_DISTURB, i, k shouldn't equal to 0 anymore
+			// duplicate when factor = 2 * EPSILON_DISTURB, i, k shouldn't equal to 0 anymore
 			for (double i = -1 * factor; i <= factor; i = i + EPSILON_DISTURB) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("i = " + i);
+				}
 				if (!inside) {
+					if (Math.abs(i) < GeoOperator.EPSILON_EQUAL) {
+						// xDis == x
+						// for testing
+						logger.debug("i = " + 0);
+						continue;
+					}
 					xDis = x + i;
 					for (double k = -1 * factor; k <= factor; k = k + EPSILON_DISTURB) {
-						if (Math.abs(i) < GeoOperator.EPSILON_EQUAL && Math.abs(k) < GeoOperator.EPSILON_EQUAL) {
-							// xDis == x && yDis == y
+						if (logger.isDebugEnabled()) {
+							logger.debug("k = " + k);
+						}
+						if (Math.abs(k) < GeoOperator.EPSILON_EQUAL) {
+							// yDis == y
+							// for testing
+							logger.debug("k = " + 0);
 							continue;
 						}
 						yDis = y + k;
 						Coordinate disturbCoor = new Coordinate(xDis, yDis);
 						disturbPoint = new TPoint(xDis, yDis);
-						// TODO should not include the point on the edge!
+						// should not include the point on the edge!
 						if (GeoOperator.pointInsidePolygon(polygon, outerPoint, disturbCoor)) {
 							if (!GeoOperator.pointOnLine(p1, p2, disturbPoint)) {
 								inside = true;
@@ -561,8 +594,8 @@ public class AlgoDCDT extends Strategy {
 			} else if (intersectPoints12.size() == 2 && intersectPoints23.size() == 2) {
 				PolygonPoint pp1 = GeoOperator.trans(intersectPoints12.get(0));// new PolygonPoint(intersectPoints12.get(0).x, intersectPoints12.get(0).y);
 				PolygonPoint pp2 = GeoOperator.trans(intersectPoints12.get(1));// new PolygonPoint(intersectPoints12.get(1).x, intersectPoints12.get(1).y);
-//				PolygonPoint pp3 = GeoOperator.trans(intersectPoints23.get(1));// new PolygonPoint(intersectPoints13.get(1).x, intersectPoints13.get(1).y);
-//				PolygonPoint pp4 = GeoOperator.trans(intersectPoints23.get(0));// new PolygonPoint(intersectPoints13.get(0).x, intersectPoints13.get(0).y);
+				// PolygonPoint pp3 = GeoOperator.trans(intersectPoints23.get(1));// new PolygonPoint(intersectPoints13.get(1).x, intersectPoints13.get(1).y);
+				// PolygonPoint pp4 = GeoOperator.trans(intersectPoints23.get(0));// new PolygonPoint(intersectPoints13.get(0).x, intersectPoints13.get(0).y);
 				// revised by kate 2014-5-6
 				PolygonPoint pp3 = GeoOperator.trans(intersectPoints23.get(0));// new PolygonPoint(intersectPoints13.get(1).x, intersectPoints13.get(1).y);
 				PolygonPoint pp4 = GeoOperator.trans(intersectPoints23.get(1));
