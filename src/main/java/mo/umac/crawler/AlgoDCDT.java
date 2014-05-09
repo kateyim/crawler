@@ -263,7 +263,7 @@ public class AlgoDCDT extends Strategy {
 	 * @param newPolygon
 	 * @return
 	 */
-	private void disturb(Polygon boundary, ArrayList<Polygon> holeList, Polygon newPolygon) {
+	protected void disturb(Polygon boundary, ArrayList<Polygon> holeList, Polygon newPolygon) {
 		ArrayList<TriangulationPoint> newPoints = (ArrayList<TriangulationPoint>) newPolygon.getPoints();
 		// 1st: avoid point intersecting with the boundary. If so, change the inner point
 		List<TriangulationPoint> boundaryPoints = boundary.getPoints();
@@ -417,7 +417,7 @@ public class AlgoDCDT extends Strategy {
 
 	}
 
-	private void addHoles(Polygon polygon, ArrayList<Polygon> holeList) {
+	protected void addHoles(Polygon polygon, ArrayList<Polygon> holeList) {
 		for (int i = 0; i < holeList.size(); i++) {
 			Polygon hole = GeoOperator.clone(holeList.get(i));
 			polygon.addHole(hole);
@@ -452,7 +452,7 @@ public class AlgoDCDT extends Strategy {
 		return polygon;
 	}
 
-	private Polygon boundary(Envelope envelope) {
+	protected Polygon boundary(Envelope envelope) {
 		List<PolygonPoint> points = new ArrayList<PolygonPoint>();
 		PolygonPoint p1 = new PolygonPoint(envelope.getMinX(), envelope.getMinY());
 		PolygonPoint p2 = new PolygonPoint(envelope.getMaxX(), envelope.getMinY());

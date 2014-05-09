@@ -33,7 +33,8 @@
  * @author Thomas �hl�n, thahlen@gmail.com
  */
 public class TriangulationUtil {
-	public final static double EPSILON = 1e-12;
+	// revised by Kate 2014-5-9
+	public final static double EPSILON = 1e-12;//1e-12;
 
 	// Returns triangle circumcircle point and radius
 	// public static Tuple2<TPoint, Double> circumCircle( TPoint a, TPoint b, TPoint c )

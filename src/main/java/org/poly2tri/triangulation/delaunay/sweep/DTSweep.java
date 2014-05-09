@@ -437,6 +437,9 @@ public class DTSweep {
 			}
 			// Check if next node is below the edge
 			Orientation o1 = orient2d(edge.q, node.next.point, edge.p);
+			if(logger.isDebugEnabled()){
+				logger.debug("Orientation o1 = " + o1);
+			}
 			if (o1 == Orientation.CCW) {
 				fillRightBelowEdgeEvent(tcx, edge, node);
 			} else {

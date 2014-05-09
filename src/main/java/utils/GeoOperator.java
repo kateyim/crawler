@@ -396,6 +396,7 @@ public class GeoOperator {
 		}
 
 		if (q.getX() >= minX && q.getX() <= maxX && q.getY() >= minY && q.getY() <= maxY) {
+			// this is exactly with the equal judgment in In org.poly2tri.triangulation.TriangulationUtil
 			double delta = Math.abs((p2.getX() - p1.getX()) * (q.getY() - p1.getY()) - (p2.getY() - p1.getY()) * (q.getX() - p1.getX()));
 			// for testing
 //			logger.info("delta = " + delta);		System.out.println(delta);
