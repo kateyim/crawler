@@ -394,6 +394,10 @@ public class DTSweep {
 	}
 
 	private static void fillRightConvexEdgeEvent(DTSweepContext tcx, DTSweepConstraint edge, AdvancingFrontNode node) {
+		// kate
+		if (logger.isDebugEnabled()) {
+			logger.debug("fillRightConvexEdgeEvent");
+		}
 		// Next concave or convex?
 		if (orient2d(node.next.point, node.next.next.point, node.next.next.next.point) == Orientation.CCW) {
 			// Concave
@@ -413,6 +417,10 @@ public class DTSweep {
 	private static void fillRightBelowEdgeEvent(DTSweepContext tcx, DTSweepConstraint edge, AdvancingFrontNode node) {
 		if (tcx.isDebugEnabled()) {
 			tcx.getDebugContext().setActiveNode(node);
+		}
+		// kate 
+		if(logger.isDebugEnabled()){
+			logger.debug("fillRightBelowEdgeEvent");
 		}
 		if (node.point.getX() < edge.p.getX()) // needed?
 		{

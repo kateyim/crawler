@@ -29,12 +29,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */package org.poly2tri.triangulation;
 
+import org.apache.log4j.Logger;
+import org.poly2tri.triangulation.delaunay.sweep.DTSweep;
+
 /**
  * @author Thomas �hl�n, thahlen@gmail.com
  */
 public class TriangulationUtil {
+
+	protected static Logger logger = Logger.getLogger(TriangulationUtil.class.getName());
+
 	// revised by Kate 2014-5-9
-	public final static double EPSILON = 1e-12;//1e-12;
+	public final static double EPSILON = 1e-12;// 1e-12;
 
 	// Returns triangle circumcircle point and radius
 	// public static Tuple2<TPoint, Double> circumCircle( TPoint a, TPoint b, TPoint c )
@@ -184,13 +190,29 @@ public class TriangulationUtil {
 	 * </pre>
 	 */
 	public static Orientation orient2d(TriangulationPoint pa, TriangulationPoint pb, TriangulationPoint pc) {
+		// kate
+		if (logger.isDebugEnabled()) {
+			logger.debug("orient2d for " + pa.toString() + ", " + pb.toString() + ", " + pc.toString());
+		}
 		double detleft = (pa.getX() - pc.getX()) * (pb.getY() - pc.getY());
 		double detright = (pa.getY() - pc.getY()) * (pb.getX() - pc.getX());
 		double val = detleft - detright;
+		if (logger.isDebugEnabled()) {
+			logger.debug("val = " + val);
+		}
 		if (val > -EPSILON && val < EPSILON) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Collinear");
+			}
 			return Orientation.Collinear;
 		} else if (val > 0) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("CCW");
+			}
 			return Orientation.CCW;
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("CW");
 		}
 		return Orientation.CW;
 	}
