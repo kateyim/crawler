@@ -64,6 +64,6 @@
 		<appender-ref ref="Stdout" />
 		<appender-ref ref="Error" />
 		<appender-ref ref="Release" />
-		<appender-ref ref="Debug" />
+		<!-- <appender-ref ref="Debug" /> -->
 	</root>
 </log4j:configuration>
