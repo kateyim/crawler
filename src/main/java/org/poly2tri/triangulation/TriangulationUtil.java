@@ -40,7 +40,7 @@ public class TriangulationUtil {
 	protected static Logger logger = Logger.getLogger(TriangulationUtil.class.getName());
 
 	// revised by Kate 2014-5-9
-	public final static double EPSILON = 1e-12;// 1e-12;
+	public final static double EPSILON = 1e-12;
 
 	// Returns triangle circumcircle point and radius
 	// public static Tuple2<TPoint, Double> circumCircle( TPoint a, TPoint b, TPoint c )

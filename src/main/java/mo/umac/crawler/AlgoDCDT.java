@@ -26,7 +26,7 @@ public class AlgoDCDT extends Strategy {
 
 	protected static Logger logger = Logger.getLogger(AlgoDCDT.class.getName());
 
-	public final double EPSILON_DISTURB = 1e-3;/* * 1000*/; // 1e-7
+	public final double EPSILON_DISTURB = 1e-4;/* * 1000*/; // 1e-7
 	public double epsilonMinArea;
 
 	public AlgoDCDT() {

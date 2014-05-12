@@ -13,7 +13,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 
 import mo.umac.crawler.AlgoDCDT;
-import mo.umac.crawler.AlgoPartition;
 import mo.umac.crawler.MainYahoo;
 import mo.umac.crawler.Strategy;
 import mo.umac.db.DBInMemory;
@@ -55,7 +54,7 @@ public class MainSynthetic extends Strategy {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		boolean debug = false;
+		boolean debug = true;
 		PaintShapes.painting = false;
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);

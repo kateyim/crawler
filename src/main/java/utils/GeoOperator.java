@@ -32,7 +32,7 @@ import com.vividsolutions.jts.geomgraph.Position;
 public class GeoOperator {
 
 	protected static Logger logger = Logger.getLogger(GeoOperator.class.getName());
-	public final static double EPSILON_EQUAL = TriangulationUtil.EPSILON; // 1e-12 in Poly2Tri
+	public final static double EPSILON_EQUAL = 1e-12;//TriangulationUtil.EPSILON; // 1e-12 in Poly2Tri
 	public final static double EPSILON_LITTLE = 1;
 
 	public final static double RADIUS = 6371007.2;// authalic earth radius of
