@@ -2,6 +2,7 @@ package utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import mo.umac.crawler.Strategy;
 import mo.umac.spatial.Circle;
@@ -16,7 +17,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.poly2tri.geometry.polygon.Polygon;
 import org.poly2tri.geometry.polygon.PolygonPoint;
 import org.poly2tri.triangulation.TriangulationPoint;
-import org.poly2tri.triangulation.TriangulationUtil;
 import org.poly2tri.triangulation.delaunay.DelaunayTriangle;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -749,4 +749,26 @@ public class GeoOperator {
 		return c;
 	}
 
+	/**
+	 * C------->B
+	 * |-
+	 * |  -
+	 * V    -
+	 * A      D
+	 * 
+	 * @param ax
+	 * @param ay
+	 * @param bx
+	 * @param by
+	 * @param cx
+	 * @param cy
+	 * @return
+	 */
+	public static double[] bisectric(double ax, double ay, double bx, double by, double cx, double cy){
+		double ca = Math.sqrt(ax * ax + ay * ay);
+		double cb = Math.sqrt(ax * ax + ay * ay);
+		double[] e1 = new double 
+		return null;
+	}
+	
 }

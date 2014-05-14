@@ -2,6 +2,7 @@ package mo.umac.crawler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSetD2;
@@ -26,7 +27,7 @@ public class AlgoDCDT extends Strategy {
 
 	protected static Logger logger = Logger.getLogger(AlgoDCDT.class.getName());
 
-	public final double EPSILON_DISTURB = 1e-4;/* * 1000*/; // 1e-7
+	public final double EPSILON_DISTURB = 1e-4;/* * 1000 */; // 1e-7
 	public double epsilonMinArea;
 
 	public AlgoDCDT() {
@@ -239,7 +240,7 @@ public class AlgoDCDT extends Strategy {
 				}
 				logger.debug("--------------------");
 			}
-			
+
 			Poly2Tri.triangulate(polygon);
 			//
 			list = polygon.getTriangles();
@@ -333,6 +334,90 @@ public class AlgoDCDT extends Strategy {
 		}
 	}
 
+	// /**
+	// * shrink the j-th point point in the polygon
+	// * check: should shrink to the inner direction!!! done
+	// *
+	// * @param polygon
+	// * @param point
+	// * : shrink this point
+	// * @param j
+	// * : point is the j-th point in the polygon
+	// */
+	// private TriangulationPoint shrink(TriangulationPoint p1, TriangulationPoint p2, Polygon polygon, TriangulationPoint point, int j) {
+	// // check done
+	// List<TriangulationPoint> points = polygon.getPoints();
+	// // check this function: done
+	// Coordinate outerPoint = GeoOperator.outOfMinBoundPoint(polygon);
+	// // if (logger.isDebugEnabled()) {
+	// // logger.debug("shrink...");
+	// // logger.debug("points.size() = " + points.size() + ", j = " + j);
+	// // }
+	// double x = point.getX();
+	// double y = point.getY();
+	//
+	// double xDis = x;
+	// double yDis = y;
+	//
+	// boolean inside = false;
+	// int factorC = 1;
+	// TriangulationPoint disturbPoint = null;
+	// while (!inside) {
+	// double factor = EPSILON_DISTURB * factorC;
+	// if (logger.isDebugEnabled()) {
+	// logger.debug("factorC = " + factorC);
+	// }
+	// if (factorC >= 1000) {
+	// logger.error("factorC >= 1000: factorC = " + factorC);
+	// }
+	// // duplicate when factor = 2 * EPSILON_DISTURB, i, k shouldn't equal to 0 anymore
+	// for (double i = -1 * factor; i <= factor; i = i + EPSILON_DISTURB) {
+	// if (logger.isDebugEnabled()) {
+	// logger.debug("i = " + i);
+	// }
+	// if (!inside) {
+	// if (Math.abs(i) < GeoOperator.EPSILON_EQUAL) {
+	// // xDis == x
+	// // for testing
+	// logger.debug("i = " + 0);
+	// continue;
+	// }
+	// xDis = x + i;
+	// for (double k = -1 * factor; k <= factor; k = k + EPSILON_DISTURB) {
+	// if (logger.isDebugEnabled()) {
+	// logger.debug("k = " + k);
+	// }
+	// if (Math.abs(k) < GeoOperator.EPSILON_EQUAL) {
+	// // yDis == y
+	// // for testing
+	// logger.debug("k = " + 0);
+	// continue;
+	// }
+	// yDis = y + k;
+	// Coordinate disturbCoor = new Coordinate(xDis, yDis);
+	// disturbPoint = new TPoint(xDis, yDis);
+	// // should not include the point on the edge!
+	// if (GeoOperator.pointInsidePolygon(polygon, outerPoint, disturbCoor)) {
+	// if (!GeoOperator.pointOnLine(p1, p2, disturbPoint)) {
+	// inside = true;
+	// // check whether jump out of the while loop: done
+	// break;
+	// }
+	// }
+	// }
+	// } else {
+	// break;
+	// }
+	// }
+	// factorC++;
+	// // factor *= factorC;
+	// }
+	// // check whether replaced it properly done
+	// points.set(j, disturbPoint);
+	// return disturbPoint;
+	//
+	// }
+
 	/**
 	 * shrink the j-th point point in the polygon
 	 * check: should shrink to the inner direction!!! done
@@ -359,57 +444,28 @@ public class AlgoDCDT extends Strategy {
 		double yDis = y;
 
 		boolean inside = false;
-		int factorC = 1;
 		TriangulationPoint disturbPoint = null;
+		double deltaX;
+		double deltaY;
 		while (!inside) {
-			double factor = EPSILON_DISTURB * factorC;
-			if (logger.isDebugEnabled()) {
-				logger.debug("factorC = " + factorC);
-			}
-			if (factorC >= 1000) {
-				logger.error("factorC >= 1000: factorC = " + factorC);
-			}
-			// duplicate when factor = 2 * EPSILON_DISTURB, i, k shouldn't equal to 0 anymore
-			for (double i = -1 * factor; i <= factor; i = i + EPSILON_DISTURB) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("i = " + i);
-				}
-				if (!inside) {
-					if (Math.abs(i) < GeoOperator.EPSILON_EQUAL) {
-						// xDis == x
-						// for testing
-						logger.debug("i = " + 0);
-						continue;
-					}
-					xDis = x + i;
-					for (double k = -1 * factor; k <= factor; k = k + EPSILON_DISTURB) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("k = " + k);
-						}
-						if (Math.abs(k) < GeoOperator.EPSILON_EQUAL) {
-							// yDis == y
-							// for testing
-							logger.debug("k = " + 0);
-							continue;
-						}
-						yDis = y + k;
-						Coordinate disturbCoor = new Coordinate(xDis, yDis);
-						disturbPoint = new TPoint(xDis, yDis);
-						// should not include the point on the edge!
-						if (GeoOperator.pointInsidePolygon(polygon, outerPoint, disturbCoor)) {
-							if (!GeoOperator.pointOnLine(p1, p2, disturbPoint)) {
-								inside = true;
-								// check whether jump out of the while loop: done
-								break;
-							}
-						}
-					}
-				} else {
+			// generate 
+			Random generator = new Random(System.currentTimeMillis());
+			double tempX = generator.nextDouble();
+			
+			
+			
+			xDis = x + i;
+			yDis = y + k;
+			Coordinate disturbCoor = new Coordinate(xDis, yDis);
+			disturbPoint = new TPoint(xDis, yDis);
+			// should not include the point on the edge!
+			if (GeoOperator.pointInsidePolygon(polygon, outerPoint, disturbCoor)) {
+				if (!GeoOperator.pointOnLine(p1, p2, disturbPoint)) {
+					inside = true;
+					// check whether jump out of the while loop: done
 					break;
 				}
 			}
-			factorC++;
-			// factor *= factorC;
 		}
 		// check whether replaced it properly done
 		points.set(j, disturbPoint);
