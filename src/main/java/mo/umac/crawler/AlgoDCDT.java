@@ -27,7 +27,7 @@ public class AlgoDCDT extends Strategy {
 
 	protected static Logger logger = Logger.getLogger(AlgoDCDT.class.getName());
 
-	public final double EPSILON_DISTURB = 1e-4;/* * 1000 */; // 1e-7
+	public final double EPSILON_DISTURB = 1e-7;/* * 1000 */; // 1e-7
 	public double epsilonMinArea;
 
 	public AlgoDCDT() {
@@ -431,33 +431,54 @@ public class AlgoDCDT extends Strategy {
 	private TriangulationPoint shrink(TriangulationPoint p1, TriangulationPoint p2, Polygon polygon, TriangulationPoint point, int j) {
 		// check done
 		List<TriangulationPoint> points = polygon.getPoints();
+		// XXX although I define the direction to inside the polygon before hand, but it may also exceed the boundaries of the polygon.
+		// So it is still necessary to check the property of inside polygon. (this is the special case)
+		// find the adjacent points
+		TriangulationPoint pointPre;
+		TriangulationPoint pointNext;
+		if (j != points.size() - 1) {
+			pointNext = points.get(j + 1);
+		} else {
+			pointNext = points.get(0);
+		}
+		if (j != 0) {
+			pointPre = points.get(j - 1);
+		} else {
+			pointPre = points.get(points.size() - 1);
+		}
+		// The bisectric vector
+		double[] e = GeoOperator.bisectric(pointPre.getX(), pointPre.getY(), pointNext.getX(), pointNext.getY(), point.getX(), point.getY());
+		double unit = GeoOperator.size(e[0], e[1]);
+		if(logger.isDebugEnabled()) {
+			logger.debug("e: " + e[0] +  ", " + e[1]);
+			logger.debug("unit = " + unit);
+		}
 		// check this function: done
 		Coordinate outerPoint = GeoOperator.outOfMinBoundPoint(polygon);
-		// if (logger.isDebugEnabled()) {
-		// logger.debug("shrink...");
-		// logger.debug("points.size() = " + points.size() + ", j = " + j);
-		// }
-		double x = point.getX();
-		double y = point.getY();
-
-		double xDis = x;
-		double yDis = y;
-
+		
 		boolean inside = false;
 		TriangulationPoint disturbPoint = null;
-		double deltaX;
-		double deltaY;
+		double[] xy = new double[2]; 
+
 		while (!inside) {
-			// generate 
+			// generate
 			Random generator = new Random(System.currentTimeMillis());
-			double tempX = generator.nextDouble();
+			double random = generator.nextDouble();
+			// with fixed precision
+			double delta = EPSILON_DISTURB + random * EPSILON_DISTURB;
+			//
+			double distance = unit + delta;
+			xy = GeoOperator.locateByVector(point.getX(), point.getY(), e, distance);
 			
+			if(logger.isDebugEnabled()) {
+				logger.debug("random = " + random);
+				logger.debug("delta = " + delta);
+				logger.debug("distance = " + distance);
+				logger.debug("xy = " + xy[0] + ", " + xy[1]);
+			}
 			
-			
-			xDis = x + i;
-			yDis = y + k;
-			Coordinate disturbCoor = new Coordinate(xDis, yDis);
-			disturbPoint = new TPoint(xDis, yDis);
+			Coordinate disturbCoor = new Coordinate(xy[0], xy[1]);
+			disturbPoint = new TPoint(xy[0], xy[1]);
 			// should not include the point on the edge!
 			if (GeoOperator.pointInsidePolygon(polygon, outerPoint, disturbCoor)) {
 				if (!GeoOperator.pointOnLine(p1, p2, disturbPoint)) {

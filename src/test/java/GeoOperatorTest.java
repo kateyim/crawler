@@ -1,7 +1,10 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import mo.umac.crawler.MainYahoo;
+
 import org.apache.log4j.Logger;
+import org.apache.log4j.xml.DOMConfigurator;
 import org.poly2tri.geometry.polygon.Polygon;
 import org.poly2tri.geometry.polygon.PolygonPoint;
 import org.poly2tri.triangulation.TriangulationPoint;
@@ -20,8 +23,11 @@ public class GeoOperatorTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
+
 		GeoOperatorTest test = new GeoOperatorTest();
-		test.testPointInTriangle();
+//		test.testPointInTriangle();
+		test.testLocateByVector();
 
 	}
 
@@ -134,17 +140,17 @@ public class GeoOperatorTest {
 		System.out.println(c.toString());
 	}
 
-	public void testPointInTriangle(){
+	public void testPointInTriangle() {
 		Coordinate v1 = new Coordinate(0, 0);
 		Coordinate v2 = new Coordinate(10, 0);
 		Coordinate v3 = new Coordinate(5, 5);
-//		Coordinate pt = new Coordinate(3, 3);
+		// Coordinate pt = new Coordinate(3, 3);
 		Coordinate pt = new Coordinate(8, 10);
 
 		boolean b = GeoOperator.pointInTriangle(pt, v1, v2, v3);
 		System.out.println(b);
 	}
-	
+
 	private Polygon hole1() {
 		List<PolygonPoint> points = new ArrayList<PolygonPoint>();
 		PolygonPoint p1 = new PolygonPoint(428.7500421642064, 623.4085470087348);
@@ -172,6 +178,27 @@ public class GeoOperatorTest {
 		}
 
 		return polygon;
+	}
+
+	public double[] testBisectric() {
+		double ax = 1;
+		double ay = 4;
+		double bx = 2;
+		double by = 2;
+		double cx = 1;
+		double cy = 2;
+		double[] e = GeoOperator.bisectric(ax, ay, bx, by, cx, cy);
+		logger.info(e[0] + ", " + e[1]);
+		return e;
+	}
+
+	public void testLocateByVector() {
+		double x = 1;
+		double y = 2;
+		double[] e = testBisectric();
+		double distance = Math.sqrt(2);
+		double[] answer = GeoOperator.locateByVector(x, y, e, distance);
+		logger.info(answer[0] + ", " + answer[1]);
 	}
 
 }

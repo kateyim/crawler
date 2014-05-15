@@ -750,6 +750,8 @@ public class GeoOperator {
 	}
 
 	/**
+	 * Given two vectors CA and CB, compute the unit vector of the bisectric between CA and CB 
+	 *
 	 * C------->B
 	 * |-
 	 * |  -
@@ -765,10 +767,36 @@ public class GeoOperator {
 	 * @return
 	 */
 	public static double[] bisectric(double ax, double ay, double bx, double by, double cx, double cy){
-		double ca = Math.sqrt(ax * ax + ay * ay);
-		double cb = Math.sqrt(ax * ax + ay * ay);
-		double[] e1 = new double 
-		return null;
+		double ca = size(ax-cx, ay-cy);
+		double cb = size(bx-cx, by-cy);
+		double[] e1 = {(ax-cx)/ca, (ay-cy)/ca};
+		double[] e2 = {(bx-cx)/cb, (by-cy)/cb};
+		double[] e12 = {e1[0] + e2[0], e1[1] + e2[1]};
+		double cd = size(e12[0], e12[1]);
+		// The unit vector on the dicrection of CD
+		double[] e3 = {e12[0] / cd, e12[1] / cd};
+		
+		return e3;
+	}
+	
+	public static double size(double x, double y) {
+		return Math.sqrt(x * x + y * y);
+	}
+	
+	/**
+	 * Get the point location on the vector with distance far from the starting point (x, y)
+	 * 
+	 * @param x
+	 * @param y
+	 * @param vector
+	 * @param distance
+	 * @return
+	 */
+	public static double[] locateByVector(double x, double y, double[] e, double distance) {
+		double[] newPoint = new double[2];
+		newPoint[0] = x + distance * e[0];
+		newPoint[1] = y + distance * e[1];
+		return newPoint; 
 	}
 	
 }
