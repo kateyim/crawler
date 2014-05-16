@@ -20,6 +20,9 @@ import paint.WindowUtilities;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
+/**
+ * @author kate
+ */
 public class AlgoDCDTTest extends AlgoDCDT {
 
 	protected static Logger logger = Logger.getLogger(AlgoDCDTTest.class.getName());
@@ -31,7 +34,9 @@ public class AlgoDCDTTest extends AlgoDCDT {
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 
 		// testEightCases();
-		testTriangulation184();
+		// testTriangulation184();
+		// testTriangulation53();
+		testTriangulation104();
 	}
 
 	public static void testEightCases() {
@@ -149,6 +154,132 @@ public class AlgoDCDTTest extends AlgoDCDT {
 		holeList.add(polygon2);
 		holeList.add(polygon3);
 		// dcdt.disturb(polygon, holeList, inner);
+		holeList.add(inner);
+		dcdt.addHoles(polygon, holeList);
+		Poly2Tri.triangulate(polygon);
+
+	}
+
+	public static void testTriangulation53() {
+		AlgoDCDT dcdt = new AlgoDCDT();
+		Envelope envelope = new Envelope(0, 1000, 0, 1000);
+		Polygon polygon = dcdt.boundary(envelope);
+		ArrayList<Polygon> holeList = new ArrayList<Polygon>();
+		//
+		List<PolygonPoint> points2 = new ArrayList<PolygonPoint>();
+		PolygonPoint p1 = new PolygonPoint(473.9764980004496, 907.3133020915193);
+		PolygonPoint p2 = new PolygonPoint(542.7123548771788, 907.3133020915193);
+		PolygonPoint p3 = new PolygonPoint(577.0802833155433, 847.7863038853806);
+		PolygonPoint p4 = new PolygonPoint(542.7123548771788, 788.2593056792418);
+		PolygonPoint p5 = new PolygonPoint(473.9764980004496, 788.2593056792418);
+		PolygonPoint p6 = new PolygonPoint(439.6085695620851, 847.7863038853806);
+		points2.add(p1);
+		points2.add(p2);
+		points2.add(p3);
+		points2.add(p4);
+		points2.add(p5);
+		points2.add(p6);
+		Polygon polygon2 = new Polygon(points2);
+		//
+		List<PolygonPoint> points1 = new ArrayList<PolygonPoint>();
+		PolygonPoint p11 = new PolygonPoint(663.5680739795832, 930.1993595301177);
+		PolygonPoint p12 = new PolygonPoint(550.0762334028996, 908.7077759994335);
+		PolygonPoint p13 = new PolygonPoint(549.2125921259866, 896.0545609153323);
+		// before:
+		// PolygonPoint p14 = new PolygonPoint(577.0802833155433, 847.7863038853806);
+		// after:
+		PolygonPoint p14 = new PolygonPoint(577.3046963701703, 848.7607982039443);
+		//
+		PolygonPoint p15 = new PolygonPoint(671.0988796509514, 911.3538247593535);
+		points1.add(p11);
+		points1.add(p12);
+		points1.add(p13);
+		points1.add(p14);
+		points1.add(p15);
+		Polygon inner = new Polygon(points1);
+		//
+		holeList.add(polygon2);
+		dcdt.disturb(polygon, holeList, inner);
+		holeList.add(inner);
+		dcdt.addHoles(polygon, holeList);
+		Poly2Tri.triangulate(polygon);
+
+	}
+
+	/**
+	 * 150.44001290181097, 202.13688451867293, 171.16421007401388, 253.5935661601067, 75.92640500959905, 257.6599268414036, 75.8100313513383, 257.3263045750901
+	 * </p>
+	 * 177.43153552861548, 248.8875730819433, 231.41458078222445, 248.8875730819433, 258.40610340902896, 202.13688451867293, 231.41458078222445,
+	 * 155.38619595540257, 177.43153552861548, 155.38619595540257, 150.44001290181097, 202.13688451867293
+	 * </p>
+	 * 208.94644387641603, 372.13666670393786, 105.3811680097843, 328.2088154281505, 105.47620280969268, 309.39599156220834, 171.86647225884107,
+	 * 253.56732598520665, 179.99175660710608, 254.2648583309549, 226.77384572209147, 352.5222470500054
+	 * </p>
+	 * 105.64722800113273, 308.41061399616524, 75.32411574825697, 257.68564273615186, 171.16421007401388, 253.5935661601067, 170.35601614683887,
+	 * 253.76346654127897
+	 */
+	public static void testTriangulation104() {
+		AlgoDCDT dcdt = new AlgoDCDT();
+		Envelope envelope = new Envelope(0, 1000, 0, 1000);
+		Polygon polygon = dcdt.boundary(envelope);
+		ArrayList<Polygon> holeList = new ArrayList<Polygon>();
+		//
+		List<PolygonPoint> points2 = new ArrayList<PolygonPoint>();
+		PolygonPoint p1 = new PolygonPoint(177.43153552861548, 248.8875730819433);
+		PolygonPoint p2 = new PolygonPoint(231.41458078222445, 248.8875730819433);
+		PolygonPoint p3 = new PolygonPoint(258.40610340902896, 202.13688451867293);
+		PolygonPoint p4 = new PolygonPoint(231.41458078222445, 155.38619595540257);
+		PolygonPoint p5 = new PolygonPoint(177.43153552861548, 155.38619595540257);
+		PolygonPoint p6 = new PolygonPoint(150.44001290181097, 202.13688451867293);
+		points2.add(p1);
+		points2.add(p2);
+		points2.add(p3);
+		points2.add(p4);
+		points2.add(p5);
+		points2.add(p6);
+		Polygon polygon2 = new Polygon(points2);
+		//
+		List<PolygonPoint> points3 = new ArrayList<PolygonPoint>();
+		PolygonPoint p31 = new PolygonPoint(208.94644387641603, 372.13666670393786);
+		PolygonPoint p32 = new PolygonPoint(105.3811680097843, 328.2088154281505);
+		PolygonPoint p33 = new PolygonPoint(105.47620280969268, 309.39599156220834);
+		PolygonPoint p34 = new PolygonPoint(171.86647225884107, 253.56732598520665);
+		PolygonPoint p35 = new PolygonPoint(179.99175660710608, 254.2648583309549);
+		PolygonPoint p36 = new PolygonPoint(226.77384572209147, 352.5222470500054);
+		points3.add(p31);
+		points3.add(p32);
+		points3.add(p33);
+		points3.add(p34);
+		points3.add(p35);
+		points3.add(p36);
+		Polygon polygon3 = new Polygon(points3);
+		//
+		List<PolygonPoint> points4 = new ArrayList<PolygonPoint>();
+		PolygonPoint p41 = new PolygonPoint(105.64722800113273, 308.41061399616524);
+		PolygonPoint p42 = new PolygonPoint(75.32411574825697, 257.68564273615186);
+		PolygonPoint p43 = new PolygonPoint(171.16421007401388, 253.5935661601067);
+		PolygonPoint p44 = new PolygonPoint(170.35601614683887, 253.76346654127897);
+		points4.add(p41);
+		points4.add(p42);
+		points4.add(p43);
+		points4.add(p44);
+		Polygon polygon4 = new Polygon(points4);
+		//
+		List<PolygonPoint> points1 = new ArrayList<PolygonPoint>();
+		PolygonPoint p11 = new PolygonPoint(150.44001290181097, 202.13688451867293);
+		PolygonPoint p12 = new PolygonPoint(171.16421007401388, 253.5935661601067);
+		PolygonPoint p13 = new PolygonPoint(75.92640500959905, 257.6599268414036);
+		PolygonPoint p14 = new PolygonPoint(75.8100313513383, 257.3263045750901);
+		points1.add(p11);
+		points1.add(p12);
+		points1.add(p13);
+		points1.add(p14);
+		Polygon inner = new Polygon(points1);
+		//
+		holeList.add(polygon2);
+		holeList.add(polygon3);
+		holeList.add(polygon4);
+		dcdt.disturb(polygon, holeList, inner);
 		holeList.add(inner);
 		dcdt.addHoles(polygon, holeList);
 		Poly2Tri.triangulate(polygon);

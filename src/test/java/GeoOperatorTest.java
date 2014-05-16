@@ -26,8 +26,7 @@ public class GeoOperatorTest {
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 
 		GeoOperatorTest test = new GeoOperatorTest();
-//		test.testPointInTriangle();
-		test.testLocateByVector();
+		test.testPointOnEdge();
 
 	}
 
@@ -70,9 +69,13 @@ public class GeoOperatorTest {
 		// TriangulationPoint p2 = new TPoint(10.0, 10.0);
 		// TriangulationPoint q = new TPoint(0.0, 0.0);
 		// case 5 error case
-		TriangulationPoint p1 = new TPoint(-1.0, -1.0);
-		TriangulationPoint p2 = new TPoint(5.0, 5.0);
-		TriangulationPoint q = new TPoint(10.0, 10.0);
+//		TriangulationPoint p1 = new TPoint(-1.0, -1.0);
+//		TriangulationPoint p2 = new TPoint(5.0, 5.0);
+//		TriangulationPoint q = new TPoint(10.0, 10.0);
+		// real case testing
+		TriangulationPoint p1 = new TPoint(542.7123548771788, 907.3133020915193);
+		TriangulationPoint p2 = new TPoint(577.0802833155433, 847.7863038853806);
+		TriangulationPoint q = new TPoint(549.2125921259866, 896.0545609153323);
 		boolean b = GeoOperator.pointOnLineSegment(p1, p2, q);
 		System.out.println(b);
 	}

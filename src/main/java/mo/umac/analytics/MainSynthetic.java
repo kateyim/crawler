@@ -32,8 +32,8 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class MainSynthetic extends Strategy {
 
-	// private static String source = "../data-experiment/synthetic/skew-1000-0.3";
-	private static String source = "../data-experiment/synthetic/uniform-1000";
+	private static String source = "../data-experiment/synthetic/skew-1000-0.3";
+	// private static String source = "../data-experiment/synthetic/uniform-1000";
 	private static String target = "../data-experiment/synthetic/target";
 	private static int n = 1000;
 	private int topK = 10;

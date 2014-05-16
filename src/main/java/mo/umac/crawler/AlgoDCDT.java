@@ -27,7 +27,7 @@ public class AlgoDCDT extends Strategy {
 
 	protected static Logger logger = Logger.getLogger(AlgoDCDT.class.getName());
 
-	public final double EPSILON_DISTURB = 1e-7;/* * 1000 */; // 1e-7
+	public final double EPSILON_DISTURB = 1e-4;/* * 1000 */; // 1e-7
 	public double epsilonMinArea;
 
 	public AlgoDCDT() {
@@ -182,43 +182,43 @@ public class AlgoDCDT extends Strategy {
 				}
 			}
 
-			if (holeList.size() == 184) {
-				//
-				for (int i = 0; i < holeList.size(); i++) {
-					Polygon polygon2 = holeList.get(i);
-					PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-					PaintShapes.paint.addPolygon(polygon2);
-				}
-				PaintShapes.paint.myRepaint();
-
-				logger.info("waiting");
-
-				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-				PaintShapes.paint.addTriangle(triangle);
-				PaintShapes.paint.myRepaint();
-
-				PaintShapes.paint.color = PaintShapes.paint.color.red;
-				PaintShapes.paint.addPoint(center);
-				PaintShapes.paint.myRepaint();
-
-				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-				PaintShapes.paint.addCircle(aCircle);
-				PaintShapes.paint.myRepaint();
-
-				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-				PaintShapes.paint.addPolygon(inner);
-				PaintShapes.paint.myRepaint();
-				//
-				// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-				// PaintShapes.paint.addPolygon(holeList.get(131));
-				// PaintShapes.paint.myRepaint();
-				//
-				// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-				// PaintShapes.paint.addPolygon(holeList.get(173));
-				// PaintShapes.paint.myRepaint();
-
-				//
-			}
+//			if (holeList.size() == 184) {
+//				//
+//				for (int i = 0; i < holeList.size(); i++) {
+//					Polygon polygon2 = holeList.get(i);
+//					PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+//					PaintShapes.paint.addPolygon(polygon2);
+//				}
+//				PaintShapes.paint.myRepaint();
+//
+//				logger.info("waiting");
+//
+//				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+//				PaintShapes.paint.addTriangle(triangle);
+//				PaintShapes.paint.myRepaint();
+//
+//				PaintShapes.paint.color = PaintShapes.paint.color.red;
+//				PaintShapes.paint.addPoint(center);
+//				PaintShapes.paint.myRepaint();
+//
+//				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+//				PaintShapes.paint.addCircle(aCircle);
+//				PaintShapes.paint.myRepaint();
+//
+//				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+//				PaintShapes.paint.addPolygon(inner);
+//				PaintShapes.paint.myRepaint();
+//				//
+//				// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+//				// PaintShapes.paint.addPolygon(holeList.get(131));
+//				// PaintShapes.paint.myRepaint();
+//				//
+//				// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+//				// PaintShapes.paint.addPolygon(holeList.get(173));
+//				// PaintShapes.paint.myRepaint();
+//
+//				//
+//			}
 			// end testing
 
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -448,10 +448,10 @@ public class AlgoDCDT extends Strategy {
 		}
 		// The bisectric vector
 		double[] e = GeoOperator.bisectric(pointPre.getX(), pointPre.getY(), pointNext.getX(), pointNext.getY(), point.getX(), point.getY());
-		double unit = GeoOperator.size(e[0], e[1]);
+//		double unit = GeoOperator.size(e[0], e[1]);
 		if(logger.isDebugEnabled()) {
 			logger.debug("e: " + e[0] +  ", " + e[1]);
-			logger.debug("unit = " + unit);
+//			logger.debug("unit = " + unit);
 		}
 		// check this function: done
 		Coordinate outerPoint = GeoOperator.outOfMinBoundPoint(polygon);
@@ -467,7 +467,7 @@ public class AlgoDCDT extends Strategy {
 			// with fixed precision
 			double delta = EPSILON_DISTURB + random * EPSILON_DISTURB;
 			//
-			double distance = unit + delta;
+			double distance = delta;
 			xy = GeoOperator.locateByVector(point.getX(), point.getY(), e, distance);
 			
 			if(logger.isDebugEnabled()) {

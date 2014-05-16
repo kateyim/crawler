@@ -32,7 +32,7 @@ import com.vividsolutions.jts.geomgraph.Position;
 public class GeoOperator {
 
 	protected static Logger logger = Logger.getLogger(GeoOperator.class.getName());
-	public final static double EPSILON_EQUAL = 1e-12;//TriangulationUtil.EPSILON; // 1e-12 in Poly2Tri
+	public final static double EPSILON_EQUAL = 1e-10;// TriangulationUtil.EPSILON; // 1e-12 in Poly2Tri
 	public final static double EPSILON_LITTLE = 1;
 
 	public final static double RADIUS = 6371007.2;// authalic earth radius of
@@ -400,7 +400,10 @@ public class GeoOperator {
 			// this is exactly with the equal judgment in In org.poly2tri.triangulation.TriangulationUtil
 			double delta = Math.abs((p2.getX() - p1.getX()) * (q.getY() - p1.getY()) - (p2.getY() - p1.getY()) * (q.getX() - p1.getX()));
 			// for testing
-//			logger.info("delta = " + delta);		System.out.println(delta);
+			if(logger.isDebugEnabled()) {
+				logger.debug("delta = " + delta);
+			}
+			// System.out.println(delta);
 			if (delta < EPSILON_EQUAL) {
 				return true;
 			}
@@ -593,7 +596,7 @@ public class GeoOperator {
 	 * @return 0: not intersection; 1: intersect; 2: intersection at the corner point
 	 */
 	public static int intersectLineLine(Coordinate p1, Coordinate q1, Coordinate p2, Coordinate q2) {
-		// TODO check 
+		// TODO check
 		// add by kate 2014-5-5
 		if (p1.distance(p2) < EPSILON_EQUAL || p1.distance(q2) < EPSILON_EQUAL || q1.distance(p2) < EPSILON_EQUAL || q1.distance(q2) < EPSILON_EQUAL) {
 			return 2;
@@ -750,13 +753,12 @@ public class GeoOperator {
 	}
 
 	/**
-	 * Given two vectors CA and CB, compute the unit vector of the bisectric between CA and CB 
-	 *
+	 * Given two vectors CA and CB, compute the unit vector of the bisectric between CA and CB
 	 * C------->B
 	 * |-
-	 * |  -
-	 * V    -
-	 * A      D
+	 * | -
+	 * V -
+	 * A D
 	 * 
 	 * @param ax
 	 * @param ay
@@ -766,23 +768,23 @@ public class GeoOperator {
 	 * @param cy
 	 * @return
 	 */
-	public static double[] bisectric(double ax, double ay, double bx, double by, double cx, double cy){
-		double ca = size(ax-cx, ay-cy);
-		double cb = size(bx-cx, by-cy);
-		double[] e1 = {(ax-cx)/ca, (ay-cy)/ca};
-		double[] e2 = {(bx-cx)/cb, (by-cy)/cb};
-		double[] e12 = {e1[0] + e2[0], e1[1] + e2[1]};
+	public static double[] bisectric(double ax, double ay, double bx, double by, double cx, double cy) {
+		double ca = size(ax - cx, ay - cy);
+		double cb = size(bx - cx, by - cy);
+		double[] e1 = { (ax - cx) / ca, (ay - cy) / ca };
+		double[] e2 = { (bx - cx) / cb, (by - cy) / cb };
+		double[] e12 = { e1[0] + e2[0], e1[1] + e2[1] };
 		double cd = size(e12[0], e12[1]);
 		// The unit vector on the dicrection of CD
-		double[] e3 = {e12[0] / cd, e12[1] / cd};
-		
+		double[] e3 = { e12[0] / cd, e12[1] / cd };
+
 		return e3;
 	}
-	
+
 	public static double size(double x, double y) {
 		return Math.sqrt(x * x + y * y);
 	}
-	
+
 	/**
 	 * Get the point location on the vector with distance far from the starting point (x, y)
 	 * 
@@ -796,7 +798,7 @@ public class GeoOperator {
 		double[] newPoint = new double[2];
 		newPoint[0] = x + distance * e[0];
 		newPoint[1] = y + distance * e[1];
-		return newPoint; 
+		return newPoint;
 	}
-	
+
 }
