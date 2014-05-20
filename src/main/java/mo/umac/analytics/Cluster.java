@@ -6,6 +6,8 @@ import java.util.Queue;
 
 import org.apache.log4j.Logger;
 
+import utils.MaximalRectangle;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -20,6 +22,7 @@ public class Cluster {
 	public static double granularityY;
 	public static ArrayList<double[]> density;
 	public static boolean[][] tag;
+	public static double EPSILON_A = 0.000001;
 
 	public static ArrayList<Envelope> cluster(double gX, double gY, Envelope e, ArrayList<double[]> d, double a) {
 		logger.info("clustering...");
@@ -74,8 +77,59 @@ public class Cluster {
 			list.add(denseRegion);
 
 		}
+		return list;
+	}
+
+	public static ArrayList<Envelope> clusterDenseAndZero(double gX, double gY, Envelope e, ArrayList<double[]> d, double a, int loop) {
+		logger.info("clustering...");
+		density = d;
+		envelope = e;
+		granularityX = gX;
+		granularityY = gY;
+
+		numGridX = (int) Math.ceil(envelope.getWidth() / granularityX);
+		numGridY = (int) Math.ceil(envelope.getHeight() / granularityY);
+		if (logger.isDebugEnabled()) {
+			logger.debug("numGridX = " + numGridX + ", numGridY = " + numGridY);
+		}
+		initTag();
+		// cluster zeros: starting from the four corners of the envelope
+		ArrayList<Envelope> list0 = new ArrayList<Envelope>();
+		// 4 corner seeds
+		// for (int i = 0; i < numGridX; i += numGridX - 1) {
+		// for (int j = 0; j < numGridY; j += numGridY - 1) {
+		// for testing
+		int i = 0;
+		int j = 0;
+		Coordinate seed = new Coordinate(i, j);
+		Envelope zeroGrid = expandFromCorner(numGridX, numGridY, seed, EPSILON_A);
+		if (logger.isDebugEnabled()) {
+			logger.debug("zeroGrid: " + zeroGrid.toString());
+		}
+		Envelope zeroRegion = converseEnvelope(zeroGrid);
+		list0.add(zeroRegion);
+		// }
+		// }
+
+		// cluster densities
+		// ArrayList<Envelope> listDense = new ArrayList<Envelope>();
+		// for (int i = 0; i < loop; i++) {
+		// Coordinate seed = getTheDensest();
+		// if (logger.isDebugEnabled()) {
+		// logger.debug("seed = " + seed.toString() + ", density = " + getDensity(seed));
+		// }
+		// Envelope denseGrid = expandFromMiddle(seed, a);
+		// Envelope denseRegion = converseEnvelope(denseGrid);
 		//
-		// ArrayList<Envelope> list = partition(envelope, denseRegion);
+		// listDense.add(denseRegion);
+		//
+		// }
+		// TODO find overlaps
+
+		//
+		ArrayList<Envelope> list = new ArrayList<Envelope>();
+		list.addAll(list0);
+		// list.addAll(listDense);
 		return list;
 	}
 
@@ -88,6 +142,9 @@ public class Cluster {
 		int rowN = density.size();
 		int colN = density.get(0).length;
 		tag = new boolean[rowN][colN];
+		if (logger.isDebugEnabled()) {
+			logger.debug("tag: [" + rowN + "], [" + colN + "]");
+		}
 		for (int i = 0; i < rowN; i++) {
 			for (int j = 0; j < colN; j++) {
 				tag[i][j] = false;
@@ -154,6 +211,106 @@ public class Cluster {
 			}
 		}
 		return new Envelope(xLeft, xRight, yLeft, yRight);
+	}
+
+	/**
+	 * The similarity computation is different from the method expandFromMiddle()
+	 * 
+	 * @param seed
+	 * @param a
+	 * @return
+	 */
+	private static Envelope expandFromCorner(int numGridX, int numGridY, Coordinate seed, double a) {
+		// if (logger.isDebugEnabled()) {
+		// logger.debug("seed = " + seed.toString());
+		// }
+		ArrayList<Coordinate> borderGrid = new ArrayList<Coordinate>();
+		// add at 2014-5-20
+		double[] border = new double[numGridX];
+		for (int i = 0; i < numGridY; i++) {
+			if ((int) seed.x == 0) {
+				border[i] = numGridX - 1;
+			} else {
+				border[i] = 0;
+			}
+		}
+		// FIXME fill the values
+		double[][] borders = new double[numGridY][numGridX];
+		for (int i = 0; i < numGridY; i++) {
+			for (int j = 0; j < numGridX; j++) {
+				borders[i][j] = 0;
+			}
+		}
+		// if (logger.isDebugEnabled()) {
+		// logger.debug("seed.x = " + seed.x);
+		// logger.debug("initialize border to " + border[0]);
+		// }
+		// for the seed:
+		double densitySeed = getDensity(seed);
+		if (densitySeed <= a) {
+			tag[(int) seed.x][(int) seed.y] = true;
+		} else {
+			logger.error("The density of the corner is not 0!");
+		}
+
+		Queue<Coordinate> queue = new LinkedList<Coordinate>();
+		queue.add(seed);
+		while (!queue.isEmpty()) {
+			Coordinate one = queue.poll();
+			ArrayList<Coordinate> udlrList = upDownLeftRight(density, one);
+			for (int i = 0; i < udlrList.size(); i++) {
+				Coordinate neighbor = udlrList.get(i);
+
+				if (tag[(int) neighbor.x][(int) neighbor.y] == false) { // not visited before
+					// simple similarity function
+					double densityNeighbor = getDensity(neighbor);
+					// if (logger.isDebugEnabled()) {
+					// logger.debug("neighbor: " + neighbor.toString());
+					// logger.debug("densityNeighbor = " + densityNeighbor);
+					// }
+					//
+					tag[(int) neighbor.x][(int) neighbor.y] = true;
+					if (densityNeighbor <= a) {
+						queue.add(neighbor);
+					} else {
+						borderGrid.add(neighbor);
+						//
+						if ((int) seed.x == 0) { // expand to the right
+							if (border[(int) neighbor.y] > neighbor.x) {
+								border[(int) neighbor.y] = neighbor.x;
+								//
+								// logger.debug("border[(int) neighbor.x] = " + border[(int) neighbor.x]);
+							}
+						} else { // expand to the left
+							if (border[(int) neighbor.y] < neighbor.x) {
+								border[(int) neighbor.y] = neighbor.x;
+								// logger.debug("border[(int) neighbor.x] = " + border[(int) neighbor.x]);
+							}
+						}
+					}
+				}
+			}
+		}
+		// if (logger.isDebugEnabled()) {
+		// logger.debug("printing border[]:");
+		// for (int i = 0; i < border.length; i++) {
+		// logger.debug(i + ": " + border[i]);
+		// }
+		// logger.debug("end printing border[]:");
+		// }
+
+		// return new Envelope(minX, maxX, minY, maxY);
+		return findLargestRectangle(numGridX, numGridY, borders);
+	}
+
+	private static Envelope findLargestRectangle(int numGridX, int numGridY, double[][] borders) {
+		MaximalRectangle mr = new MaximalRectangle();
+		try {
+			Envelope envelope = mr.rectangle(numGridY, numGridX, borders);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return envelope;
 	}
 
 	private static Envelope converseEnvelope(Envelope denseGrid) {

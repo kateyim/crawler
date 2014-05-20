@@ -61,8 +61,9 @@ public class USDensity {
 	final static int NAME_INDEX = 5;
 
 	/**
-	 * The road information for the US states. </p> Downloaded from {@link http
-	 * ://www.census.gov/cgi-bin/geo/shapefiles2013/layers.cgi}
+	 * The road information for the US states.
+	 * </p>
+	 * Downloaded from {@link http://www.census.gov/cgi-bin/geo/shapefiles2013/layers.cgi}
 	 */
 	private static String ROAD_SHP_FILE = "../data-map/tl_2013_40_prisecroads/tl_2013_40_prisecroads.shp";
 
@@ -79,13 +80,13 @@ public class USDensity {
 	private static final String ZIP_FOLDER_PATH = "../data-map/us-road/new-york/";
 	private static final String UN_ZIP_FOLDER_PATH = "../data-map/us-road/new-york-upzip/";
 
-	private static String densityFile = "../data-experiment/densityMap-ny-0.01";
+	private static String densityFile = "../data-experiment/partition/densityMap-ny-0.01";
 	// temple
-	private static String clusterRegionFilePre = "../data-experiment/combinedDensity-ny-";
-	// private static String dentiestRegionFile =
-	// "../data-experiment/combinedDensity-ny-0.8-11.mbr";
-	private static String dentiestRegionFile = "../data-experiment/combinedDensity-ny-0.8-2.mbr";
-	public static String clusterRegionFile = "../data-experiment/combinedDensity-ny.mbr";
+	private static String clusterRegionFilePre = "../data-experiment/partition/combinedDensity-ny-";
+	// private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.8-11.mbr";
+	// 2014-5-19 why this file?
+	private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.8-2.mbr";
+	public static String clusterRegionFile = "../data-experiment/partition/combinedDensity-ny.mbr";
 
 	/**
 	 * @param args
@@ -95,8 +96,8 @@ public class USDensity {
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		// computeDensityInEachGrids();
-		// findDentiestRegions();
-		partition();
+		findClusteredRegions();
+		// partition();
 	}
 
 	/** compute the density on the map, run only once for a state folder */
@@ -110,7 +111,7 @@ public class USDensity {
 	}
 
 	/** cluster the regions, and then write to file */
-	public static void findDentiestRegions() {
+	public static void findClusteredRegions() {
 		ArrayList<double[]> density = USDensity.readDensityFromFile(densityFile);
 		// FIXME 2d array -> 1d array(only store non 0 values) ->
 		// TreeMap/HashMap
@@ -118,7 +119,7 @@ public class USDensity {
 		int loop = 2;
 		for (loop = 2; loop <= 2; loop++) {
 			for (a = 0.8; a < 1; a = a + 0.2) {
-				ArrayList<Envelope> clusteredRegion = Cluster.cluster(granularityX, granularityY, envelope, density, a, loop);
+				ArrayList<Envelope> clusteredRegion = Cluster.clusterDenseAndZero(granularityX, granularityY, envelope, density, a, loop);
 				USDensity.writePartition(clusterRegionFilePre + a + "-" + loop + ".mbr", clusteredRegion);
 			}
 		}

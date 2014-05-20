@@ -255,6 +255,10 @@ public class AlgoDCDT extends Strategy {
 		}
 	}
 
+	private void stopCriteria(){
+		
+	}
+	
 	/**
 	 * Disturb the point if it lies on an point/edge exist before
 	 * should change the inner, or one hole in the holeList
