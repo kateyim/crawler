@@ -93,23 +93,23 @@ public class Cluster {
 			logger.debug("numGridX = " + numGridX + ", numGridY = " + numGridY);
 		}
 		initTag();
+		double[][] densitiesForRectangle = rewriteDesity();
 		// cluster zeros: starting from the four corners of the envelope
 		ArrayList<Envelope> list0 = new ArrayList<Envelope>();
 		// 4 corner seeds
-		// for (int i = 0; i < numGridX; i += numGridX - 1) {
-		// for (int j = 0; j < numGridY; j += numGridY - 1) {
-		// for testing
-		int i = 0;
-		int j = 0;
-		Coordinate seed = new Coordinate(i, j);
-		Envelope zeroGrid = expandFromCorner(numGridX, numGridY, seed, EPSILON_A);
-		if (logger.isDebugEnabled()) {
-			logger.debug("zeroGrid: " + zeroGrid.toString());
+		for (int i = 0; i < numGridX; i += numGridX - 1) {
+			for (int j = 0; j < numGridY; j += numGridY - 1) {
+				// for testing
+				Coordinate seed = new Coordinate(i, j);
+				// Envelope zeroGrid = expandFromCorner(numGridX, numGridY, seed, EPSILON_A);
+				Envelope zeroGrid = findMaxRectangleFromCorner(seed, densitiesForRectangle);
+				if (logger.isDebugEnabled()) {
+					logger.debug("zeroGrid: " + zeroGrid.toString());
+				}
+				Envelope zeroRegion = converseEnvelope(zeroGrid);
+				list0.add(zeroRegion);
+			}
 		}
-		Envelope zeroRegion = converseEnvelope(zeroGrid);
-		list0.add(zeroRegion);
-		// }
-		// }
 
 		// cluster densities
 		// ArrayList<Envelope> listDense = new ArrayList<Envelope>();
@@ -131,6 +131,29 @@ public class Cluster {
 		list.addAll(list0);
 		// list.addAll(listDense);
 		return list;
+	}
+
+	/**
+	 * For finding the rectangles
+	 * 
+	 * @param density2
+	 */
+	private static double[][] rewriteDesity() {
+		int numRow = density.size();
+		int numCol = density.get(0).length;
+		double[][] densitiesForRectangle = new double[numRow][numCol];
+		for (int i = 0; i < density.size(); i++) {
+			double[] aRow = density.get(i);
+			for (int j = 0; j < aRow.length; j++) {
+				double den = aRow[j];
+				if (den > 0) {
+					densitiesForRectangle[i][j] = 0;
+				} else {
+					densitiesForRectangle[i][j] = 1;
+				}
+			}
+		}
+		return densitiesForRectangle;
 	}
 
 	private static double getDensity(Coordinate c) {
@@ -303,6 +326,34 @@ public class Cluster {
 		return findLargestRectangle(numGridX, numGridY, borders);
 	}
 
+
+	/**
+	 * cut off to a part containing the seed grid.
+	 * 
+	 * @param seed
+	 * @param densitiesForRectangle
+	 * @return
+	 */
+	private static Envelope findMaxRectangleFromCorner(Coordinate seed, double[][] densitiesForRectangle) {
+		// extract one part 
+		double[][] borders = null;
+		int numColumns = 0;
+		int numRows = 0;
+		// FIXME here
+		
+		
+		
+		// find the maximum rectangle in this part
+		MaximalRectangle mr = new MaximalRectangle();
+		try {
+			Envelope envelope = mr.rectangle(numColumns, numRows, borders);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return envelope;
+	}
+
+	
 	private static Envelope findLargestRectangle(int numGridX, int numGridY, double[][] borders) {
 		MaximalRectangle mr = new MaximalRectangle();
 		try {

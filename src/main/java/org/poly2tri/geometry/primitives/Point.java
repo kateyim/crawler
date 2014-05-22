@@ -10,6 +10,18 @@ public abstract class Point
     public abstract float getYf();
     public abstract float getZf();
     
+    // add by yanhui
+    // at 2014-5-22
+    public enum SHRINK_TAG {
+    	YES, NO
+    }
+    
+    public SHRINK_TAG shrinkTag = SHRINK_TAG.NO;
+    
+    public void shrinking() {
+    	this.shrinkTag = SHRINK_TAG.YES;
+    }
+    
     public abstract void set( double x, double y, double z );
 
     protected static int calculateHashCode( double x, double y, double z)
@@ -29,3 +41,5 @@ public abstract class Point
         
     }
 }
+
+

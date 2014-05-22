@@ -260,6 +260,16 @@ public class AlgoDCDT extends Strategy {
 	}
 	
 	/**
+	 * @return
+	 */
+	private boolean checkShrinkingTri(DelaunayTriangle dt){
+		// TODO 
+		
+		
+		return false;
+	}
+	
+	/**
 	 * Disturb the point if it lies on an point/edge exist before
 	 * should change the inner, or one hole in the holeList
 	 * 
