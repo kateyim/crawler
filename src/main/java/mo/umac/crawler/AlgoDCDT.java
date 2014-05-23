@@ -1,7 +1,11 @@
 package mo.umac.crawler;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import mo.umac.metadata.AQuery;
@@ -12,6 +16,7 @@ import org.apache.log4j.Logger;
 import org.poly2tri.Poly2Tri;
 import org.poly2tri.geometry.polygon.Polygon;
 import org.poly2tri.geometry.polygon.PolygonPoint;
+import org.poly2tri.geometry.primitives.Point;
 import org.poly2tri.triangulation.TriangulationPoint;
 import org.poly2tri.triangulation.delaunay.DelaunayTriangle;
 import org.poly2tri.triangulation.point.TPoint;
@@ -29,6 +34,22 @@ public class AlgoDCDT extends Strategy {
 
 	public final double EPSILON_DISTURB = 1e-4;/* * 1000 */; // 1e-7
 	public double epsilonMinArea;
+
+	/**
+	 * Key: perturbation point
+	 * Value: 0: perturbed from a point; 1: perturbed from an edge;
+	 */
+	Map<Coordinate, Integer> pertMap = new HashMap<Coordinate, Integer>();
+	/**
+	 * key: the perturbed point
+	 * value: the original point
+	 */
+	Map<Coordinate, Coordinate> pertPointMap = new HashMap<Coordinate, Coordinate>();
+	/**
+	 * key: the perturbed point
+	 * value: the original edge
+	 */
+	Map<Coordinate, Coordinate[]> pertEdgeMap = new HashMap<Coordinate, Coordinate[]>();
 
 	public AlgoDCDT() {
 		super();
@@ -76,7 +97,7 @@ public class AlgoDCDT extends Strategy {
 		Polygon polygon = boundary(envelope);
 		addHoles(polygon, holeList);
 		//
-		epsilonMinArea = EPSILON_DISTURB * Math.max(envelope.getHeight(), envelope.getWidth());
+		epsilonMinArea = EPSILON_DISTURB * Math.sqrt(envelope.getHeight() * envelope.getHeight() + envelope.getWidth() * envelope.getWidth()) / 2;
 		//
 		if (logger.isDebugEnabled()) {
 			logger.debug(GeoOperator.polygonToString(polygon));
@@ -112,19 +133,43 @@ public class AlgoDCDT extends Strategy {
 					maxIndex = i;
 				}
 			}
-			if (maxArea < epsilonMinArea) {
-				break;
+			DelaunayTriangle triangle = list.get(maxIndex);
+
+			if (maxArea <= epsilonMinArea) {
+				if (checkShrinkingTri(triangle)) {
+					// sort the list from large to small
+					Collections.sort(list, new Comparator<DelaunayTriangle>() {
+						public int compare(DelaunayTriangle one, DelaunayTriangle other) {
+							double a1 = one.area();
+							double a2 = other.area();
+							if (a1 > a2) {
+								return -1;
+							} else if (a1 < a2) {
+								return 1;
+							} else {
+								return 0;
+							}
+						}
+					});
+					for (int i = 0; i < list.size(); i++) {
+						triangle = list.get(i);
+						// maxArea = triangle.area();
+						if (!checkShrinkingTri(triangle)) {
+							break;
+						}
+					}
+				}
 			}
+			//
 			if (logger.isDebugEnabled()) {
 				logger.debug("List<DelaunayTriangle> size = " + list.size());
-				logger.debug("maxArea = " + maxArea);
+				// logger.debug("maxArea = " + maxArea);
 				logger.debug("maxIndex = " + maxIndex);
 				for (int i = 0; i < list.size(); i++) {
 					DelaunayTriangle tri = list.get(i);
 					logger.debug(GeoOperator.triangleToString(tri));
 				}
 			}
-			DelaunayTriangle triangle = list.get(maxIndex);
 			list.clear();
 			TPoint centroid = triangle.centroid();
 			if (logger.isDebugEnabled()) {
@@ -182,43 +227,43 @@ public class AlgoDCDT extends Strategy {
 				}
 			}
 
-//			if (holeList.size() == 184) {
-//				//
-//				for (int i = 0; i < holeList.size(); i++) {
-//					Polygon polygon2 = holeList.get(i);
-//					PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-//					PaintShapes.paint.addPolygon(polygon2);
-//				}
-//				PaintShapes.paint.myRepaint();
-//
-//				logger.info("waiting");
-//
-//				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-//				PaintShapes.paint.addTriangle(triangle);
-//				PaintShapes.paint.myRepaint();
-//
-//				PaintShapes.paint.color = PaintShapes.paint.color.red;
-//				PaintShapes.paint.addPoint(center);
-//				PaintShapes.paint.myRepaint();
-//
-//				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-//				PaintShapes.paint.addCircle(aCircle);
-//				PaintShapes.paint.myRepaint();
-//
-//				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-//				PaintShapes.paint.addPolygon(inner);
-//				PaintShapes.paint.myRepaint();
-//				//
-//				// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-//				// PaintShapes.paint.addPolygon(holeList.get(131));
-//				// PaintShapes.paint.myRepaint();
-//				//
-//				// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-//				// PaintShapes.paint.addPolygon(holeList.get(173));
-//				// PaintShapes.paint.myRepaint();
-//
-//				//
-//			}
+			// if (holeList.size() == 184) {
+			// //
+			// for (int i = 0; i < holeList.size(); i++) {
+			// Polygon polygon2 = holeList.get(i);
+			// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			// PaintShapes.paint.addPolygon(polygon2);
+			// }
+			// PaintShapes.paint.myRepaint();
+			//
+			// logger.info("waiting");
+			//
+			// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+			// PaintShapes.paint.addTriangle(triangle);
+			// PaintShapes.paint.myRepaint();
+			//
+			// PaintShapes.paint.color = PaintShapes.paint.color.red;
+			// PaintShapes.paint.addPoint(center);
+			// PaintShapes.paint.myRepaint();
+			//
+			// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+			// PaintShapes.paint.addCircle(aCircle);
+			// PaintShapes.paint.myRepaint();
+			//
+			// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			// PaintShapes.paint.addPolygon(inner);
+			// PaintShapes.paint.myRepaint();
+			// //
+			// // PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+			// // PaintShapes.paint.addPolygon(holeList.get(131));
+			// // PaintShapes.paint.myRepaint();
+			// //
+			// // PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			// // PaintShapes.paint.addPolygon(holeList.get(173));
+			// // PaintShapes.paint.myRepaint();
+			//
+			// //
+			// }
 			// end testing
 
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -255,20 +300,42 @@ public class AlgoDCDT extends Strategy {
 		}
 	}
 
-	private void stopCriteria(){
-		
+	private void stopCriteria() {
+
 	}
-	
+
 	/**
 	 * @return
 	 */
-	private boolean checkShrinkingTri(DelaunayTriangle dt){
-		// TODO 
-		
-		
+	private boolean checkShrinkingTri(DelaunayTriangle triangle) {
+		TriangulationPoint[] tp = triangle.points;
+		for (int i = 0; i < tp.length; i++) {
+			Coordinate p = GeoOperator.trans(tp[i]);
+			Integer pOrE = pertMap.get(p);
+			if (pOrE == null) {
+				continue;
+			}
+			if (pOrE == 0) {
+				Coordinate originPoint = pertPointMap.get(p);
+
+			} else {
+				// pOrE == 1
+				Coordinate[] originPoints = pertEdgeMap.get(p);
+			}
+
+
+			for (int j = 0; j < tp.length; j++) {
+				if (j != i) {
+					Coordinate q = GeoOperator.trans(tp[j]);
+					// TODO
+
+				}
+			}
+		}
+
 		return false;
 	}
-	
+
 	/**
 	 * Disturb the point if it lies on an point/edge exist before
 	 * should change the inner, or one hole in the holeList
@@ -462,17 +529,17 @@ public class AlgoDCDT extends Strategy {
 		}
 		// The bisectric vector
 		double[] e = GeoOperator.bisectric(pointPre.getX(), pointPre.getY(), pointNext.getX(), pointNext.getY(), point.getX(), point.getY());
-//		double unit = GeoOperator.size(e[0], e[1]);
-		if(logger.isDebugEnabled()) {
-			logger.debug("e: " + e[0] +  ", " + e[1]);
-//			logger.debug("unit = " + unit);
+		// double unit = GeoOperator.size(e[0], e[1]);
+		if (logger.isDebugEnabled()) {
+			logger.debug("e: " + e[0] + ", " + e[1]);
+			// logger.debug("unit = " + unit);
 		}
 		// check this function: done
 		Coordinate outerPoint = GeoOperator.outOfMinBoundPoint(polygon);
-		
+
 		boolean inside = false;
 		TriangulationPoint disturbPoint = null;
-		double[] xy = new double[2]; 
+		double[] xy = new double[2];
 
 		while (!inside) {
 			// generate
@@ -483,14 +550,14 @@ public class AlgoDCDT extends Strategy {
 			//
 			double distance = delta;
 			xy = GeoOperator.locateByVector(point.getX(), point.getY(), e, distance);
-			
-			if(logger.isDebugEnabled()) {
+
+			if (logger.isDebugEnabled()) {
 				logger.debug("random = " + random);
 				logger.debug("delta = " + delta);
 				logger.debug("distance = " + distance);
 				logger.debug("xy = " + xy[0] + ", " + xy[1]);
 			}
-			
+
 			Coordinate disturbCoor = new Coordinate(xy[0], xy[1]);
 			disturbPoint = new TPoint(xy[0], xy[1]);
 			// should not include the point on the edge!
