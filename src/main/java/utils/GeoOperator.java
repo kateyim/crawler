@@ -715,6 +715,13 @@ public class GeoOperator {
 		}
 		return false;
 	}
+	
+	public static boolean equalPoint(Coordinate pp, Coordinate tp) {
+		if (Math.abs(pp.x - tp.x) < EPSILON_EQUAL && Math.abs(pp.y - tp.y) < EPSILON_EQUAL) {
+			return true;
+		}
+		return false;
+	}
 
 	public static String polygonToString(Polygon inner) {
 		StringBuffer sb = new StringBuffer("Polygon: ");

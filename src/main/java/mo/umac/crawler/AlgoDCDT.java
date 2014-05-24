@@ -39,17 +39,17 @@ public class AlgoDCDT extends Strategy {
 	 * Key: perturbation point
 	 * Value: 0: perturbed from a point; 1: perturbed from an edge;
 	 */
-	Map<Coordinate, Integer> pertMap = new HashMap<Coordinate, Integer>();
+	Map<TriangulationPoint, Integer> pertMap = new HashMap<TriangulationPoint, Integer>();
 	/**
 	 * key: the perturbed point
 	 * value: the original point
 	 */
-	Map<Coordinate, Coordinate> pertPointMap = new HashMap<Coordinate, Coordinate>();
+	Map<TriangulationPoint, TriangulationPoint> pertPointMap = new HashMap<TriangulationPoint, TriangulationPoint>();
 	/**
 	 * key: the perturbed point
 	 * value: the original edge
 	 */
-	Map<Coordinate, Coordinate[]> pertEdgeMap = new HashMap<Coordinate, Coordinate[]>();
+	Map<TriangulationPoint, TriangulationPoint[]> pertEdgeMap = new HashMap<TriangulationPoint, TriangulationPoint[]>();
 
 	public AlgoDCDT() {
 		super();
@@ -122,7 +122,8 @@ public class AlgoDCDT extends Strategy {
 			PaintShapes.paint.myRepaint();
 		}
 
-		while (list.size() != 0) {
+		boolean finished = false;
+		while (!finished) {
 			double maxArea = Double.MIN_VALUE;
 			int maxIndex = 0;
 			for (int i = 0; i < list.size(); i++) {
@@ -136,27 +137,42 @@ public class AlgoDCDT extends Strategy {
 			DelaunayTriangle triangle = list.get(maxIndex);
 
 			if (maxArea <= epsilonMinArea) {
+				// this triangle may be the "cannot exist triangle"
 				if (checkShrinkingTri(triangle)) {
+					// skip this triangle, and find the next one
 					// sort the list from large to small
 					Collections.sort(list, new Comparator<DelaunayTriangle>() {
 						public int compare(DelaunayTriangle one, DelaunayTriangle other) {
 							double a1 = one.area();
 							double a2 = other.area();
-							if (a1 > a2) {
+							if (a1 < a2) {
 								return -1;
-							} else if (a1 < a2) {
+							} else if (a1 > a2) {
 								return 1;
 							} else {
 								return 0;
 							}
 						}
 					});
-					for (int i = 0; i < list.size(); i++) {
+					boolean findNoShrinkTri = false;
+					for (int i = list.size() - 2; i >= 0; i--) {
+						// the last one is shrunk
 						triangle = list.get(i);
 						// maxArea = triangle.area();
 						if (!checkShrinkingTri(triangle)) {
+							findNoShrinkTri = true;
 							break;
 						}
+					}
+					// remove these cannot exist triangles
+					if (findNoShrinkTri == false) {
+						finished = true;
+						// finish the crawling
+						// TODO check: jump to where?
+						if (logger.isDebugEnabled()) {
+							logger.debug("finished = true");
+						}
+						break;
 					}
 				}
 			}
@@ -308,29 +324,51 @@ public class AlgoDCDT extends Strategy {
 	 * @return
 	 */
 	private boolean checkShrinkingTri(DelaunayTriangle triangle) {
+		// TODO checking
 		TriangulationPoint[] tp = triangle.points;
 		for (int i = 0; i < tp.length; i++) {
 			Coordinate p = GeoOperator.trans(tp[i]);
 			Integer pOrE = pertMap.get(p);
 			if (pOrE == null) {
+				// this point hasn't been shrunk
 				continue;
 			}
 			if (pOrE == 0) {
-				Coordinate originPoint = pertPointMap.get(p);
+				// this point is shrink from another point
+				TriangulationPoint originPoint = pertPointMap.get(p);
+				for (int j = 0; j < tp.length; j++) {
+					if (j != i) {
+						TriangulationPoint q = tp[j];
+						if (GeoOperator.equalPoint(originPoint, q)) {
+							// find
+							return true;
+						}
 
+					}
+				}
 			} else {
 				// pOrE == 1
-				Coordinate[] originPoints = pertEdgeMap.get(p);
-			}
-
-
-			for (int j = 0; j < tp.length; j++) {
-				if (j != i) {
-					Coordinate q = GeoOperator.trans(tp[j]);
-					// TODO
-
+				TriangulationPoint[] originPoints = pertEdgeMap.get(p);
+				TriangulationPoint q1 = null;// = GeoOperator.trans(tp[j]);
+				TriangulationPoint q2 = null;// =
+				for (int j = 0; j < tp.length; j++) {
+					if (j != i) {
+						if (q1 == null) {
+							q1 = tp[j];
+						} else {
+							q2 = tp[j];
+						}
+					}
+				}
+				if (GeoOperator.equalPoint(originPoints[0], q1) && GeoOperator.equalPoint(originPoints[2], q2)) {
+					// find
+					return true;
+				} else if (GeoOperator.equalPoint(originPoints[0], q2) && GeoOperator.equalPoint(originPoints[2], q1)) {
+					// find
+					return true;
 				}
 			}
+
 		}
 
 		return false;
@@ -510,7 +548,7 @@ public class AlgoDCDT extends Strategy {
 	 *            : point is the j-th point in the polygon
 	 */
 	private TriangulationPoint shrink(TriangulationPoint p1, TriangulationPoint p2, Polygon polygon, TriangulationPoint point, int j) {
-		// check done
+		// check done 1
 		List<TriangulationPoint> points = polygon.getPoints();
 		// XXX although I define the direction to inside the polygon before hand, but it may also exceed the boundaries of the polygon.
 		// So it is still necessary to check the property of inside polygon. (this is the special case)
@@ -571,6 +609,19 @@ public class AlgoDCDT extends Strategy {
 		}
 		// check whether replaced it properly done
 		points.set(j, disturbPoint);
+		// add at 2014-5-24
+		// TODO checking: add to the map
+		if (GeoOperator.equalPoint(point, p1)) {
+			pertMap.put(disturbPoint, 0);
+			pertPointMap.put(disturbPoint, point);
+		} else if (GeoOperator.equalPoint(point, p2)) {
+			pertMap.put(disturbPoint, 0);
+			pertPointMap.put(disturbPoint, point);
+		} else {
+			pertMap.put(disturbPoint, 1);
+			TriangulationPoint[] value = { p1, p2 };
+			pertEdgeMap.put(disturbPoint, value);
+		}
 		return disturbPoint;
 
 	}
