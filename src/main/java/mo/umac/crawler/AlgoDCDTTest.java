@@ -16,6 +16,7 @@ import org.poly2tri.triangulation.point.TPoint;
 
 import paint.PaintShapes;
 import paint.WindowUtilities;
+import utils.GeoOperator;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -36,7 +37,42 @@ public class AlgoDCDTTest extends AlgoDCDT {
 		// testEightCases();
 		// testTriangulation184();
 		// testTriangulation53();
-		testTriangulation104();
+		// testTriangulation104();
+		testShrink();
+		// AlgoDCDTTest test = new AlgoDCDTTest();
+		// test.testIntersect();
+	}
+
+	public void testIntersect() {
+		Circle aCircle = new Circle(new Coordinate(415.0752119518988, 4.875326097704483E-5), 436.97110832295834);
+		DelaunayTriangle triangle = new DelaunayTriangle(new TPoint(1000.0, 0.0), new TPoint(245.22563585569634, 1.4625978293113449E-4), new TPoint(0.0, 0.0));
+		Polygon inner = intersect(aCircle, triangle);
+		System.out.println(GeoOperator.polygonToString(inner));
+
+	}
+
+	public static void testShrink() {
+		AlgoDCDT algo = new AlgoDCDT();
+		TriangulationPoint p1 = new TPoint(0.0, 0.0);
+		TriangulationPoint p2 = new TPoint(1000.0, 0.0);
+		TriangulationPoint point = new TPoint(852.0463202748545, 0.0);
+		int j = 2;
+		//
+		// polygon: Polygon: [245.22563585569634, 1.4625978293113449E-4]; [1.222368850126051E-4, 3.6452837008118994E-11]; [852.0463202748545, 0.0];
+		// [852.0463202748568, 2.867038695066859E-5];
+		List<PolygonPoint> points = new ArrayList<PolygonPoint>();
+		PolygonPoint pp1 = new PolygonPoint(245.22563585569634, 1.4625978293113449E-4);
+		PolygonPoint pp2 = new PolygonPoint(1.222368850126051E-4, 3.6452837008118994E-11);
+		PolygonPoint pp3 = new PolygonPoint(852.0463202748545, 0.0);
+		PolygonPoint pp4 = new PolygonPoint(852.0463202748568, 2.867038695066859E-5);
+		points.add(pp1);
+		points.add(pp2);
+		points.add(pp3);
+		points.add(pp4);
+		Polygon polygon = new Polygon(points);
+
+		//
+		algo.shrink(p1, p2, polygon, point, j);
 	}
 
 	public static void testEightCases() {

@@ -32,8 +32,9 @@ public class AlgoDCDT extends Strategy {
 
 	protected static Logger logger = Logger.getLogger(AlgoDCDT.class.getName());
 
-	public final double EPSILON_DISTURB = 1e-4;/* * 1000 */; // 1e-7
+	public final static double EPSILON_DISTURB = 1e-4;/* * 1000 */; // 1e-7
 	public double epsilonMinArea;
+	public int maxCountForInside = 10000;
 
 	/**
 	 * Key: perturbation point
@@ -62,21 +63,208 @@ public class AlgoDCDT extends Strategy {
 			logger.info("------------crawling---------");
 			logger.info(envelope.toString());
 		}
+		epsilonMinArea = EPSILON_DISTURB * Math.sqrt(envelope.getHeight() * envelope.getHeight() + envelope.getWidth() * envelope.getWidth()) / 2;
+		//
+		ArrayList<Polygon> holeList = new ArrayList<Polygon>();
+		Polygon polygonHexagon = issueFirstHexagon(state, category, query, envelope, holeList);
+		holeList.add(polygonHexagon);
+		Polygon polygon = boundary(envelope);
+		addHoles(polygon, holeList);
+		Poly2Tri.triangulate(polygon);
+		List<DelaunayTriangle> listTris = polygon.getTriangles();
+		//
+		if (PaintShapes.painting) {
+			PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
+			for (int i = 0; i < listTris.size(); i++) {
+				DelaunayTriangle dt = listTris.get(i);
+				PaintShapes.paint.addTriangle(dt);
+			}
+			PaintShapes.paint.myRepaint();
+		}
+		boolean finished = false;
+		// when there comes up the first small triangle, then the following triangles are also small
+		boolean beginSmallTri = false;
+		while (!finished) {
+			int maxIndex = 0;
+			double maxArea = Double.MIN_VALUE;
+			DelaunayTriangle triangle = null;
+			if (!beginSmallTri) {
+				// find the triangle with the maximum area
+				for (int i = 0; i < listTris.size(); i++) {
+					triangle = listTris.get(i);
+					double area = triangle.area();
+					if (area > maxArea) {
+						maxArea = area;
+						maxIndex = i;
+					}
+				}
+				triangle = listTris.get(maxIndex);
+			}
+			// begin to handle the small triangles
+			if (beginSmallTri || maxArea <= epsilonMinArea) {
+				beginSmallTri = true;
+				if (logger.isDebugEnabled()) {
+					logger.debug("beginSmallTri");
+					logger.debug("list.size() = " + listTris.size());
+					// logger.debug("max triangle " + GeoOperator.triangleToString(triangle));
+				}
+				// sort the list from large to small
+				Collections.sort(listTris, new Comparator<DelaunayTriangle>() {
+					public int compare(DelaunayTriangle one, DelaunayTriangle other) {
+						double a1 = one.area();
+						double a2 = other.area();
+						if (a1 > a2) {
+							return -1;
+						} else if (a1 < a2) {
+							return 1;
+						} else {
+							return 0;
+						}
+					}
+				});
+				// this triangle may be the "cannot exist triangle"
+				// skip this triangle, and find the next one
+				boolean findNoShrinkTri = false;
+				for (int i = 0; i < listTris.size(); i++) {
+					// find the one which is not shrunk and with the maximum area.
+					logger.debug("listTris.get(i) = " + i);
+					triangle = listTris.get(i);
+					if (!checkShrinkingTri(triangle)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("find the largest triangle with no perturbation: i = " + i);
+							logger.debug("maximum triangle = " + GeoOperator.triangleToString(triangle));
+						}
+
+						// add at 2014-4-17
+						Circle aCircle = issueCircleLoop(state, category, query, triangle);
+						Polygon inner = issueInnerPolygon(aCircle, triangle);
+						boolean cannotDisturb = disturb(polygon, holeList, inner);
+						if (cannotDisturb) {
+							// get next triangle
+							logger.debug("cannotDisturb");
+						} else {
+							if (logger.isDebugEnabled()) {
+								logger.debug("before disturb--------------------");
+								logger.debug("aCircle = " + aCircle.toString());
+								logger.debug("triangle = " + triangle.toString());
+								logger.debug("inner: " + GeoOperator.polygonToString(inner));
+								// for (int i = 0; i < holeList.size(); i++) {
+								// logger.debug(i + ": " + GeoOperator.polygonToString(holeList.get(i)));
+								// }
+								logger.debug("end recording before disturb--------------------");
+							}
+							//
+							polygon = boundary(envelope);
+							holeList.add(inner);
+							addHoles(polygon, holeList);
+							Poly2Tri.triangulate(polygon);
+							//
+							listTris.clear();
+							listTris = polygon.getTriangles();
+							//
+							findNoShrinkTri = true;
+							break;
+						}
+					}
+
+				}
+				logger.debug("jump out of for loop");
+
+				// remove these cannot exist triangles
+				if (findNoShrinkTri == false) {
+					finished = true;
+					if (logger.isDebugEnabled()) {
+						logger.debug("finished = true");
+					}
+					break;
+				}
+
+			} else {
+				Circle aCircle = issueCircleLoop(state, category, query, triangle);
+				Polygon inner = intersect(aCircle, triangle);
+				// add at 2014-4-17
+				if (logger.isDebugEnabled()) {
+					logger.debug("before disturb--------------------");
+					logger.debug("aCircle = " + aCircle.toString());
+					logger.debug("triangle = " + triangle.toString());
+					logger.debug("inner: " + GeoOperator.polygonToString(inner));
+					// for (int i = 0; i < holeList.size(); i++) {
+					// logger.debug(i + ": " + GeoOperator.polygonToString(holeList.get(i)));
+					// }
+					logger.debug("end recording before disturb--------------------");
+				}
+
+				if (PaintShapes.painting) {
+					PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+					PaintShapes.paint.addPolygon(inner);
+					PaintShapes.paint.myRepaint();
+				}
+				//
+				polygon = boundary(envelope);
+				boolean cannotDisturb = disturb(polygon, holeList, inner);
+				if (cannotDisturb) {
+					logger.debug("cannotDisturb");
+				} else {
+					holeList.add(inner);
+					addHoles(polygon, holeList);
+
+					Poly2Tri.triangulate(polygon);
+					//
+					listTris.clear();
+					listTris = polygon.getTriangles();
+					if (PaintShapes.painting) {
+						PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+						for (int i = 0; i < listTris.size(); i++) {
+							DelaunayTriangle dt = listTris.get(i);
+							PaintShapes.paint.addTriangle(dt);
+						}
+						PaintShapes.paint.myRepaint();
+					}
+				}
+			}
+		}
+	}
+
+	private Polygon issueFirstHexagon(String state, int category, String query, Envelope envelope, ArrayList<Polygon> holeList) {
 		Coordinate center = envelope.centre();
 		AQuery aQuery = new AQuery(center, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
 		ResultSetD2 resultSet = query(aQuery);
-		// if (logger.isDebugEnabled()) {
-		// logger.debug("resultSet.getPOIs().size() = " + resultSet.getPOIs().size());
-		// }
 		Coordinate farthestCoordinate = CrawlerD1.farthest(resultSet);
 		if (farthestCoordinate == null) {
 			logger.error("farestest point is null");
 		}
 		double radius = center.distance(farthestCoordinate);
-		// if (logger.isDebugEnabled()) {
-		// logger.debug("farthestCoordinate = " + farthestCoordinate.toString());
-		// logger.debug("radius = " + radius);
-		// }
+		Circle aCircle = new Circle(center, radius);
+		resultSet.addACircle(aCircle);
+		Polygon polygonHexagon = findInnerHexagon(aCircle);
+		if (PaintShapes.painting) {
+			PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+			PaintShapes.paint.addCircle(aCircle);
+			PaintShapes.paint.myRepaint();
+			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			PaintShapes.paint.addPolygon(polygonHexagon);
+			PaintShapes.paint.myRepaint();
+		}
+		return polygonHexagon;
+	}
+
+	private Circle issueCircleLoop(String state, int category, String query, DelaunayTriangle triangle) {
+		TPoint centroid = triangle.centroid();
+		Coordinate center = new Coordinate(centroid.getX(), centroid.getY());
+		if (PaintShapes.painting) {
+			PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+			PaintShapes.paint.addTriangle(triangle);
+			PaintShapes.paint.color = PaintShapes.paint.color.red;
+			PaintShapes.paint.addPoint(center);
+			PaintShapes.paint.myRepaint();
+		}
+		AQuery aQuery = new AQuery(center, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
+		ResultSetD2 resultSet = query(aQuery);
+		Coordinate farthestCoordinate = CrawlerD1.farthest(resultSet);
+		if (farthestCoordinate == null) {
+			logger.error("farestest point is null");
+		}
+		double radius = center.distance(farthestCoordinate);
 		Circle aCircle = new Circle(center, radius);
 		resultSet.addACircle(aCircle);
 		if (PaintShapes.painting) {
@@ -84,242 +272,28 @@ public class AlgoDCDT extends Strategy {
 			PaintShapes.paint.addCircle(aCircle);
 			PaintShapes.paint.myRepaint();
 		}
-		//
-		ArrayList<Polygon> holeList = new ArrayList<Polygon>();
-		//
-		Polygon polygonHexagon = findInnerHexagon(aCircle);
-		if (PaintShapes.painting) {
-			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-			PaintShapes.paint.addPolygon(polygonHexagon);
-			PaintShapes.paint.myRepaint();
-		}
-		holeList.add(polygonHexagon);
-		Polygon polygon = boundary(envelope);
-		addHoles(polygon, holeList);
-		//
-		epsilonMinArea = EPSILON_DISTURB * Math.sqrt(envelope.getHeight() * envelope.getHeight() + envelope.getWidth() * envelope.getWidth()) / 2;
-		//
-		if (logger.isDebugEnabled()) {
-			logger.debug(GeoOperator.polygonToString(polygon));
-			logger.debug("EPSILON_MIN_AREA = " + epsilonMinArea);
-			// logger.error("--------------------");
-			// logger.error(GeoOperator.polygonToString(polygon));
-
-			for (int i = 0; i < holeList.size(); i++) {
-				logger.debug(GeoOperator.polygonToString(holeList.get(i)));
-				// logger.error(GeoOperator.polygonToString(holeList.get(i)));
-			}
-		}
-		Poly2Tri.triangulate(polygon);
-
-		List<DelaunayTriangle> list = polygon.getTriangles();
-		if (PaintShapes.painting) {
-			PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
-			for (int i = 0; i < list.size(); i++) {
-				DelaunayTriangle dt = list.get(i);
-				PaintShapes.paint.addTriangle(dt);
-			}
-			PaintShapes.paint.myRepaint();
-		}
-
-		boolean finished = false;
-		while (!finished) {
-			double maxArea = Double.MIN_VALUE;
-			int maxIndex = 0;
-			for (int i = 0; i < list.size(); i++) {
-				DelaunayTriangle triangle = list.get(i);
-				double area = triangle.area();
-				if (area > maxArea) {
-					maxArea = area;
-					maxIndex = i;
-				}
-			}
-			DelaunayTriangle triangle = list.get(maxIndex);
-
-			if (maxArea <= epsilonMinArea) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("maxArea <= epsilonMinArea");
-					logger.debug("list.size() = " + list.size());
-				}
-				// this triangle may be the "cannot exist triangle"
-				if (checkShrinkingTri(triangle)) {
-					// skip this triangle, and find the next one
-					// sort the list from large to small
-					Collections.sort(list, new Comparator<DelaunayTriangle>() {
-						public int compare(DelaunayTriangle one, DelaunayTriangle other) {
-							double a1 = one.area();
-							double a2 = other.area();
-							if (a1 < a2) {
-								return -1;
-							} else if (a1 > a2) {
-								return 1;
-							} else {
-								return 0;
-							}
-						}
-					});
-					boolean findNoShrinkTri = false;
-					int i = list.size() - 2;
-					for (/* int i = list.size() - 2 */; i >= 0; i--) {
-						// the last one is shrunk
-						triangle = list.get(i);
-						// maxArea = triangle.area();
-						if (!checkShrinkingTri(triangle)) {
-							findNoShrinkTri = true;
-							break;
-						}
-					}
-					if (logger.isDebugEnabled()) {
-						logger.debug("find the largest triangle with no perturbation: i = " + i);
-						logger.debug("max triangule = " + GeoOperator.triangleToString(triangle));
-					}
-					// remove these cannot exist triangles
-					if (findNoShrinkTri == false) {
-						finished = true;
-						// finish the crawling
-						// TODO check: jump to where?
-						if (logger.isDebugEnabled()) {
-							logger.debug("finished = true");
-						}
-						break;
-					}
-				}
-			}
-			//
-			if (logger.isDebugEnabled()) {
-				logger.debug("List<DelaunayTriangle> size = " + list.size());
-				// logger.debug("maxArea = " + maxArea);
-				logger.debug("maxIndex = " + maxIndex);
-				for (int i = 0; i < list.size(); i++) {
-					DelaunayTriangle tri = list.get(i);
-					logger.debug(GeoOperator.triangleToString(tri));
-				}
-			}
-			list.clear();
-			TPoint centroid = triangle.centroid();
-			// if (logger.isDebugEnabled()) {
-			// logger.debug("centroid = " + centroid.toString());
-			// }
-			// issue the centroid query
-			center = new Coordinate(centroid.getX(), centroid.getY());
-			if (PaintShapes.painting) {
-				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-				PaintShapes.paint.addTriangle(triangle);
-				PaintShapes.paint.color = PaintShapes.paint.color.red;
-				PaintShapes.paint.addPoint(center);
-				PaintShapes.paint.myRepaint();
-			}
-			aQuery = new AQuery(center, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
-			resultSet = query(aQuery);
-			farthestCoordinate = CrawlerD1.farthest(resultSet);
-			if (farthestCoordinate == null) {
-				logger.error("farestest point is null");
-			}
-			radius = center.distance(farthestCoordinate);
-			// if (logger.isDebugEnabled()) {
-			// logger.debug("radius = " + radius);
-			// }
-			aCircle = new Circle(center, radius);
-			resultSet.addACircle(aCircle);
-			if (PaintShapes.painting) {
-				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-				PaintShapes.paint.addCircle(aCircle);
-				PaintShapes.paint.myRepaint();
-			}
-			Polygon inner = intersect(aCircle, triangle);
-			// for testing
-			// if (logger.isDebugEnabled()) {
-			// logger.debug("holeList.size() = " + holeList.size());
-			// logger.debug("aCircle = " + aCircle.toString());
-			// logger.debug("triangle = " + triangle.toString());
-			// logger.debug("inner = " + GeoOperator.polygonToString(inner));
-			// }
-			// for testing print all triangles: whether this triangle overlapped with a previous one
-
-			// add at 2014-4-17
-			if (logger.isDebugEnabled()) {
-				logger.debug("before disturb--------------------");
-				logger.debug("inner: " + GeoOperator.polygonToString(inner));
-				for (int i = 0; i < holeList.size(); i++) {
-					logger.debug(i + ": " + GeoOperator.polygonToString(holeList.get(i)));
-				}
-			}
-
-			// if (holeList.size() == 184) {
-			// //
-			// for (int i = 0; i < holeList.size(); i++) {
-			// Polygon polygon2 = holeList.get(i);
-			// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-			// PaintShapes.paint.addPolygon(polygon2);
-			// }
-			// PaintShapes.paint.myRepaint();
-			//
-			// logger.info("waiting");
-			//
-			// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-			// PaintShapes.paint.addTriangle(triangle);
-			// PaintShapes.paint.myRepaint();
-			//
-			// PaintShapes.paint.color = PaintShapes.paint.color.red;
-			// PaintShapes.paint.addPoint(center);
-			// PaintShapes.paint.myRepaint();
-			//
-			// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-			// PaintShapes.paint.addCircle(aCircle);
-			// PaintShapes.paint.myRepaint();
-			//
-			// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-			// PaintShapes.paint.addPolygon(inner);
-			// PaintShapes.paint.myRepaint();
-			// //
-			// // PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-			// // PaintShapes.paint.addPolygon(holeList.get(131));
-			// // PaintShapes.paint.myRepaint();
-			// //
-			// // PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-			// // PaintShapes.paint.addPolygon(holeList.get(173));
-			// // PaintShapes.paint.myRepaint();
-			//
-			// //
-			// }
-			// end testing
-
-			if (PaintShapes.painting) {
-				// logger.debug(polygonToString(inner));
-				// logger.error(GeoOperator.polygonToString(inner));
-				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-				PaintShapes.paint.addPolygon(inner);
-				PaintShapes.paint.myRepaint();
-			}
-			polygon = boundary(envelope);
-			disturb(polygon, holeList, inner);
-			holeList.add(inner);
-			addHoles(polygon, holeList);
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("after disturb, but before triangulate--------------------");
-				for (int i = 0; i < holeList.size(); i++) {
-					logger.debug(i + ": " + GeoOperator.polygonToString(holeList.get(i)));
-				}
-				logger.debug("--------------------");
-			}
-
-			Poly2Tri.triangulate(polygon);
-			//
-			list = polygon.getTriangles();
-			if (PaintShapes.painting) {
-				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-				for (int i = 0; i < list.size(); i++) {
-					DelaunayTriangle dt = list.get(i);
-					PaintShapes.paint.addTriangle(dt);
-				}
-				PaintShapes.paint.myRepaint();
-			}
-		}
+		return aCircle;
 	}
 
-	private void stopCriteria() {
+	private Polygon issueInnerPolygon(Circle aCircle, DelaunayTriangle triangle) {
+		Polygon inner = intersect(aCircle, triangle);
+		if (logger.isDebugEnabled()) {
+			logger.debug("before disturb--------------------");
+			logger.debug("aCircle = " + aCircle.toString());
+			logger.debug("triangle = " + triangle.toString());
+			logger.debug("inner: " + GeoOperator.polygonToString(inner));
+			// for (int i = 0; i < holeList.size(); i++) {
+			// logger.debug(i + ": " + GeoOperator.polygonToString(holeList.get(i)));
+			// }
+			logger.debug("end recording before disturb--------------------");
+		}
 
+		if (PaintShapes.painting) {
+			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			PaintShapes.paint.addPolygon(inner);
+			PaintShapes.paint.myRepaint();
+		}
+		return inner;
 	}
 
 	/**
@@ -329,7 +303,6 @@ public class AlgoDCDT extends Strategy {
 		// TODO checking
 		TriangulationPoint[] tp = triangle.points;
 		for (int i = 0; i < tp.length; i++) {
-			// Coordinate p = GeoOperator.trans(tp[i]);
 			DoubleWrapper dw = new DoubleWrapper(tp[i].getX(), tp[i].getY());
 
 			// this point is shrink from another point
@@ -338,7 +311,7 @@ public class AlgoDCDT extends Strategy {
 				for (int j = 0; j < tp.length; j++) {
 					if (j != i) {
 						TriangulationPoint q = tp[j];
-						if (GeoOperator.equalPoint(originPoint, q)) {
+						if (GeoOperator.equalPointForShrink(originPoint, q)) {
 							// find
 							return true;
 						}
@@ -359,10 +332,10 @@ public class AlgoDCDT extends Strategy {
 						}
 					}
 				}
-				if (GeoOperator.equalPoint(originPoints[0], q1) && GeoOperator.equalPoint(originPoints[1], q2)) {
+				if (GeoOperator.equalPointForShrink(originPoints[0], q1) && GeoOperator.equalPointForShrink(originPoints[1], q2)) {
 					// find
 					return true;
-				} else if (GeoOperator.equalPoint(originPoints[0], q2) && GeoOperator.equalPoint(originPoints[1], q1)) {
+				} else if (GeoOperator.equalPointForShrink(originPoints[0], q2) && GeoOperator.equalPointForShrink(originPoints[1], q1)) {
 					// find
 					return true;
 				}
@@ -382,7 +355,7 @@ public class AlgoDCDT extends Strategy {
 	 * @param newPolygon
 	 * @return
 	 */
-	protected void disturb(Polygon boundary, ArrayList<Polygon> holeList, Polygon newPolygon) {
+	protected boolean disturb(Polygon boundary, ArrayList<Polygon> holeList, Polygon newPolygon) {
 		ArrayList<TriangulationPoint> newPoints = (ArrayList<TriangulationPoint>) newPolygon.getPoints();
 		// 1st: avoid point intersecting with the boundary. If so, change the inner point
 		List<TriangulationPoint> boundaryPoints = boundary.getPoints();
@@ -402,6 +375,10 @@ public class AlgoDCDT extends Strategy {
 					logger.debug("before shrink, newPoint = " + newPoint.toString());
 					// TODO check change the newPolygon
 					newPoint = shrink(boundaryPoint, nextBoundaryPoint, newPolygon, newPoint, j);
+					if (newPoint == null) {
+						// endlessLoop = true;
+						return true;
+					}
 					logger.debug("after shrink, newPoint = " + newPoint.toString());
 				}
 			}
@@ -434,22 +411,35 @@ public class AlgoDCDT extends Strategy {
 					if (GeoOperator.pointOnLineSegment(holePoint, nextHolePoint, newPoint)) {
 						logger.debug("before shrink, newPoint = " + newPoint.toString());
 						newPoint = shrink(holePoint, nextHolePoint, newPolygon, newPoint, k);
+						if (newPoint == null) {
+							// endlessLoop = true;
+							return true;
+						}
 						logger.debug("after shrink, newPoint = " + newPoint.toString());
 					}
 					if (GeoOperator.pointOnLineSegment(newPoint, nextNewPoint, holePoint)) {
 						logger.debug("before shrink, holePoint = " + holePoint.toString());
 						holePoint = shrink(newPoint, nextNewPoint, hole, holePoint, j);
+						if (holePoint == null) {
+							// endlessLoop = true;
+							return true;
+						}
 						logger.debug("after shrink, newPoint = " + holePoint.toString());
 					}
 					// 4th: avoid edge intersecting with edges: shrink one point of the inner polygon
 					if (GeoOperator.edgeOnEdge(holePoint, nextHolePoint, newPoint, nextNewPoint)) {
 						logger.debug("edgeOnEdge:");
 						// change the judgment in the shrink: done (by pointOnLine() function)
-						shrink(holePoint, nextHolePoint, newPolygon, newPoint, k);
+						TriangulationPoint tagPoint = shrink(holePoint, nextHolePoint, newPolygon, newPoint, k);
+						if (tagPoint == null) {
+							// endlessLoop = true;
+							return true;
+						}
 					}
 				}
 			}
 		}
+		return false;
 	}
 
 	// /**
@@ -546,7 +536,15 @@ public class AlgoDCDT extends Strategy {
 	 * @param j
 	 *            : point is the j-th point in the polygon
 	 */
-	private TriangulationPoint shrink(TriangulationPoint p1, TriangulationPoint p2, Polygon polygon, TriangulationPoint point, int j) {
+	public TriangulationPoint shrink(TriangulationPoint p1, TriangulationPoint p2, Polygon polygon, TriangulationPoint point, int j) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("shrinking...");
+			logger.debug("p1: " + p1.toString());
+			logger.debug("p2: " + p2.toString());
+			logger.debug("polygon: " + GeoOperator.polygonToString(polygon));
+			logger.debug("point " + point.toString());
+			logger.debug("j = " + j);
+		}
 		// check done 1
 		List<TriangulationPoint> points = polygon.getPoints();
 		// XXX although I define the direction to inside the polygon before hand, but it may also exceed the boundaries of the polygon.
@@ -577,8 +575,8 @@ public class AlgoDCDT extends Strategy {
 		boolean inside = false;
 		TriangulationPoint disturbPoint = null;
 		double[] xy = new double[2];
-
-		while (!inside) {
+		int c = 0;
+		while (!inside && c <= maxCountForInside) {
 			// generate
 			Random generator = new Random(System.currentTimeMillis());
 			double random = generator.nextDouble();
@@ -589,7 +587,7 @@ public class AlgoDCDT extends Strategy {
 			xy = GeoOperator.locateByVector(point.getX(), point.getY(), e, distance);
 
 			if (logger.isDebugEnabled()) {
-				logger.debug("random = " + random);
+				// logger.debug("random = " + random);
 				// logger.debug("delta = " + delta);
 				// logger.debug("distance = " + distance);
 				// logger.debug("xy = " + xy[0] + ", " + xy[1]);
@@ -605,6 +603,12 @@ public class AlgoDCDT extends Strategy {
 					break;
 				}
 			}
+			c++;
+		}
+		logger.debug("random number = " + c);
+		// add at 2014-5-26
+		if (!inside && c > maxCountForInside) {
+			return null;
 		}
 		// check whether replaced it properly done
 		points.set(j, disturbPoint);
@@ -612,27 +616,27 @@ public class AlgoDCDT extends Strategy {
 		DoubleWrapper dw = new DoubleWrapper(disturbPoint.getX(), disturbPoint.getY());
 		if (GeoOperator.equalPoint(point, p1) || GeoOperator.equalPoint(point, p2)) {
 			DoubleWrapper dwOrigin = new DoubleWrapper(point.getX(), point.getY());
-			TriangulationPoint tp = pertPointMap.get(dwOrigin);
+			TriangulationPoint tp = null;// pertPointMap.get(dwOrigin);
 			if (tp != null) {
 				pertPointMap.put(dw, tp);
 			} else {
 				pertPointMap.put(dw, point);
 			}
-			TriangulationPoint[] tps = pertEdgeMap.get(dwOrigin);
-			if (tps != null) {
-				pertEdgeMap.put(dw, tps);
-			}
+			// TriangulationPoint[] tps = pertEdgeMap.get(dwOrigin);
+			// if (tps != null) {
+			// pertEdgeMap.put(dw, tps);
+			// }
 		} else {
-			DoubleWrapper dw1 = new DoubleWrapper(p1.getX(), p1.getY());
-			DoubleWrapper dw2 = new DoubleWrapper(p2.getX(), p2.getY());
-			TriangulationPoint dwOrigin1 = pertPointMap.get(dw1);
-			TriangulationPoint dwOrigin2 = pertPointMap.get(dw2);
-			if (dwOrigin1 != null) {
-				p1 = dwOrigin1;
-			}
-			if (dwOrigin2 != null) {
-				p2 = dwOrigin2;
-			}
+			// DoubleWrapper dw1 = new DoubleWrapper(p1.getX(), p1.getY());
+			// DoubleWrapper dw2 = new DoubleWrapper(p2.getX(), p2.getY());
+			// TriangulationPoint dwOrigin1 = pertPointMap.get(dw1);
+			// TriangulationPoint dwOrigin2 = pertPointMap.get(dw2);
+			// if (dwOrigin1 != null) {
+			// p1 = dwOrigin1;
+			// }
+			// if (dwOrigin2 != null) {
+			// p2 = dwOrigin2;
+			// }
 			TriangulationPoint[] value = { p1, p2 };
 			pertEdgeMap.put(dw, value);
 		}

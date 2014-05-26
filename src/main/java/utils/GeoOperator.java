@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import mo.umac.crawler.AlgoDCDT;
+import mo.umac.crawler.AlgoDCDTTest;
 import mo.umac.crawler.Strategy;
 import mo.umac.spatial.Circle;
 import mo.umac.spatial.ECEFLLA;
@@ -33,7 +35,7 @@ public class GeoOperator {
 
 	protected static Logger logger = Logger.getLogger(GeoOperator.class.getName());
 	public final static double EPSILON_EQUAL = 1e-10;// TriangulationUtil.EPSILON; // 1e-12 in Poly2Tri
-	public final static int EPSILON_EQUAL_BIT = 10;
+	public final static double EPSILON_EQUAL_FOR_SHRINK = AlgoDCDT.EPSILON_DISTURB * 2;
 	public final static double EPSILON_LITTLE = 1;
 
 	public final static double RADIUS = 6371007.2;// authalic earth radius of
@@ -401,9 +403,9 @@ public class GeoOperator {
 			// this is exactly with the equal judgment in In org.poly2tri.triangulation.TriangulationUtil
 			double delta = Math.abs((p2.getX() - p1.getX()) * (q.getY() - p1.getY()) - (p2.getY() - p1.getY()) * (q.getX() - p1.getX()));
 			// for testing
-//			if(logger.isDebugEnabled()) {
-//				logger.debug("delta = " + delta);
-//			}
+			// if(logger.isDebugEnabled()) {
+			// logger.debug("delta = " + delta);
+			// }
 			// System.out.println(delta);
 			if (delta < EPSILON_EQUAL) {
 				return true;
@@ -710,13 +712,24 @@ public class GeoOperator {
 		logger.info("coordinate: " + coordinate.x + ", " + coordinate.y);
 	}
 
+	public static boolean equalPointForShrink(TriangulationPoint pp, TriangulationPoint tp) {
+		double distance = Math.sqrt((pp.getX() - tp.getX()) * (pp.getX() - tp.getX()) + (pp.getY() - tp.getY()) * (pp.getY() - tp.getY()));
+		// if (Math.abs(pp.getX() - tp.getX()) < EPSILON_EQUAL_FOR_SHRINK && Math.abs(pp.getY() - tp.getY()) < EPSILON_EQUAL_FOR_SHRINK) {
+		// return true;
+		// }
+		if (distance <= EPSILON_EQUAL_FOR_SHRINK) {
+			return true;
+		}
+		return false;
+	}
+
 	public static boolean equalPoint(TriangulationPoint pp, TriangulationPoint tp) {
 		if (Math.abs(pp.getX() - tp.getX()) < EPSILON_EQUAL && Math.abs(pp.getY() - tp.getY()) < EPSILON_EQUAL) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	public static boolean equalPoint(Coordinate pp, Coordinate tp) {
 		if (Math.abs(pp.x - tp.x) < EPSILON_EQUAL && Math.abs(pp.y - tp.y) < EPSILON_EQUAL) {
 			return true;

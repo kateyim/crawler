@@ -32,14 +32,14 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class MainSynthetic extends Strategy {
 
-	// private static String source = "../data-experiment/synthetic/skew-1000-0.3";
+	private static String source = "../data-experiment/synthetic/skew-1000-0.3";
 	// private static String source = "../data-experiment/synthetic/uniform-1000";
 	private static String target = "../data-experiment/synthetic/target";
-//	private static int n = 1000;
-//	private int topK = 10;
-	private static String source = "../data-experiment/synthetic/test";
-	private static int n = 10;
-	private int topK = 2;
+	private static int n = 1000;
+	private int topK = 10;
+	// private static String source = "../data-experiment/synthetic/test";
+	// private static int n = 10;
+	// private int topK = 2;
 	private static Envelope envelope = new Envelope(0, 1000, 0, 1000);
 	private static String state = "NY";
 	private static int categoryID = 96926236;
@@ -54,7 +54,7 @@ public class MainSynthetic extends Strategy {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		boolean debug = true;
+		boolean debug = false;
 		PaintShapes.painting = false;
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
