@@ -191,29 +191,29 @@ public class TriangulationUtil {
 	 */
 	public static Orientation orient2d(TriangulationPoint pa, TriangulationPoint pb, TriangulationPoint pc) {
 		// kate
-		if (logger.isDebugEnabled()) {
-			logger.debug("orient2d for " + pa.toString() + ", " + pb.toString() + ", " + pc.toString());
-		}
+//		if (logger.isDebugEnabled()) {
+//			logger.debug("orient2d for " + pa.toString() + ", " + pb.toString() + ", " + pc.toString());
+//		}
 		double detleft = (pa.getX() - pc.getX()) * (pb.getY() - pc.getY());
 		double detright = (pa.getY() - pc.getY()) * (pb.getX() - pc.getX());
 		double val = detleft - detright;
-		if (logger.isDebugEnabled()) {
-			logger.debug("val = " + val);
-		}
+//		if (logger.isDebugEnabled()) {
+//			logger.debug("val = " + val);
+//		}
 		if (val > -EPSILON && val < EPSILON) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Collinear");
-			}
+//			if (logger.isDebugEnabled()) {
+//				logger.debug("Collinear");
+//			}
 			return Orientation.Collinear;
 		} else if (val > 0) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("CCW");
-			}
+//			if (logger.isDebugEnabled()) {
+//				logger.debug("CCW");
+//			}
 			return Orientation.CCW;
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("CW");
-		}
+//		if (logger.isDebugEnabled()) {
+//			logger.debug("CW");
+//		}
 		return Orientation.CW;
 	}
 

@@ -33,6 +33,7 @@ public class GeoOperator {
 
 	protected static Logger logger = Logger.getLogger(GeoOperator.class.getName());
 	public final static double EPSILON_EQUAL = 1e-10;// TriangulationUtil.EPSILON; // 1e-12 in Poly2Tri
+	public final static int EPSILON_EQUAL_BIT = 10;
 	public final static double EPSILON_LITTLE = 1;
 
 	public final static double RADIUS = 6371007.2;// authalic earth radius of
@@ -400,9 +401,9 @@ public class GeoOperator {
 			// this is exactly with the equal judgment in In org.poly2tri.triangulation.TriangulationUtil
 			double delta = Math.abs((p2.getX() - p1.getX()) * (q.getY() - p1.getY()) - (p2.getY() - p1.getY()) * (q.getX() - p1.getX()));
 			// for testing
-			if(logger.isDebugEnabled()) {
-				logger.debug("delta = " + delta);
-			}
+//			if(logger.isDebugEnabled()) {
+//				logger.debug("delta = " + delta);
+//			}
 			// System.out.println(delta);
 			if (delta < EPSILON_EQUAL) {
 				return true;

@@ -209,21 +209,21 @@ public class Polygon implements Triangulatable {
 	 */
 	public void prepareTriangulation(TriangulationContext<?> tcx) {
 		// print the points and the holes
-		if (logger.isDebugEnabled()) {
-			logger.debug("_points:");
-			for (int i = 0; i < _points.size(); i++) {
-				logger.debug("_points " + i + ": [" + _points.get(i).getX() + _points.get(i).getY() + "]");
-			}
-			logger.debug("_holes:");
-			int j = 0;
-			if (_holes != null) {
-				for (Polygon p : _holes) {
-					logger.debug("_points " + j + ": " + GeoOperator.polygonToString(p));
-					j++;
-				}
-			}
-
-		}
+//		if (logger.isDebugEnabled()) {
+//			logger.debug("_points:");
+//			for (int i = 0; i < _points.size(); i++) {
+//				logger.debug("_points " + i + ": [" + _points.get(i).getX() + _points.get(i).getY() + "]");
+//			}
+//			logger.debug("_holes:");
+//			int j = 0;
+//			if (_holes != null) {
+//				for (Polygon p : _holes) {
+//					logger.debug("_points " + j + ": " + GeoOperator.polygonToString(p));
+//					j++;
+//				}
+//			}
+//
+//		}
 
 		if (m_triangles == null) {
 			m_triangles = new ArrayList<DelaunayTriangle>(_points.size());

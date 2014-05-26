@@ -16,12 +16,12 @@ import org.apache.log4j.Logger;
 import org.poly2tri.Poly2Tri;
 import org.poly2tri.geometry.polygon.Polygon;
 import org.poly2tri.geometry.polygon.PolygonPoint;
-import org.poly2tri.geometry.primitives.Point;
 import org.poly2tri.triangulation.TriangulationPoint;
 import org.poly2tri.triangulation.delaunay.DelaunayTriangle;
 import org.poly2tri.triangulation.point.TPoint;
 
 import paint.PaintShapes;
+import utils.DoubleWrapper;
 import utils.GeoOperator;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -39,17 +39,17 @@ public class AlgoDCDT extends Strategy {
 	 * Key: perturbation point
 	 * Value: 0: perturbed from a point; 1: perturbed from an edge;
 	 */
-	Map<TriangulationPoint, Integer> pertMap = new HashMap<TriangulationPoint, Integer>();
+	// Map<DoubleWrapper, Integer> pertMap = new HashMap<DoubleWrapper, Integer>();
 	/**
 	 * key: the perturbed point
 	 * value: the original point
 	 */
-	Map<TriangulationPoint, TriangulationPoint> pertPointMap = new HashMap<TriangulationPoint, TriangulationPoint>();
+	Map<DoubleWrapper, TriangulationPoint> pertPointMap = new HashMap<DoubleWrapper, TriangulationPoint>();
 	/**
 	 * key: the perturbed point
 	 * value: the original edge
 	 */
-	Map<TriangulationPoint, TriangulationPoint[]> pertEdgeMap = new HashMap<TriangulationPoint, TriangulationPoint[]>();
+	Map<DoubleWrapper, TriangulationPoint[]> pertEdgeMap = new HashMap<DoubleWrapper, TriangulationPoint[]>();
 
 	public AlgoDCDT() {
 		super();
@@ -65,21 +65,21 @@ public class AlgoDCDT extends Strategy {
 		Coordinate center = envelope.centre();
 		AQuery aQuery = new AQuery(center, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
 		ResultSetD2 resultSet = query(aQuery);
-		if (logger.isDebugEnabled()) {
-			logger.debug("resultSet.getPOIs().size() = " + resultSet.getPOIs().size());
-		}
+		// if (logger.isDebugEnabled()) {
+		// logger.debug("resultSet.getPOIs().size() = " + resultSet.getPOIs().size());
+		// }
 		Coordinate farthestCoordinate = CrawlerD1.farthest(resultSet);
 		if (farthestCoordinate == null) {
 			logger.error("farestest point is null");
 		}
 		double radius = center.distance(farthestCoordinate);
-		if (logger.isDebugEnabled()) {
-			logger.debug("farthestCoordinate = " + farthestCoordinate.toString());
-			logger.debug("radius = " + radius);
-		}
+		// if (logger.isDebugEnabled()) {
+		// logger.debug("farthestCoordinate = " + farthestCoordinate.toString());
+		// logger.debug("radius = " + radius);
+		// }
 		Circle aCircle = new Circle(center, radius);
 		resultSet.addACircle(aCircle);
-		if (logger.isDebugEnabled() && PaintShapes.painting) {
+		if (PaintShapes.painting) {
 			PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
 			PaintShapes.paint.addCircle(aCircle);
 			PaintShapes.paint.myRepaint();
@@ -88,7 +88,7 @@ public class AlgoDCDT extends Strategy {
 		ArrayList<Polygon> holeList = new ArrayList<Polygon>();
 		//
 		Polygon polygonHexagon = findInnerHexagon(aCircle);
-		if (logger.isDebugEnabled() && PaintShapes.painting) {
+		if (PaintShapes.painting) {
 			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
 			PaintShapes.paint.addPolygon(polygonHexagon);
 			PaintShapes.paint.myRepaint();
@@ -113,7 +113,7 @@ public class AlgoDCDT extends Strategy {
 		Poly2Tri.triangulate(polygon);
 
 		List<DelaunayTriangle> list = polygon.getTriangles();
-		if (logger.isDebugEnabled() && PaintShapes.painting) {
+		if (PaintShapes.painting) {
 			PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
 			for (int i = 0; i < list.size(); i++) {
 				DelaunayTriangle dt = list.get(i);
@@ -137,6 +137,10 @@ public class AlgoDCDT extends Strategy {
 			DelaunayTriangle triangle = list.get(maxIndex);
 
 			if (maxArea <= epsilonMinArea) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("maxArea <= epsilonMinArea");
+					logger.debug("list.size() = " + list.size());
+				}
 				// this triangle may be the "cannot exist triangle"
 				if (checkShrinkingTri(triangle)) {
 					// skip this triangle, and find the next one
@@ -155,7 +159,8 @@ public class AlgoDCDT extends Strategy {
 						}
 					});
 					boolean findNoShrinkTri = false;
-					for (int i = list.size() - 2; i >= 0; i--) {
+					int i = list.size() - 2;
+					for (/* int i = list.size() - 2 */; i >= 0; i--) {
 						// the last one is shrunk
 						triangle = list.get(i);
 						// maxArea = triangle.area();
@@ -163,6 +168,10 @@ public class AlgoDCDT extends Strategy {
 							findNoShrinkTri = true;
 							break;
 						}
+					}
+					if (logger.isDebugEnabled()) {
+						logger.debug("find the largest triangle with no perturbation: i = " + i);
+						logger.debug("max triangule = " + GeoOperator.triangleToString(triangle));
 					}
 					// remove these cannot exist triangles
 					if (findNoShrinkTri == false) {
@@ -188,12 +197,12 @@ public class AlgoDCDT extends Strategy {
 			}
 			list.clear();
 			TPoint centroid = triangle.centroid();
-			if (logger.isDebugEnabled()) {
-				logger.debug("centroid = " + centroid.toString());
-			}
+			// if (logger.isDebugEnabled()) {
+			// logger.debug("centroid = " + centroid.toString());
+			// }
 			// issue the centroid query
 			center = new Coordinate(centroid.getX(), centroid.getY());
-			if (logger.isDebugEnabled() && PaintShapes.painting) {
+			if (PaintShapes.painting) {
 				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
 				PaintShapes.paint.addTriangle(triangle);
 				PaintShapes.paint.color = PaintShapes.paint.color.red;
@@ -207,23 +216,16 @@ public class AlgoDCDT extends Strategy {
 				logger.error("farestest point is null");
 			}
 			radius = center.distance(farthestCoordinate);
-			if (logger.isDebugEnabled()) {
-				logger.debug("radius = " + radius);
-			}
+			// if (logger.isDebugEnabled()) {
+			// logger.debug("radius = " + radius);
+			// }
 			aCircle = new Circle(center, radius);
 			resultSet.addACircle(aCircle);
-			if (logger.isDebugEnabled() && PaintShapes.painting) {
+			if (PaintShapes.painting) {
 				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
 				PaintShapes.paint.addCircle(aCircle);
 				PaintShapes.paint.myRepaint();
 			}
-			// if (holeList.size() == 25) {
-			// logger.debug("holeList.size() = 25");
-			// }
-			// if (holeList.size() == 26) {
-			// logger.debug("holeList.size() = 26");
-			// }
-			//
 			Polygon inner = intersect(aCircle, triangle);
 			// for testing
 			// if (logger.isDebugEnabled()) {
@@ -282,7 +284,7 @@ public class AlgoDCDT extends Strategy {
 			// }
 			// end testing
 
-			if (logger.isDebugEnabled() && PaintShapes.painting) {
+			if (PaintShapes.painting) {
 				// logger.debug(polygonToString(inner));
 				// logger.error(GeoOperator.polygonToString(inner));
 				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
@@ -305,7 +307,7 @@ public class AlgoDCDT extends Strategy {
 			Poly2Tri.triangulate(polygon);
 			//
 			list = polygon.getTriangles();
-			if (logger.isDebugEnabled() && PaintShapes.painting) {
+			if (PaintShapes.painting) {
 				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
 				for (int i = 0; i < list.size(); i++) {
 					DelaunayTriangle dt = list.get(i);
@@ -327,15 +329,12 @@ public class AlgoDCDT extends Strategy {
 		// TODO checking
 		TriangulationPoint[] tp = triangle.points;
 		for (int i = 0; i < tp.length; i++) {
-			Coordinate p = GeoOperator.trans(tp[i]);
-			Integer pOrE = pertMap.get(p);
-			if (pOrE == null) {
-				// this point hasn't been shrunk
-				continue;
-			}
-			if (pOrE == 0) {
-				// this point is shrink from another point
-				TriangulationPoint originPoint = pertPointMap.get(p);
+			// Coordinate p = GeoOperator.trans(tp[i]);
+			DoubleWrapper dw = new DoubleWrapper(tp[i].getX(), tp[i].getY());
+
+			// this point is shrink from another point
+			TriangulationPoint originPoint = pertPointMap.get(dw);
+			if (originPoint != null) {
 				for (int j = 0; j < tp.length; j++) {
 					if (j != i) {
 						TriangulationPoint q = tp[j];
@@ -346,9 +345,9 @@ public class AlgoDCDT extends Strategy {
 
 					}
 				}
-			} else {
-				// pOrE == 1
-				TriangulationPoint[] originPoints = pertEdgeMap.get(p);
+			}
+			TriangulationPoint[] originPoints = pertEdgeMap.get(dw);
+			if (originPoints != null) {
 				TriangulationPoint q1 = null;// = GeoOperator.trans(tp[j]);
 				TriangulationPoint q2 = null;// =
 				for (int j = 0; j < tp.length; j++) {
@@ -360,10 +359,10 @@ public class AlgoDCDT extends Strategy {
 						}
 					}
 				}
-				if (GeoOperator.equalPoint(originPoints[0], q1) && GeoOperator.equalPoint(originPoints[2], q2)) {
+				if (GeoOperator.equalPoint(originPoints[0], q1) && GeoOperator.equalPoint(originPoints[1], q2)) {
 					// find
 					return true;
-				} else if (GeoOperator.equalPoint(originPoints[0], q2) && GeoOperator.equalPoint(originPoints[2], q1)) {
+				} else if (GeoOperator.equalPoint(originPoints[0], q2) && GeoOperator.equalPoint(originPoints[1], q1)) {
 					// find
 					return true;
 				}
@@ -568,10 +567,10 @@ public class AlgoDCDT extends Strategy {
 		// The bisectric vector
 		double[] e = GeoOperator.bisectric(pointPre.getX(), pointPre.getY(), pointNext.getX(), pointNext.getY(), point.getX(), point.getY());
 		// double unit = GeoOperator.size(e[0], e[1]);
-		if (logger.isDebugEnabled()) {
-			logger.debug("e: " + e[0] + ", " + e[1]);
-			// logger.debug("unit = " + unit);
-		}
+		// if (logger.isDebugEnabled()) {
+		// logger.debug("e: " + e[0] + ", " + e[1]);
+		// // logger.debug("unit = " + unit);
+		// }
 		// check this function: done
 		Coordinate outerPoint = GeoOperator.outOfMinBoundPoint(polygon);
 
@@ -591,9 +590,9 @@ public class AlgoDCDT extends Strategy {
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("random = " + random);
-				logger.debug("delta = " + delta);
-				logger.debug("distance = " + distance);
-				logger.debug("xy = " + xy[0] + ", " + xy[1]);
+				// logger.debug("delta = " + delta);
+				// logger.debug("distance = " + distance);
+				// logger.debug("xy = " + xy[0] + ", " + xy[1]);
 			}
 
 			Coordinate disturbCoor = new Coordinate(xy[0], xy[1]);
@@ -610,17 +609,32 @@ public class AlgoDCDT extends Strategy {
 		// check whether replaced it properly done
 		points.set(j, disturbPoint);
 		// add at 2014-5-24
-		// TODO checking: add to the map
-		if (GeoOperator.equalPoint(point, p1)) {
-			pertMap.put(disturbPoint, 0);
-			pertPointMap.put(disturbPoint, point);
-		} else if (GeoOperator.equalPoint(point, p2)) {
-			pertMap.put(disturbPoint, 0);
-			pertPointMap.put(disturbPoint, point);
+		DoubleWrapper dw = new DoubleWrapper(disturbPoint.getX(), disturbPoint.getY());
+		if (GeoOperator.equalPoint(point, p1) || GeoOperator.equalPoint(point, p2)) {
+			DoubleWrapper dwOrigin = new DoubleWrapper(point.getX(), point.getY());
+			TriangulationPoint tp = pertPointMap.get(dwOrigin);
+			if (tp != null) {
+				pertPointMap.put(dw, tp);
+			} else {
+				pertPointMap.put(dw, point);
+			}
+			TriangulationPoint[] tps = pertEdgeMap.get(dwOrigin);
+			if (tps != null) {
+				pertEdgeMap.put(dw, tps);
+			}
 		} else {
-			pertMap.put(disturbPoint, 1);
+			DoubleWrapper dw1 = new DoubleWrapper(p1.getX(), p1.getY());
+			DoubleWrapper dw2 = new DoubleWrapper(p2.getX(), p2.getY());
+			TriangulationPoint dwOrigin1 = pertPointMap.get(dw1);
+			TriangulationPoint dwOrigin2 = pertPointMap.get(dw2);
+			if (dwOrigin1 != null) {
+				p1 = dwOrigin1;
+			}
+			if (dwOrigin2 != null) {
+				p2 = dwOrigin2;
+			}
 			TriangulationPoint[] value = { p1, p2 };
-			pertEdgeMap.put(disturbPoint, value);
+			pertEdgeMap.put(dw, value);
 		}
 		return disturbPoint;
 
