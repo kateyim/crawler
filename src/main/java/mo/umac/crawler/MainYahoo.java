@@ -35,14 +35,15 @@ public class MainYahoo {
 
 	public static void main(String[] args) {
 		/************************* Change these lines *************************/
-		debug = false;
+		debug = true;
 		initForServer(false);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		shutdownLogs(MainYahoo.debug);
 		/************************* Crawling Algorithm ***************************/
 		// Strategy crawlerStrategy = new AlgoSlice();
-		Strategy crawlerStrategy = new AlgoPartition();
-		AlgoPartition.clusterRegionFile = USDensity.clusterRegionFile;
+//		Strategy crawlerStrategy = new AlgoPartition();
+//		AlgoPartition.clusterRegionFile = USDensity.clusterRegionFile;
+		Strategy crawlerStrategy = new AlgoDCDT();
 		/**********************************************************************/
 		Context crawlerContext = new Context(crawlerStrategy);
 		// specify the states to be crawled
@@ -61,7 +62,7 @@ public class MainYahoo {
 		String category2 = "Restaurants";
 		listCategoryNames.add(category2);
 		//
-		PaintShapes.painting = false;
+		PaintShapes.painting = true;
 		// change top-k
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = 100;
 		crawlerContext.callCrawling(listNameStates, listCategoryNames);

@@ -34,7 +34,7 @@ public class AlgoDCDT extends Strategy {
 
 	public final static double EPSILON_DISTURB = 1e-4;/* * 1000 */; // 1e-7
 	public double epsilonMinArea;
-	public int maxCountForInside = 10000;
+	public int maxCountForInside = 100000;
 
 	/**
 	 * Key: perturbation point
@@ -64,6 +64,7 @@ public class AlgoDCDT extends Strategy {
 			logger.info(envelope.toString());
 		}
 		epsilonMinArea = EPSILON_DISTURB * Math.sqrt(envelope.getHeight() * envelope.getHeight() + envelope.getWidth() * envelope.getWidth()) / 2;
+		logger.debug("epsilonMinArea = " + epsilonMinArea);
 		//
 		ArrayList<Polygon> holeList = new ArrayList<Polygon>();
 		Polygon polygonHexagon = issueFirstHexagon(state, category, query, envelope, holeList);
@@ -84,22 +85,50 @@ public class AlgoDCDT extends Strategy {
 		boolean finished = false;
 		// when there comes up the first small triangle, then the following triangles are also small
 		boolean beginSmallTri = false;
+		int IndexBigTriCanBeDisturbed = 0;
 		while (!finished) {
-			int maxIndex = 0;
+			if (IndexBigTriCanBeDisturbed >= listTris.size()) {
+				break;
+			}
+
 			double maxArea = Double.MIN_VALUE;
 			DelaunayTriangle triangle = null;
 			if (!beginSmallTri) {
-				// find the triangle with the maximum area
-				for (int i = 0; i < listTris.size(); i++) {
-					triangle = listTris.get(i);
-					double area = triangle.area();
-					if (area > maxArea) {
-						maxArea = area;
-						maxIndex = i;
+				int maxIndex = 0;
+				if (IndexBigTriCanBeDisturbed == 0) {
+					// find the triangle with the maximum area
+					for (int i = 0; i < listTris.size(); i++) {
+						triangle = listTris.get(i);
+						double area = triangle.area();
+						if (area > maxArea) {
+							maxArea = area;
+							maxIndex = i;
+						}
 					}
+					triangle = listTris.get(maxIndex);
+				} else if (IndexBigTriCanBeDisturbed == 1) {
+					logger.debug("IndexBigTriCanBeDisturbed = 1");
+					// sort the list from large to small
+					Collections.sort(listTris, new Comparator<DelaunayTriangle>() {
+						public int compare(DelaunayTriangle one, DelaunayTriangle other) {
+							double a1 = one.area();
+							double a2 = other.area();
+							if (a1 > a2) {
+								return -1;
+							} else if (a1 < a2) {
+								return 1;
+							} else {
+								return 0;
+							}
+						}
+					});
+					triangle = listTris.get(1);
+				} else {
+					logger.debug("IndexBigTriCanBeDisturbed = " + IndexBigTriCanBeDisturbed);
+					triangle = listTris.get(IndexBigTriCanBeDisturbed);
 				}
-				triangle = listTris.get(maxIndex);
 			}
+			logger.debug("maxArea = " + maxArea);
 			// begin to handle the small triangles
 			if (beginSmallTri || maxArea <= epsilonMinArea) {
 				beginSmallTri = true;
@@ -165,6 +194,8 @@ public class AlgoDCDT extends Strategy {
 							findNoShrinkTri = true;
 							break;
 						}
+					} else {
+						logger.debug("shrinking");
 					}
 
 				}
@@ -204,10 +235,21 @@ public class AlgoDCDT extends Strategy {
 				boolean cannotDisturb = disturb(polygon, holeList, inner);
 				if (cannotDisturb) {
 					logger.debug("cannotDisturb");
+					// TODO what to do?
+					// find next triangle
+					IndexBigTriCanBeDisturbed++;
 				} else {
+					// recovery to the default value
+					if (IndexBigTriCanBeDisturbed > 0) {
+						IndexBigTriCanBeDisturbed = 0;
+					}
+
 					holeList.add(inner);
 					addHoles(polygon, holeList);
-
+//					if(logger.isDebugEnabled()) {
+//						logger.debug("polygon: " + GeoOperator.polygonToString(polygon));
+//						
+//					}
 					Poly2Tri.triangulate(polygon);
 					//
 					listTris.clear();
@@ -299,49 +341,144 @@ public class AlgoDCDT extends Strategy {
 	/**
 	 * @return
 	 */
+	// private boolean checkShrinkingTri(DelaunayTriangle triangle) {
+	// // TODO checking
+	// TriangulationPoint[] tp = triangle.points;
+	// for (int i = 0; i < tp.length; i++) {
+	// DoubleWrapper dw = new DoubleWrapper(tp[i].getX(), tp[i].getY());
+	//
+	// // this point is shrink from another point
+	// TriangulationPoint originPoint = pertPointMap.get(dw);
+	// if (originPoint != null) {
+	// for (int j = 0; j < tp.length; j++) {
+	// if (j != i) {
+	// TriangulationPoint q = tp[j];
+	// if (GeoOperator.equalPointForShrink(originPoint, q)) {
+	// // find
+	// return true;
+	// }
+	//
+	// }
+	// }
+	// }
+	// TriangulationPoint[] originPoints = pertEdgeMap.get(dw);
+	// if (originPoints != null) {
+	// TriangulationPoint q1 = null;// = GeoOperator.trans(tp[j]);
+	// TriangulationPoint q2 = null;// =
+	// for (int j = 0; j < tp.length; j++) {
+	// if (j != i) {
+	// if (q1 == null) {
+	// q1 = tp[j];
+	// } else {
+	// q2 = tp[j];
+	// }
+	// }
+	// }
+	// if (GeoOperator.equalPointForShrink(originPoints[0], q1) && GeoOperator.equalPointForShrink(originPoints[1], q2)) {
+	// // find
+	// return true;
+	// } else if (GeoOperator.equalPointForShrink(originPoints[0], q2) && GeoOperator.equalPointForShrink(originPoints[1], q1)) {
+	// // find
+	// return true;
+	// }
+	// }
+	//
+	// }
+	//
+	// return false;
+	// }
+
 	private boolean checkShrinkingTri(DelaunayTriangle triangle) {
 		// TODO checking
 		TriangulationPoint[] tp = triangle.points;
+		TriangulationPoint[] tpOrigin = new TriangulationPoint[3];
 		for (int i = 0; i < tp.length; i++) {
 			DoubleWrapper dw = new DoubleWrapper(tp[i].getX(), tp[i].getY());
-
 			// this point is shrink from another point
 			TriangulationPoint originPoint = pertPointMap.get(dw);
-			if (originPoint != null) {
-				for (int j = 0; j < tp.length; j++) {
-					if (j != i) {
-						TriangulationPoint q = tp[j];
-						if (GeoOperator.equalPointForShrink(originPoint, q)) {
-							// find
-							return true;
-						}
-
-					}
-				}
-			}
-			TriangulationPoint[] originPoints = pertEdgeMap.get(dw);
-			if (originPoints != null) {
-				TriangulationPoint q1 = null;// = GeoOperator.trans(tp[j]);
-				TriangulationPoint q2 = null;// =
-				for (int j = 0; j < tp.length; j++) {
-					if (j != i) {
-						if (q1 == null) {
-							q1 = tp[j];
-						} else {
-							q2 = tp[j];
-						}
-					}
-				}
-				if (GeoOperator.equalPointForShrink(originPoints[0], q1) && GeoOperator.equalPointForShrink(originPoints[1], q2)) {
-					// find
-					return true;
-				} else if (GeoOperator.equalPointForShrink(originPoints[0], q2) && GeoOperator.equalPointForShrink(originPoints[1], q1)) {
-					// find
-					return true;
-				}
-			}
-
+			tpOrigin[i] = originPoint;
 		}
+		// 1. check overlapping point
+		for (int i = 0; i < tp.length; i++) {
+			for (int j = 0; j < tp.length; j++) {
+				if (j == i) {
+					continue;
+				}
+				if (GeoOperator.equalPointForShrink(tp[i], tpOrigin[j])) {
+					return true;
+				}
+				if (GeoOperator.equalPointForShrink(tpOrigin[i], tp[j])) {
+					return true;
+				}
+				if (GeoOperator.equalPointForShrink(tpOrigin[i], tpOrigin[j])) {
+					return true;
+				}
+			}
+		}
+		// 2. check 3 points collinear
+		if (GeoOperator.pointOnLine(tp[0], tp[1], tpOrigin[2])) {
+			return true;
+		}
+		if (GeoOperator.pointOnLine(tp[0], tpOrigin[1], tp[2])) {
+			return true;
+		}
+		if (GeoOperator.pointOnLine(tp[0], tpOrigin[1], tpOrigin[2])) {
+			return true;
+		}
+		if (GeoOperator.pointOnLine(tpOrigin[0], tp[1], tp[2])) {
+			return true;
+		}
+		if (GeoOperator.pointOnLine(tpOrigin[0], tp[1], tpOrigin[2])) {
+			return true;
+		}
+		if (GeoOperator.pointOnLine(tpOrigin[0], tpOrigin[1], tp[2])) {
+			return true;
+		}
+		if (GeoOperator.pointOnLine(tpOrigin[0], tpOrigin[1], tpOrigin[2])) {
+			return true;
+		}
+
+		// for (int i = 0; i < tp.length; i++) {
+		// DoubleWrapper dw = new DoubleWrapper(tp[i].getX(), tp[i].getY());
+		// // this point is shrink from another point
+		// TriangulationPoint originPoint = pertPointMap.get(dw);
+		//
+		// // the other two points
+		// TriangulationPoint next1 = null;
+		// TriangulationPoint next2 = null;
+		// TriangulationPoint next1Origin = null;
+		// TriangulationPoint next2Origin = null;
+		//
+		// if (originPoint != null) {
+		// for (int j = 0; j < tp.length; j++) {
+		// if (j != i) {
+		// if (next1 == null) {
+		// next1 = tp[j];
+		// } else {
+		// next2 = tp[j];
+		// }
+		// if (GeoOperator.equalPointForShrink(originPoint, tp[j])) {
+		// return true;
+		// }
+		// DoubleWrapper dwQ = new DoubleWrapper(tp[j].getX(), tp[j].getY());
+		// TriangulationPoint originQ = pertPointMap.get(dwQ);
+		// if (originQ != null && GeoOperator.equalPointForShrink(originPoint, originQ)) {
+		// return true;
+		// }
+		// //
+		// if (next2 == null) {
+		// next1Origin = originQ;
+		// } else {
+		// next2Origin = originQ;
+		// }
+		//
+		// }
+		// }
+		// }
+		// // judge on line
+		//
+		//
+		// }
 
 		return false;
 	}
@@ -613,33 +750,16 @@ public class AlgoDCDT extends Strategy {
 		// check whether replaced it properly done
 		points.set(j, disturbPoint);
 		// add at 2014-5-24
-		DoubleWrapper dw = new DoubleWrapper(disturbPoint.getX(), disturbPoint.getY());
-		if (GeoOperator.equalPoint(point, p1) || GeoOperator.equalPoint(point, p2)) {
-			DoubleWrapper dwOrigin = new DoubleWrapper(point.getX(), point.getY());
-			TriangulationPoint tp = null;// pertPointMap.get(dwOrigin);
-			if (tp != null) {
-				pertPointMap.put(dw, tp);
-			} else {
-				pertPointMap.put(dw, point);
-			}
-			// TriangulationPoint[] tps = pertEdgeMap.get(dwOrigin);
-			// if (tps != null) {
-			// pertEdgeMap.put(dw, tps);
-			// }
+		DoubleWrapper dwDisturb = new DoubleWrapper(disturbPoint.getX(), disturbPoint.getY());
+		// 2014-5-27
+		DoubleWrapper dwOrigin = new DoubleWrapper(point.getX(), point.getY());
+		TriangulationPoint OriginOrigin = pertPointMap.get(dwOrigin);
+		if (OriginOrigin != null) {
+			pertPointMap.put(dwDisturb, OriginOrigin);
 		} else {
-			// DoubleWrapper dw1 = new DoubleWrapper(p1.getX(), p1.getY());
-			// DoubleWrapper dw2 = new DoubleWrapper(p2.getX(), p2.getY());
-			// TriangulationPoint dwOrigin1 = pertPointMap.get(dw1);
-			// TriangulationPoint dwOrigin2 = pertPointMap.get(dw2);
-			// if (dwOrigin1 != null) {
-			// p1 = dwOrigin1;
-			// }
-			// if (dwOrigin2 != null) {
-			// p2 = dwOrigin2;
-			// }
-			TriangulationPoint[] value = { p1, p2 };
-			pertEdgeMap.put(dw, value);
+			pertPointMap.put(dwDisturb, point);
 		}
+
 		return disturbPoint;
 
 	}

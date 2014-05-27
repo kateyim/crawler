@@ -359,6 +359,9 @@ public class GeoOperator {
 	}
 
 	public static boolean pointOnLine(TriangulationPoint p1, TriangulationPoint p2, TriangulationPoint q) {
+		if( p1 == null || p2 == null || q == null){
+			return false;
+		}
 		// check done
 		double delta = Math.abs((p2.getX() - p1.getX()) * (q.getY() - p1.getY()) - (p2.getY() - p1.getY()) * (q.getX() - p1.getX()));
 		if (delta < EPSILON_EQUAL) {
@@ -713,6 +716,9 @@ public class GeoOperator {
 	}
 
 	public static boolean equalPointForShrink(TriangulationPoint pp, TriangulationPoint tp) {
+		if(pp == null || tp == null){
+			return false;
+		}
 		double distance = Math.sqrt((pp.getX() - tp.getX()) * (pp.getX() - tp.getX()) + (pp.getY() - tp.getY()) * (pp.getY() - tp.getY()));
 		// if (Math.abs(pp.getX() - tp.getX()) < EPSILON_EQUAL_FOR_SHRINK && Math.abs(pp.getY() - tp.getY()) < EPSILON_EQUAL_FOR_SHRINK) {
 		// return true;
