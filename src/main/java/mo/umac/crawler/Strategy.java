@@ -39,8 +39,7 @@ public abstract class Strategy {
 	protected final static int MAX_START = 250;
 
 	/**
-	 * The maximum number of results on can get through this query by only
-	 * changing the start value.
+	 * The maximum number of results on can get through this query by only changing the start value.
 	 */
 	protected static int MAX_TOTAL_RESULTS_RETURNED;// = MAX_START +
 													// MAX_RESULTS_NUM; // =270;
@@ -86,8 +85,7 @@ public abstract class Strategy {
 	}
 
 	/**
-	 * Select the envelope information from UScensus data, if listNameStates is
-	 * empty, then return all envelopes in the U.S.
+	 * Select the envelope information from UScensus data, if listNameStates is empty, then return all envelopes in the U.S.
 	 * 
 	 * @param listNameStates
 	 * @return
@@ -132,7 +130,7 @@ public abstract class Strategy {
 	 * @param category
 	 * @param state
 	 */
-	protected void prepareData(String category, String state) {
+	public void prepareData(String category, String state) {
 		//
 		logger.info("preparing data...");
 		Strategy.categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);
@@ -150,8 +148,8 @@ public abstract class Strategy {
 
 	/*
 	 * (non-Javadoc)
-	 * @see mo.umac.crawler.YahooLocalCrawlerStrategy#endData() shut down the
-	 * connection
+	 * 
+	 * @see mo.umac.crawler.YahooLocalCrawlerStrategy#endData() shut down the connection
 	 */
 	protected static void endData() {
 		DBExternal.distroyConn();
@@ -159,12 +157,11 @@ public abstract class Strategy {
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * mo.umac.crawler.YahooLocalCrawlerStrategy#crawlByCategoriesStates(java
-	 * .util.LinkedList, java.util.List, java.util.LinkedList,
-	 * java.util.HashMap)
+	 * 
+	 * @see mo.umac.crawler.YahooLocalCrawlerStrategy#crawlByCategoriesStates(java .util.LinkedList, java.util.List, java.util.LinkedList, java.util.HashMap)
 	 */
-	protected void crawlByCategoriesStates(LinkedList<Envelope> listEnvelopeStates, List<String> listCategoryNames, LinkedList<String> nameStates, HashMap<Integer, String> categoryIDMap) {
+	protected void crawlByCategoriesStates(LinkedList<Envelope> listEnvelopeStates, List<String> listCategoryNames, LinkedList<String> nameStates,
+			HashMap<Integer, String> categoryIDMap) {
 
 		long before = System.currentTimeMillis();
 		logger.info("Start at : " + before);
@@ -237,6 +234,22 @@ public abstract class Strategy {
 		// logger.info(id);
 		// }
 
+	}
+
+	public void callCrawlingSingle(String state, int category, String query, Envelope envelope) {
+		long before = System.currentTimeMillis();
+		logger.info("Start at : " + before);
+		// load data from the external dataset
+		prepareData(query, state);
+		crawl(state, category, query, envelope);
+		endData();
+		long after = System.currentTimeMillis();
+		logger.info("Stop at: " + after);
+		logger.info("time for crawling = " + (after - before) / 1000);
+		//
+		logger.info("countNumQueries = " + Strategy.countNumQueries);
+		logger.info("countCrawledPoints = " + Strategy.dbInMemory.poisIDs.size());
+		logger.info("Finished ! Oh ! Yeah! ");
 	}
 
 }

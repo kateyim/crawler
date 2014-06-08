@@ -69,8 +69,7 @@ public class H2DB extends DBExternal {
 
 	/****************************** sqls for creating table ******************************/
 	/**
-	 * level: the divided level radius: the radius of the circle want to covered
-	 * PRIMARY KEY
+	 * level: the divided level radius: the radius of the circle want to covered PRIMARY KEY
 	 */
 	private String sqlCreateQueryTable = "CREATE TABLE IF NOT EXISTS QUERY "
 			+ "(QUERYID INT, QUERY VARCHAR(100), ZIP INT, RESULTS INT, START INT, "
@@ -91,8 +90,7 @@ public class H2DB extends DBExternal {
 			+ "CATEGORYID INT, CATEGORYNAME VARCHAR(200))";
 
 	/**
-	 * This table records that the item is returned by which query in which
-	 * position.
+	 * This table records that the item is returned by which query in which position.
 	 */
 	private String sqlCreateRelationshipTable = "CREATE TABLE IF NOT EXISTS RELATIONSHIP "
 			+ "(ITEMID INT, QEURYID INT, POSITION INT)";
@@ -397,6 +395,7 @@ public class H2DB extends DBExternal {
 				e.printStackTrace();
 			}
 			stat.close();
+			conn.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -773,8 +772,7 @@ public class H2DB extends DBExternal {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see mo.umac.db.DBExternal#readFromExtenalDB(java.lang.String,
-	 * java.lang.String)
+	 * @see mo.umac.db.DBExternal#readFromExtenalDB(java.lang.String, java.lang.String)
 	 */
 	@Override
 	public HashMap<Integer, APOI> readFromExtenalDB(String categoryQ,
@@ -991,8 +989,7 @@ public class H2DB extends DBExternal {
 	}
 
 	/**
-	 * Convert H2DB to a files, only contain id, numCrawl, coordinates from the
-	 * table
+	 * Convert H2DB to a files, only contain id, numCrawl, coordinates from the table
 	 * 
 	 * @param dbName
 	 * @param tableName
@@ -1104,6 +1101,83 @@ public class H2DB extends DBExternal {
 			statTarget.execute(s4Relationship);
 			//
 			statTarget.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	/**
+	 * add at 2014-6-4
+	 * 
+	 * @param source
+	 * @param target
+	 * @param factor
+	 */
+	public void scale(String source, String target, double factor) {
+		String sql = "select * from item";
+
+		try {
+			Connection conSrc = getConnection(source);
+			Statement statSrc = conSrc.createStatement();
+
+			Connection conTarget = getConnection(target);
+			conTarget.setAutoCommit(false);
+			Statement statTarget = conTarget.createStatement();
+			// create tables
+			statTarget.execute(sqlCreateItemTableKey);
+
+			PreparedStatement prepItem = conTarget
+					.prepareStatement(sqlPrepInsertItem);
+
+			java.sql.ResultSet rs = statSrc.executeQuery(sql);
+			while (rs.next()) {
+
+				int itemID = rs.getInt(1);
+				String title = rs.getString(2);
+				String city = rs.getString(3);
+				String state = rs.getString(4);
+
+				double latitude = rs.getDouble(5);
+				double longitude = rs.getDouble(6);
+				double distance = rs.getDouble(7);
+
+				double averageRating = rs.getDouble(8);
+				double totalRating = rs.getDouble(9);
+				double totalReviews = rs.getDouble(10);
+				Rating rating = new Rating();
+				rating.setAverageRating(averageRating);
+				rating.setTotalRatings((int) totalRating);
+				rating.setTotalReviews((int) totalReviews);
+
+				int numCrawled = rs.getInt(11);
+
+				// write
+				prepItem.setInt(1, itemID);
+				prepItem.setString(2, title);
+				prepItem.setString(3, city);
+				prepItem.setString(4, state);
+				prepItem.setDouble(5, latitude * factor);
+				prepItem.setDouble(6, longitude * factor * (-1));
+				prepItem.setDouble(7, distance);
+
+				prepItem.setDouble(8, Rating.noAverageRatingValue);
+				prepItem.setDouble(9, Rating.noAverageRatingValue);
+				prepItem.setDouble(10, Rating.noAverageRatingValue);
+
+				prepItem.setDouble(11, numCrawled);
+				prepItem.addBatch();
+
+			}
+			rs.close();
+			statSrc.close();
+
+			prepItem.executeBatch();
+			conTarget.commit();
+			conTarget.setAutoCommit(true);
+			statTarget.close();
+			prepItem.close();
+			conTarget.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

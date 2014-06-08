@@ -1,4 +1,4 @@
-package mo.umac.analytics;
+package mo.umac.crawler;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,9 +12,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import mo.umac.crawler.AlgoDCDT;
-import mo.umac.crawler.MainYahoo;
-import mo.umac.crawler.Strategy;
+import mo.umac.analytics.Cluster;
 import mo.umac.db.DBInMemory;
 import mo.umac.db.H2DB;
 import mo.umac.metadata.APOI;
