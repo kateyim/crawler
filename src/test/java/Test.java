@@ -1,3 +1,5 @@
+import com.vividsolutions.jts.triangulate.quadedge.QuadEdge;
+
 public class Test {
 
 	/**
@@ -9,6 +11,11 @@ public class Test {
 		// sizeOf();
 		testBreak();
 
+	}
+	
+	public void testQE(){
+		QuadEdge qe;
+		com.vividsolutions.jts.triangulate.quadedge.QuadEdgeTriangle tri;
 	}
 
 	public static void testRead() {
