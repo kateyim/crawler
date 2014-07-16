@@ -13,6 +13,8 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import mo.umac.kallmann.cdt.Triangle;
+import mo.umac.kallmann.cdt.Vector2d;
 import mo.umac.spatial.Circle;
 
 import org.poly2tri.triangulation.TriangulationPoint;
@@ -105,6 +107,20 @@ public class PaintShapes extends JPanel {
 		arrDraw.add(getLine(line));
 	}
 
+	
+	public static void addLine(Vector2d v1, Vector2d v2) {
+		arrDraw.add(getLine(v1, v2));
+	}
+	
+	public static Line2D.Double getLine(Vector2d v1, Vector2d v2) {
+		double x1 = v1.x;
+		double y1 = v1.y;
+		double x2 = v2.x;
+		double y2 = v2.y;
+		Line2D.Double shape = new Line2D.Double(x1, y1, x2, y2);
+		return shape;
+	}
+
 	// public static void addConstraintPolygon(ArrayList<Coordinate> points) {
 	// int npoints = points.size();
 	// int[] xpoints = new int[npoints];
@@ -140,6 +156,18 @@ public class PaintShapes extends JPanel {
 		Polygon polygon = new Polygon(xpoints, ypoints, npoints);
 		arrDrawTempTriangles.add(polygon);
 	}
+	
+	public static void addTriangle(Triangle dt) {
+		int npoints = dt.points.length;
+		int[] xpoints = new int[npoints];
+		int[] ypoints = new int[npoints];
+		for (int i = 0; i < dt.points.length; i++) {
+			xpoints[i] = (int) dt.points[i].getX();
+			ypoints[i] = (int) dt.points[i].getY();
+		}
+		Polygon polygon = new Polygon(xpoints, ypoints, npoints);
+		arrDrawTempTriangles.add(polygon);
+	}
 
 	public static void addPolygon(org.poly2tri.geometry.polygon.Polygon p) {
 		List<TriangulationPoint> list = p.getPoints();
@@ -154,7 +182,7 @@ public class PaintShapes extends JPanel {
 		Polygon polygon = new Polygon(xpoints, ypoints, npoints);
 		arrFillConstraintPoly.add(polygon);
 	}
-
+	
 	public static Ellipse2D.Double getCircle(Circle circle) {
 		Coordinate center = circle.getCenter();
 		double radius = circle.getRadius();

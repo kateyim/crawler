@@ -30,8 +30,8 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class MainSynthetic extends Strategy {
 
-	private static String source = "../data-experiment/synthetic/skew-1000-0.3";
-	// private static String source = "../data-experiment/synthetic/uniform-1000";
+	// private static String source = "../data-experiment/synthetic/skew-1000-0.3";
+	private static String source = "../data-experiment/synthetic/uniform-1000";
 	private static String target = "../data-experiment/synthetic/target";
 	private static int n = 1000;
 	private int topK = 10;
@@ -52,8 +52,8 @@ public class MainSynthetic extends Strategy {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		boolean debug = false;
-		PaintShapes.painting = false;
+		boolean debug = true;
+		PaintShapes.painting = true;
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		MainSynthetic test = new MainSynthetic();
@@ -416,7 +416,8 @@ public class MainSynthetic extends Strategy {
 	}
 
 	@Override
-	protected void crawlByCategoriesStates(LinkedList<Envelope> listEnvelopeStates, List<String> listCategoryNames, LinkedList<String> listNameStates, HashMap<Integer, String> categoryIDMap) {
+	protected void crawlByCategoriesStates(LinkedList<Envelope> listEnvelopeStates, List<String> listCategoryNames, LinkedList<String> listNameStates,
+			HashMap<Integer, String> categoryIDMap) {
 		// TODO Auto-generated method stub
 
 	}

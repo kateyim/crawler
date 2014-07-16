@@ -6,8 +6,8 @@ import java.util.Vector;
 
 import mo.umac.crawler.AlgoDCDT;
 import mo.umac.crawler.AlgoDCDTTest;
+import mo.umac.crawler.CopyOfAlgoDCDT;
 import mo.umac.crawler.Strategy;
-import mo.umac.kallmann.cdt.Vector2d;
 import mo.umac.spatial.Circle;
 import mo.umac.spatial.ECEFLLA;
 
@@ -28,16 +28,17 @@ import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geomgraph.Position;
 
 /**
- * With kallman's triangulation
+ * For Poly2tri
  * 
  * //FIXME all operations should be compared to postgresql operations in order to check the correctness of CRS
  * 
  * @author kate
  */
-public class GeoOperator {
+public class CopyOfGeoOperator {
 
-	protected static Logger logger = Logger.getLogger(GeoOperator.class.getName());
+	protected static Logger logger = Logger.getLogger(CopyOfGeoOperator.class.getName());
 	public final static double EPSILON_EQUAL = 1e-10;// TriangulationUtil.EPSILON; // 1e-12 in Poly2Tri
+	public final static double EPSILON_EQUAL_FOR_SHRINK = CopyOfAlgoDCDT.EPSILON_DISTURB * 2;
 	public final static double EPSILON_LITTLE = 1;
 
 	public final static double RADIUS = 6371007.2;// authalic earth radius of
@@ -717,6 +718,20 @@ public class GeoOperator {
 		logger.info("coordinate: " + coordinate.x + ", " + coordinate.y);
 	}
 
+	public static boolean equalPointForShrink(TriangulationPoint pp, TriangulationPoint tp) {
+		if(pp == null || tp == null){
+			return false;
+		}
+		double distance = Math.sqrt((pp.getX() - tp.getX()) * (pp.getX() - tp.getX()) + (pp.getY() - tp.getY()) * (pp.getY() - tp.getY()));
+		// if (Math.abs(pp.getX() - tp.getX()) < EPSILON_EQUAL_FOR_SHRINK && Math.abs(pp.getY() - tp.getY()) < EPSILON_EQUAL_FOR_SHRINK) {
+		// return true;
+		// }
+		if (distance <= EPSILON_EQUAL_FOR_SHRINK) {
+			return true;
+		}
+		return false;
+	}
+
 	public static boolean equalPoint(TriangulationPoint pp, TriangulationPoint tp) {
 		if (Math.abs(pp.getX() - tp.getX()) < EPSILON_EQUAL && Math.abs(pp.getY() - tp.getY()) < EPSILON_EQUAL) {
 			return true;
@@ -767,10 +782,6 @@ public class GeoOperator {
 		return c;
 	}
 
-	public static Coordinate trans(Vector2d p) {
-		Coordinate c = new Coordinate(p.getX(), p.getY());
-		return c;
-	}
 	/**
 	 * Given two vectors CA and CB, compute the unit vector of the bisectric between CA and CB
 	 * C------->B
@@ -819,6 +830,5 @@ public class GeoOperator {
 		newPoint[1] = y + distance * e[1];
 		return newPoint;
 	}
-
 
 }

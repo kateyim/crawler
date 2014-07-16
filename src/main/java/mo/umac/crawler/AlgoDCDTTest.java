@@ -24,7 +24,7 @@ import com.vividsolutions.jts.geom.Envelope;
 /**
  * @author kate
  */
-public class AlgoDCDTTest extends AlgoDCDT {
+public class AlgoDCDTTest extends CopyOfAlgoDCDT {
 
 	protected static Logger logger = Logger.getLogger(AlgoDCDTTest.class.getName());
 
@@ -39,7 +39,7 @@ public class AlgoDCDTTest extends AlgoDCDT {
 		// testTriangulation53();
 		// testTriangulation104();
 		testShrink();
-		// AlgoDCDTTest test = new AlgoDCDTTest();
+		// CopyOfAlgoDCDTTest test = new CopyOfAlgoDCDTTest();
 		// test.testIntersect();
 	}
 
@@ -52,7 +52,7 @@ public class AlgoDCDTTest extends AlgoDCDT {
 	}
 
 	public static void testShrink() {
-		AlgoDCDT algo = new AlgoDCDT();
+		CopyOfAlgoDCDT algo = new CopyOfAlgoDCDT();
 		TriangulationPoint p1 = new TPoint(0.0, 0.0);
 		TriangulationPoint p2 = new TPoint(1000.0, 0.0);
 		TriangulationPoint point = new TPoint(852.0463202748545, 0.0);
@@ -134,7 +134,7 @@ public class AlgoDCDTTest extends AlgoDCDT {
 			PaintShapes.paint.addCircle(circle);
 			PaintShapes.paint.myRepaint();
 		}
-		AlgoDCDT algo = new AlgoDCDT();
+		CopyOfAlgoDCDT algo = new CopyOfAlgoDCDT();
 		Polygon p = algo.intersect(circle, triangle);
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
 			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
@@ -144,7 +144,7 @@ public class AlgoDCDTTest extends AlgoDCDT {
 	}
 
 	public static void testTriangulation184() {
-		AlgoDCDT dcdt = new AlgoDCDT();
+		CopyOfAlgoDCDT dcdt = new CopyOfAlgoDCDT();
 		Envelope envelope = new Envelope(0, 1000, 0, 1000);
 		Polygon polygon = dcdt.boundary(envelope);
 		ArrayList<Polygon> holeList = new ArrayList<Polygon>();
@@ -197,7 +197,7 @@ public class AlgoDCDTTest extends AlgoDCDT {
 	}
 
 	public static void testTriangulation53() {
-		AlgoDCDT dcdt = new AlgoDCDT();
+		CopyOfAlgoDCDT dcdt = new CopyOfAlgoDCDT();
 		Envelope envelope = new Envelope(0, 1000, 0, 1000);
 		Polygon polygon = dcdt.boundary(envelope);
 		ArrayList<Polygon> holeList = new ArrayList<Polygon>();
@@ -255,7 +255,7 @@ public class AlgoDCDTTest extends AlgoDCDT {
 	 * 253.76346654127897
 	 */
 	public static void testTriangulation104() {
-		AlgoDCDT dcdt = new AlgoDCDT();
+		CopyOfAlgoDCDT dcdt = new CopyOfAlgoDCDT();
 		Envelope envelope = new Envelope(0, 1000, 0, 1000);
 		Polygon polygon = dcdt.boundary(envelope);
 		ArrayList<Polygon> holeList = new ArrayList<Polygon>();
