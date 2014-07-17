@@ -53,7 +53,7 @@ public class MainSynthetic extends Strategy {
 	 */
 	public static void main(String[] args) {
 		boolean debug = true;
-		PaintShapes.painting = true;
+		PaintShapes.painting = false;
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		MainSynthetic test = new MainSynthetic();
@@ -297,12 +297,12 @@ public class MainSynthetic extends Strategy {
 					int numCrawled = rs.getInt(11);
 					//
 					// print query result to console
-					if (logger.isDebugEnabled()) {
-						logger.debug("itemID: " + itemID);
-						logger.debug("latitude: " + latitude);
-						logger.debug("longitude: " + longitude);
-						logger.debug("--------------------------");
-					}
+					// if (logger.isDebugEnabled()) {
+					// logger.debug("itemID: " + itemID);
+					// logger.debug("latitude: " + latitude);
+					// logger.debug("longitude: " + longitude);
+					// logger.debug("--------------------------");
+					// }
 					APOI poi = new APOI(itemID, title, city, state, longitude, latitude, rating, distance, null, numCrawled);
 					map.put(itemID, poi);
 				}

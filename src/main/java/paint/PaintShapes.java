@@ -45,7 +45,7 @@ public class PaintShapes extends JPanel {
 
 	public void paintComponent(Graphics g) {
 		// XXX clear() only used testing AlgoDCDT
-		// clear(g);
+		clear(g);
 		g.setColor(color);
 		for (Shape i : arrDraw) {
 			Graphics2D g2d = (Graphics2D) g;
@@ -68,7 +68,6 @@ public class PaintShapes extends JPanel {
 		arrDraw.clear();
 		arrFill.clear();
 		arrDrawTempTriangles.clear();
-		//
 		arrFillConstraintPoly.clear();
 	}
 
@@ -107,11 +106,10 @@ public class PaintShapes extends JPanel {
 		arrDraw.add(getLine(line));
 	}
 
-	
 	public static void addLine(Vector2d v1, Vector2d v2) {
 		arrDraw.add(getLine(v1, v2));
 	}
-	
+
 	public static Line2D.Double getLine(Vector2d v1, Vector2d v2) {
 		double x1 = v1.x;
 		double y1 = v1.y;
@@ -156,7 +154,7 @@ public class PaintShapes extends JPanel {
 		Polygon polygon = new Polygon(xpoints, ypoints, npoints);
 		arrDrawTempTriangles.add(polygon);
 	}
-	
+
 	public static void addTriangle(Triangle dt) {
 		int npoints = dt.points.length;
 		int[] xpoints = new int[npoints];
@@ -182,7 +180,7 @@ public class PaintShapes extends JPanel {
 		Polygon polygon = new Polygon(xpoints, ypoints, npoints);
 		arrFillConstraintPoly.add(polygon);
 	}
-	
+
 	public static Ellipse2D.Double getCircle(Circle circle) {
 		Coordinate center = circle.getCenter();
 		double radius = circle.getRadius();

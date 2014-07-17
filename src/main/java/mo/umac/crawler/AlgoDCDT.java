@@ -53,61 +53,59 @@ public class AlgoDCDT extends Strategy {
 		Mesh mesh = new Mesh(a, b, c, d);
 		//
 		Polygon polygonHexagon = issueFirstHexagon(state, category, query, envelope);
-		// represents the constraint and the hole
-		Constraints constraint = new Constraints(polygonHexagon.getPoints());
-		//
-		mesh.insertConstraint(constraint);
-
-		HashMap<Triangle, String> listTris = mesh.getTriangles();
-		//
 		if (PaintShapes.painting) {
-			PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
-			Iterator it = listTris.entrySet().iterator();
-			while (it.hasNext()) {
-				Entry entry = (Entry) it.next();
-				Triangle t = (Triangle) entry.getKey();
-				PaintShapes.paint.addTriangle(t);
-			}
+			// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+			// PaintShapes.paint.myRepaint();
+			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			PaintShapes.paint.addPolygon(polygonHexagon);
 			PaintShapes.paint.myRepaint();
 		}
-		
+		// represents the constraint and the hole
+		Constraints constraint = new Constraints(polygonHexagon.getPoints());
+		mesh.insertConstraint(constraint);
+
+		mesh.printTriangles();
+
 		boolean finished = false;
 		while (!finished) {
-			double maxArea = Double.MIN_VALUE;
-			// max triangle
-			Triangle triangle = null;
-			// find the largest triangle
-			Iterator it = listTris.entrySet().iterator();
-			while (it.hasNext()) {
-				Entry entry = (Entry) it.next();
-				Triangle t = (Triangle) entry.getKey();
-				if (t.area() > maxArea) {
-					maxArea = t.area();
-					triangle = t;
-				}
-			}
+			Triangle triangle = mesh.getBiggestTriangle();
 			if (triangle == null) {
 				finished = true;
 				break;
 			}
 			Circle aCircle = issueCircleLoop(state, category, query, triangle);
 			Polygon inner = issueInnerPolygon(aCircle, triangle);
-			// TODO testing
+			//
+			if (logger.isDebugEnabled()) {
+				logger.debug("max triangle = " + triangle.toString());
+				logger.debug("aCircle = " + aCircle.toString());
+				logger.debug("inner polygon = " + GeoOperator.polygonToString(inner));
+			}
+			//
 			constraint = new Constraints(inner.getPoints());
 			mesh.insertConstraint(constraint);
-			//
-			listTris = mesh.getTriangles();
-			//
+			// mesh.printTriangles();
 			if (PaintShapes.painting) {
+				//
 				PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
-				it = listTris.entrySet().iterator();
+				Iterator it = mesh.getTriangles().entrySet().iterator();
 				while (it.hasNext()) {
-					Entry entry = (Entry) it.next();
-					Triangle t = (Triangle) entry.getKey();
+					Entry pairs = (Entry) it.next();
+					Triangle t = (Triangle) pairs.getKey();
 					PaintShapes.paint.addTriangle(t);
+					logger.debug(t.toString());
 				}
+				//
+				// PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
+				PaintShapes.paint.addTriangle(triangle);
+				// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+				// PaintShapes.paint.addCircle(aCircle);
+				// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+				PaintShapes.paint.addPolygon(inner);
 				PaintShapes.paint.myRepaint();
 			}
+			logger.debug("finished one iteration");
+
 		}
 
 	}
@@ -124,27 +122,12 @@ public class AlgoDCDT extends Strategy {
 		Circle aCircle = new Circle(center, radius);
 		resultSet.addACircle(aCircle);
 		Polygon polygonHexagon = findInnerHexagon(aCircle);
-		if (PaintShapes.painting) {
-			PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-			PaintShapes.paint.addCircle(aCircle);
-			PaintShapes.paint.myRepaint();
-			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-			PaintShapes.paint.addPolygon(polygonHexagon);
-			PaintShapes.paint.myRepaint();
-		}
 		return polygonHexagon;
 	}
 
 	private Circle issueCircleLoop(String state, int category, String query, Triangle triangle) {
 		Vector2d centroid = triangle.centroid();
 		Coordinate center = new Coordinate(centroid.getX(), centroid.getY());
-		if (PaintShapes.painting) {
-			PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-			PaintShapes.paint.addTriangle(triangle);
-			PaintShapes.paint.color = PaintShapes.paint.color.red;
-			PaintShapes.paint.addPoint(center);
-			PaintShapes.paint.myRepaint();
-		}
 		AQuery aQuery = new AQuery(center, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
 		ResultSetD2 resultSet = query(aQuery);
 		Coordinate farthestCoordinate = CrawlerD1.farthest(resultSet);
@@ -154,32 +137,11 @@ public class AlgoDCDT extends Strategy {
 		double radius = center.distance(farthestCoordinate);
 		Circle aCircle = new Circle(center, radius);
 		resultSet.addACircle(aCircle);
-		if (PaintShapes.painting) {
-			PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-			PaintShapes.paint.addCircle(aCircle);
-			PaintShapes.paint.myRepaint();
-		}
 		return aCircle;
 	}
 
 	private Polygon issueInnerPolygon(Circle aCircle, Triangle triangle) {
 		Polygon inner = intersect(aCircle, triangle);
-		if (logger.isDebugEnabled()) {
-			logger.debug("before disturb--------------------");
-			logger.debug("aCircle = " + aCircle.toString());
-			logger.debug("triangle = " + triangle.toString());
-			logger.debug("inner: " + GeoOperator.polygonToString(inner));
-			// for (int i = 0; i < holeList.size(); i++) {
-			// logger.debug(i + ": " + GeoOperator.polygonToString(holeList.get(i)));
-			// }
-			logger.debug("end recording before disturb--------------------");
-		}
-
-		if (PaintShapes.painting) {
-			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-			PaintShapes.paint.addPolygon(inner);
-			PaintShapes.paint.myRepaint();
-		}
 		return inner;
 	}
 
@@ -232,7 +194,6 @@ public class AlgoDCDT extends Strategy {
 	//
 	// return false;
 	// }
-
 
 	/**
 	 * Hexagon inscribed in a circle

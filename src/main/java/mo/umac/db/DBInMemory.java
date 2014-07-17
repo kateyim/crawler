@@ -122,44 +122,17 @@ public class DBInMemory {
 		ResultSetD2 resultSet = queryByID(resultsID);
 		resultSet.setTotalResultsReturned(resultsID.size());
 
-		// if (logger.isDebugEnabled()) {
-		// int size1 = resultsID.size();
-		// int size2 = resultSet.getPOIs().size();
-		// if (size1 != size2) {
-		// logger.error("size1 != size2");
-		// }
-		// }
-
 		writeToExternalDB(queryID, qc, resultSet);
-		// revised at 2013-9-30
-		// writeToInMemoryDB(queryID, qc, resultSet);
 
-		//
-		// if (logger.isDebugEnabled()) {
-		// logger.debug("countNumQueries = " + CrawlerStrategy.countNumQueries);
-		// logger.debug("number of points crawled = " + numCrawlerPoints());
-		//
-		// int size1 = numCrawlerPoints();
-		// Set set = new TreeSet();
-		// int size2 = numOfTuplesInExternalDB(set);
-		// logger.debug("numCrawlerPoints in memory = " + size1);
-		// logger.debug("numCrawlerPoints in db = " + size2);
-		// if (size1 != size2) {
-		// logger.error("size1 != size2");
-		// logger.error("countNumQueries = " + CrawlerStrategy.countNumQueries);
-		// logger.error("numCrawlerPoints in memory = " + size1);
-		// logger.error("numCrawlerPoints in db = " + size2);
+		// if (queryID % 10 == 0) {
+		logger.info("countNumQueries = " + Strategy.countNumQueries);
+		logger.info("countCrawledPoints = " + numCrawlerPoints());
 		// }
-		// }
-
-//		logger.info("countNumQueries = " + Strategy.countNumQueries);
-//		logger.info("countCrawledPoints = " + numCrawlerPoints());
-		
-		if (queryID % 10 == 0) {
+		if (queryID % 14 == 0) {
 			logger.info("countNumQueries = " + Strategy.countNumQueries);
 			logger.info("countCrawledPoints = " + numCrawlerPoints());
 		}
-		
+
 		// another drawing method
 		// logger.info("countCrawledPoints2 = " + numCrawlerPoints());
 		// logger.info("countNumQueries2 = " + Strategy.countNumQueries);

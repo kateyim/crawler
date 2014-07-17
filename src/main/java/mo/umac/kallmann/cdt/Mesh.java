@@ -450,7 +450,7 @@ public class Mesh {
 	 */
 	private QuadEdge insertSite(Vector2d x) {
 		QuadEdge e = locate(x);
-		logger.debug("inserting sites: " + x.toString());
+		// logger.debug("inserting sites: " + x.toString());
 		// logger.debug("locating x = " + x.toString() + " at " + e.toString());
 		if (e == null) {
 			return e;
@@ -586,7 +586,7 @@ public class Mesh {
 	 * @param b
 	 */
 	private void insertEdge(Vector2d a, Vector2d b) {
-		logger.debug("inserting edge: " + a.toString() + "->" + b.toString());
+		// logger.debug("inserting edge: " + a.toString() + "->" + b.toString());
 		Vector2d aa = null;
 		Vector2d bb = null;
 		QuadEdge ea = insertSite(a);
@@ -979,17 +979,14 @@ public class Mesh {
 		logger.debug("End of Printing Edges.");
 	}
 
-	private void printTriangles() {
+	public void printTriangles() {
 		logger.debug("Printing Triangles: " + triangleMap.size());
+		PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
 		Iterator it = triangleMap.entrySet().iterator();
-		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
 		while (it.hasNext()) {
 			Entry pairs = (Entry) it.next();
 			Triangle t = (Triangle) pairs.getKey();
-			// paint the triangle
-			PaintShapes.paint.addLine(t.points[0], t.points[1]);
-			PaintShapes.paint.addLine(t.points[2], t.points[1]);
-			PaintShapes.paint.addLine(t.points[0], t.points[2]);
+			PaintShapes.paint.addTriangle(t);
 			logger.debug(t.toString());
 		}
 		PaintShapes.paint.myRepaint();
@@ -1000,10 +997,7 @@ public class Mesh {
 	private void printATriangle(Triangle t, java.awt.Color color) {
 		// paint the triangle
 		PaintShapes.paint.color = color;
-		PaintShapes.paint.addLine(t.points[0], t.points[1]);
-		PaintShapes.paint.addLine(t.points[2], t.points[1]);
-		PaintShapes.paint.addLine(t.points[0], t.points[2]);
-		logger.debug(t.toString());
+		PaintShapes.paint.addTriangle(t);
 		PaintShapes.paint.myRepaint();
 	}
 
@@ -1036,7 +1030,8 @@ public class Mesh {
 
 	private void removeTriangle(Triangle t) {
 		triangleMap.remove(t.sortTriangle());
-		// printATriangle(t, PaintShapes.paint.greenTranslucence);
+		logger.debug("removing: " + t.toString());
+		printATriangle(t, PaintShapes.paint.greenTranslucence);
 		// printTriangles();
 	}
 
@@ -1045,6 +1040,26 @@ public class Mesh {
 	 */
 	public HashMap<Triangle, String> getTriangles() {
 		return triangleMap;
+	}
+
+	public Triangle getBiggestTriangle() {
+		if (triangleMap.size() == 0) {
+			return null;
+		}
+		double maxArea = Double.MIN_VALUE;
+		// max triangle
+		Triangle triangle = null;
+		// find the largest triangle
+		Iterator it = triangleMap.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry entry = (Entry) it.next();
+			Triangle t = (Triangle) entry.getKey();
+			if (t.area() > maxArea) {
+				maxArea = t.area();
+				triangle = t;
+			}
+		}
+		return triangle;
 	}
 
 }
