@@ -1,10 +1,13 @@
 package mo.umac.kallmann.cdt;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+
+import mo.umac.crawler.Strategy;
 
 import org.apache.log4j.Logger;
 import org.poly2tri.geometry.polygon.Polygon;
@@ -35,6 +38,9 @@ public class Mesh {
 	 * Only use the key: Triangle;
 	 * 
 	 * Only save outside hole triangles
+	 * 
+	 * 2014-7-18
+	 * There are bugs in the way of constructing triangleMap
 	 */
 	private static HashMap<Triangle, String> triangleMap = new HashMap<Triangle, String>();
 
@@ -811,6 +817,7 @@ public class Mesh {
 	 * @return
 	 */
 	private QuadEdge bruteForceLocate(Vector2d x) {
+		logger.debug("bruteForceLocate");
 		QuadEdge e;
 		for (LlistNode<Edge> p = edges.first(); !edges.isEnd(p); p = edges.next(p)) {
 			e = ((QuadEdge) edges.retrieve(p));
@@ -841,6 +848,10 @@ public class Mesh {
 					Line l1 = new Line(e.orig(), e.dest());
 					Line l2 = new Line(e.dest(), e.lPrev().orig());
 					Line l3 = new Line(e.lPrev().orig(), e.orig());
+					//
+					Triangle t = new Triangle(e.orig(), e.dest(), e.lPrev().orig());
+					removeTriangle(t);
+					//
 					int d = min(Math.abs(l1.eval(x)), Math.abs(l2.eval(x)), Math.abs(l3.eval(x)));
 					switch (d) {
 					case 0:
@@ -964,10 +975,9 @@ public class Mesh {
 	}
 
 	/************** For Testing ***************/
-	private void printEdges() {
+	public void printEdges() {
 		logger.debug("Printing Edges: " + edges.length());
-		PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
-
+		PaintShapes.paint.color = Color.RED;
 		for (LlistNode<Edge> p = edges.first(); !edges.isEnd(p); p = edges.next(p)) {
 			QuadEdge e = ((QuadEdge) edges.retrieve(p));
 			logger.debug(e.toString());
@@ -1021,17 +1031,29 @@ public class Mesh {
 			inside = GeoOperator.pointInsidePolygon(hole, outerPoint, p);
 		}
 		if (!inside) {
-			triangleMap.put(t.sortTriangle(), null);
-			// printATriangle(t, PaintShapes.paint.redTranslucence);
+			triangleMap.put(t.sortTriangle(), "A");
+			logger.debug("adding: " + t.toString());
+			if (Strategy.countNumQueries == 13) {
+				printATriangle(t, Color.GREEN);
+			}
 			// printTriangles();
 			// printEdges();
+		} else {
+			logger.debug("inside: " + hole.toString());
+			logger.debug(t.toString());
 		}
 	}
 
 	private void removeTriangle(Triangle t) {
+		String value = triangleMap.get(t.sortTriangle());
+		if (value == null) {
+			logger.debug("removing nothing");
+		}
 		triangleMap.remove(t.sortTriangle());
 		logger.debug("removing: " + t.toString());
-		printATriangle(t, PaintShapes.paint.greenTranslucence);
+		if (Strategy.countNumQueries == 13) {
+			printATriangle(t, Color.BLUE);
+		}
 		// printTriangles();
 	}
 
@@ -1060,6 +1082,28 @@ public class Mesh {
 			}
 		}
 		return triangle;
+	}
+
+	/**
+	 * Check whether the computed triangles are consisting with the edges.
+	 */
+	public void checkTriangles() {
+		// TODO
+
+	}
+
+	/**
+	 * Avoiding holes
+	 * 
+	 * @param holes
+	 * @return
+	 */
+	public HashMap<Triangle, String> getTrianglesFromEdges(ArrayList<Polygon> holes) {
+		for (LlistNode<Edge> p = edges.first(); !edges.isEnd(p); p = edges.next(p)) {
+			QuadEdge e = ((QuadEdge) edges.retrieve(p));
+		}
+
+		return null;
 	}
 
 }

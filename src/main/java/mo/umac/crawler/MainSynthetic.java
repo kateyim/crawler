@@ -53,7 +53,7 @@ public class MainSynthetic extends Strategy {
 	 */
 	public static void main(String[] args) {
 		boolean debug = true;
-		PaintShapes.painting = false;
+		PaintShapes.painting = true;
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		MainSynthetic test = new MainSynthetic();

@@ -44,7 +44,7 @@ public abstract class Strategy {
 	protected static int MAX_TOTAL_RESULTS_RETURNED;// = MAX_START +
 													// MAX_RESULTS_NUM; // =270;
 
-	public static int countNumQueries = 1;
+	public static int countNumQueries = 0;
 
 	protected int zip = 0;
 

@@ -89,6 +89,13 @@ public class Main {
 		double triArea = mesh.triArea(a, b, c);
 		System.out.println(triArea);
 	}
+	
+	/**
+	 * Draw the shapes for debugging
+	 */
+	public void testing(){
+		
+	}
 
 	// public void testInCircle() {
 	// Vector2d a = new Vector2d(0, 0);

@@ -112,32 +112,29 @@ public class DBInMemory {
 
 		poisIDs.addAll(resultsID);
 
+		Strategy.countNumQueries++;
 		// FIXME add re-transfer from the break point.
 		int queryID = Strategy.countNumQueries;
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("countNumQueries = " + Strategy.countNumQueries);
-		}
 
 		ResultSetD2 resultSet = queryByID(resultsID);
 		resultSet.setTotalResultsReturned(resultsID.size());
 
 		writeToExternalDB(queryID, qc, resultSet);
 
-		// if (queryID % 10 == 0) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("countNumQueries = " + Strategy.countNumQueries);
+		}
+		
+		 if (queryID % 10 == 0) {
 		logger.info("countNumQueries = " + Strategy.countNumQueries);
 		logger.info("countCrawledPoints = " + numCrawlerPoints());
-		// }
-		if (queryID % 14 == 0) {
-			logger.info("countNumQueries = " + Strategy.countNumQueries);
-			logger.info("countCrawledPoints = " + numCrawlerPoints());
-		}
+		 }
 
 		// another drawing method
 		// logger.info("countCrawledPoints2 = " + numCrawlerPoints());
 		// logger.info("countNumQueries2 = " + Strategy.countNumQueries);
 
-		Strategy.countNumQueries++;
 		return resultSet;
 	}
 

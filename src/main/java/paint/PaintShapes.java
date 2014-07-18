@@ -45,7 +45,7 @@ public class PaintShapes extends JPanel {
 
 	public void paintComponent(Graphics g) {
 		// XXX clear() only used testing AlgoDCDT
-		clear(g);
+//		clear(g);
 		g.setColor(color);
 		for (Shape i : arrDraw) {
 			Graphics2D g2d = (Graphics2D) g;

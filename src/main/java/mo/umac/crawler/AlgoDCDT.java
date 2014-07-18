@@ -17,6 +17,7 @@ import mo.umac.spatial.Circle;
 import org.apache.log4j.Logger;
 import org.poly2tri.geometry.polygon.Polygon;
 import org.poly2tri.geometry.polygon.PolygonPoint;
+
 import paint.PaintShapes;
 import utils.GeoOperator;
 
@@ -53,18 +54,9 @@ public class AlgoDCDT extends Strategy {
 		Mesh mesh = new Mesh(a, b, c, d);
 		//
 		Polygon polygonHexagon = issueFirstHexagon(state, category, query, envelope);
-		if (PaintShapes.painting) {
-			// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-			// PaintShapes.paint.myRepaint();
-			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-			PaintShapes.paint.addPolygon(polygonHexagon);
-			PaintShapes.paint.myRepaint();
-		}
 		// represents the constraint and the hole
 		Constraints constraint = new Constraints(polygonHexagon.getPoints());
 		mesh.insertConstraint(constraint);
-
-		mesh.printTriangles();
 
 		boolean finished = false;
 		while (!finished) {
@@ -81,29 +73,31 @@ public class AlgoDCDT extends Strategy {
 				logger.debug("aCircle = " + aCircle.toString());
 				logger.debug("inner polygon = " + GeoOperator.polygonToString(inner));
 			}
+			logger.debug("Strategy.countNumQueries = " + Strategy.countNumQueries);
+			if (Strategy.countNumQueries == 13) { // 13 is wrong
+				logger.debug("13");
+			}
 			//
 			constraint = new Constraints(inner.getPoints());
 			mesh.insertConstraint(constraint);
+			// if (Strategy.countNumQueries == 13) {
 			// mesh.printTriangles();
-			if (PaintShapes.painting) {
-				//
-				PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
-				Iterator it = mesh.getTriangles().entrySet().iterator();
-				while (it.hasNext()) {
-					Entry pairs = (Entry) it.next();
-					Triangle t = (Triangle) pairs.getKey();
-					PaintShapes.paint.addTriangle(t);
-					logger.debug(t.toString());
-				}
-				//
-				// PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
-				PaintShapes.paint.addTriangle(triangle);
-				// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-				// PaintShapes.paint.addCircle(aCircle);
-				// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-				PaintShapes.paint.addPolygon(inner);
-				PaintShapes.paint.myRepaint();
+			// }
+			if (Strategy.countNumQueries == 14) { // 13 is wrong
+				System.exit(0);
 			}
+			// if (PaintShapes.painting) {
+			// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+			// PaintShapes.paint.addCircle(aCircle);
+			// PaintShapes.paint.myRepaint();
+			// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			// PaintShapes.paint.addPolygon(inner);
+			// PaintShapes.paint.myRepaint();
+			// PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
+			// PaintShapes.paint.addTriangle(triangle);
+			// PaintShapes.paint.myRepaint();
+			// mesh.printTriangles();
+			// }
 			logger.debug("finished one iteration");
 
 		}
