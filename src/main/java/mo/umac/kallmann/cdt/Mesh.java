@@ -7,14 +7,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import mo.umac.crawler.AlgoDCDT;
+import mo.umac.crawler.Strategy;
+
 import org.apache.log4j.Logger;
 import org.poly2tri.geometry.polygon.Polygon;
 import org.poly2tri.geometry.polygon.PolygonPoint;
 
-import com.vividsolutions.jts.geom.Coordinate;
-
 import paint.PaintShapes;
 import utils.GeoOperator;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 public class Mesh {
 	protected static Logger logger = Logger.getLogger(Mesh.class.getName());
@@ -60,26 +63,16 @@ public class Mesh {
 			points.add(pp);
 		}
 		hole = new Polygon(points);
-		//
-		// for (int i = 0; i < vConsList.size(); i++) {
-		// Vector2d p = vConsList.get(i);
-		// insertSite(p);
-		// printEdges();
-		// }
 		logger.debug("inserting edges: ");
 		int size = vConsList.size();
 		for (int i = 0; i < size - 1; i++) {
 			Vector2d v1 = vConsList.get(i);
 			Vector2d v2 = vConsList.get(i + 1);
 			insertEdge(v1, v2);
-			// printEdges();
 		}
 		if (size >= 2) {
 			insertEdge(vConsList.get(size - 1), vConsList.get(0));
-			// printEdges();
 		}
-		// printing triangles
-		// printTriangles();
 
 	}
 
@@ -595,6 +588,10 @@ public class Mesh {
 	 */
 	private void insertEdge(Vector2d a, Vector2d b) {
 		// logger.debug("inserting edge: " + a.toString() + "->" + b.toString());
+		// add at 2014-7-19
+		if (coincide(a, b)) {
+			return;
+		}
 		Vector2d aa = null;
 		Vector2d bb = null;
 		QuadEdge ea = insertSite(a);
@@ -938,6 +935,7 @@ public class Mesh {
 	}
 
 	private void deleteEdge(QuadEdge e) {
+		logger.debug("deleteEdge");
 		// Make sure the starting edge does not get deleted:
 		if (startingEdge == e) {
 			logger.debug("Mesh::DeleteEdge: attempting to delete starting edge");
@@ -951,6 +949,13 @@ public class Mesh {
 
 		// remove edge from the edge list:
 		QuadEdge qe = e;
+		if (qe == null) {
+			logger.debug("qe == null");
+		}
+		// FIXME This is the first time "delete edge". But should I delete any edges?
+		if (qe.p == null) {
+			logger.debug("qe.p == null"); // this is null
+		}
 		edges.remove(edges.prev(qe.p));
 		// delete qe;
 		// add at 2014-7-11 remove a triangle and add a new triangle
@@ -1028,7 +1033,7 @@ public class Mesh {
 	private void addTriangle(Triangle t) {
 		Vector2d center = t.centroid();
 		//
-		Coordinate outerPoint = new Coordinate(Double.MAX_VALUE, Double.MAX_VALUE);
+		Coordinate outerPoint = AlgoDCDT.outerPoint;
 		Coordinate p = new Coordinate(center.x, center.y);
 		boolean inside = false;
 		if (hole != null) {
@@ -1036,7 +1041,7 @@ public class Mesh {
 		}
 		if (!inside) {
 			Triangle sorted = t.sortTriangle();
-			// if (Strategy.countNumQueries == 12) {
+			// if (Strategy.countNumQueries == 56) {
 			// printATriangle(sorted, Color.GREEN);
 			// logger.info("trying to add: " + sorted.toString());
 			// if (triangleMap.get(sorted) == null) {
@@ -1046,8 +1051,6 @@ public class Mesh {
 			// }
 			// }
 			triangleMap.put(sorted, "");
-			// printTriangles();
-			// printEdges();
 		} else {
 			logger.debug("inside: " + hole.toString());
 			logger.debug(t.toString());
@@ -1060,7 +1063,7 @@ public class Mesh {
 		if (value == null) {
 			logger.debug("removing nothing: " + sorted.toString());
 		}
-		// if (Strategy.countNumQueries == 12) {
+		// if (Strategy.countNumQueries == 56) {
 		// printATriangle(sorted, Color.BLUE);
 		// logger.info("trying to remove: " + sorted.toString());
 		// if (triangleMap.get(sorted) == null) {
@@ -1070,7 +1073,6 @@ public class Mesh {
 		// }
 		// }
 		triangleMap.remove(sorted.sortTriangle());
-		// printTriangles();
 	}
 
 	/**

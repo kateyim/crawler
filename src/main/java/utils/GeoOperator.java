@@ -299,7 +299,8 @@ public class GeoOperator {
 			// }
 			double k = (p2.y - p1.y) / (p2.x - p1.x);
 			double c = p1.y - k * p1.x;
-			double delt = 4 * Math.pow(k * c - point.x - k * point.y, 2) - 4 * (1 + k * k) * ((c - point.y) * (c - point.y) + point.x * point.x - radius * radius);
+			double delt = 4 * Math.pow(k * c - point.x - k * point.y, 2) - 4 * (1 + k * k)
+					* ((c - point.y) * (c - point.y) + point.x * point.x - radius * radius);
 			// if (logger.isDebugEnabled()) {
 			// logger.debug("delt=" + delt + "  k=" + k);
 			// }
@@ -361,7 +362,7 @@ public class GeoOperator {
 	}
 
 	public static boolean pointOnLine(TriangulationPoint p1, TriangulationPoint p2, TriangulationPoint q) {
-		if( p1 == null || p2 == null || q == null){
+		if (p1 == null || p2 == null || q == null) {
 			return false;
 		}
 		// check done
@@ -597,6 +598,24 @@ public class GeoOperator {
 		return false;
 	}
 
+	public static void main(String[] args) {
+		PolygonPoint p1 = new PolygonPoint(592.494600571512, 255.22982502213824);
+		PolygonPoint p2 = new PolygonPoint(599.3692781853376, 366.0929969594081);
+		PolygonPoint p3 = new PolygonPoint(488.46619577498774, 313.1943930801416);
+		PolygonPoint p4 = new PolygonPoint(488.4648004316064, 313.1344773526042);
+		// test pointInsidePolygon
+		List<PolygonPoint> points = new ArrayList<PolygonPoint>();
+		points.add(p1);
+		points.add(p2);
+		points.add(p3);
+		points.add(p4);
+		Polygon polygon = new Polygon(points);
+		Coordinate outerPoint = new Coordinate(-100, -100);
+		Coordinate p = new Coordinate(500, 313.15);
+		boolean b = pointInsidePolygon(polygon, outerPoint, p);
+		System.out.println(b);
+	}
+
 	/**
 	 * check whether two line segments intersects {@link http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/} one lineSegment is p1,q1, the
 	 * other is p2, q2
@@ -771,6 +790,7 @@ public class GeoOperator {
 		Coordinate c = new Coordinate(p.getX(), p.getY());
 		return c;
 	}
+
 	/**
 	 * Given two vectors CA and CB, compute the unit vector of the bisectric between CA and CB
 	 * C------->B
@@ -819,6 +839,5 @@ public class GeoOperator {
 		newPoint[1] = y + distance * e[1];
 		return newPoint;
 	}
-
 
 }

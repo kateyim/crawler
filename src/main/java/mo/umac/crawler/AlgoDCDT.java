@@ -1,5 +1,6 @@
 package mo.umac.crawler;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,8 +33,11 @@ import com.vividsolutions.jts.geom.LineSegment;
  * 
  */
 public class AlgoDCDT extends Strategy {
-
+	
 	protected static Logger logger = Logger.getLogger(AlgoDCDT.class.getName());
+	
+	// for synthetic dataset
+	public static Coordinate outerPoint = new Coordinate(-100, -100);
 
 	public AlgoDCDT() {
 		super();
@@ -79,33 +83,45 @@ public class AlgoDCDT extends Strategy {
 			//
 			if (logger.isDebugEnabled()) {
 				logger.debug("max triangle = " + triangle.toString());
+				logger.debug("max area = " + triangle.area());
 				logger.debug("aCircle = " + aCircle.toString());
-				if (inner != null) {
-					logger.debug("inner polygon = " + GeoOperator.polygonToString(inner));
-				} else {
-					logger.debug("fully covered");
-				}
+				logger.debug("inner polygon = " + GeoOperator.polygonToString(inner));
 			}
+			// debugging
+//			if (Strategy.countNumQueries == 55) {
+//				mesh.printTriangles();
+//			}
+//			if (Strategy.countNumQueries >= 56) {
+//				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+//				PaintShapes.paint.addPolygon(inner);
+//				PaintShapes.paint.myRepaint();
+//				PaintShapes.paint.color = Color.RED;
+//				PaintShapes.paint.addTriangle(triangle);
+//				PaintShapes.paint.myRepaint();
+//			}
+//			if (Strategy.countNumQueries == 58) {
+//				return;
+//			}
 			constraint = new Constraints(inner.getPoints());
 			mesh.insertConstraint(constraint);
-			if (inner == null) {
-				// fully covered
-				logger.info("fully covered");
-				mesh.removeTriangle(triangle);
-			}
+			// if (inner == null) {
+			// // fully covered
+			// logger.info("fully covered");
+			// mesh.removeTriangle(triangle);
+			// }
 
-			if (PaintShapes.painting) {
-				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-				PaintShapes.paint.addCircle(aCircle);
-				PaintShapes.paint.myRepaint();
-				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-				PaintShapes.paint.addPolygon(inner);
-				PaintShapes.paint.myRepaint();
-				PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
-				PaintShapes.paint.addTriangle(triangle);
-				PaintShapes.paint.myRepaint();
-				mesh.printTriangles();
-			}
+			// if (PaintShapes.painting) {
+			// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+			// PaintShapes.paint.addCircle(aCircle);
+			// PaintShapes.paint.myRepaint();
+			// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			// PaintShapes.paint.addPolygon(inner);
+			// PaintShapes.paint.myRepaint();
+			// PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
+			// PaintShapes.paint.addTriangle(triangle);
+			// PaintShapes.paint.myRepaint();
+			// mesh.printTriangles();
+			// }
 			logger.debug("finished one iteration");
 
 		}
@@ -245,10 +261,10 @@ public class AlgoDCDT extends Strategy {
 				points.add(p1);
 			}
 			Polygon p = new Polygon(points);
-			// return p;
+			return p;
 			// revised at 2014-7-19
 			// if the circle fully covers the triangle, then return null;
-			return null;
+			// return null;
 		} else if (numVerticesInsideCircle == 2) {
 			return case2(circle, triangle, verticesInsideCircle);
 		} else if (numVerticesInsideCircle == 1) {
