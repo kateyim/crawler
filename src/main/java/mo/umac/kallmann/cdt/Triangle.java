@@ -1,8 +1,12 @@
 package mo.umac.kallmann.cdt;
 
+import java.util.HashMap;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.poly2tri.triangulation.point.TPoint;
+
+import utils.DoubleTruncation;
 
 public class Triangle {
 	protected static Logger logger = Logger.getLogger(Triangle.class.getName());
@@ -23,22 +27,6 @@ public class Triangle {
 		points[1] = p2;
 		points[2] = p3;
 	}
-
-	/**
-	 * For testing
-	 * 
-	 * @param args
-	 */
-	// public static void main(String[] args) {
-	// DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
-	//
-	// Triangle t = new Triangle(new Vector2d(1.0, 2.0), new Vector2d(1.0, 1.5), new Vector2d(0.7, 2.0));
-	// Triangle after = t.sortTriangle();
-	// Triangle b = new Triangle(new Vector2d(1.0, 2.0), new Vector2d(1.0, 1.5), new Vector2d(0.7, 2.0));
-	// boolean flag = t.equals(b);
-	// logger.debug(flag);
-	// // logger.debug(after.toString());
-	// }
 
 	public Triangle sortTriangle() {
 		Vector2d[] after = sortVectors(points);
@@ -119,7 +107,7 @@ public class Triangle {
 		// return ((c2 + c3)*a + (c3 + c1)*c + (c1 + c2)*b) / (2*(c1 + c2 + c3));
 		return (a.multiply(c2 + c3).add(c.multiply(c3 + c1)).add(b.multiply(c1 + c2))).divide(2 * (c1 + c2 + c3));
 	}
-	
+
 	public Vector2d circumCenter() {
 		Vector2d a = points[0];
 		Vector2d b = points[1];
@@ -159,12 +147,37 @@ public class Triangle {
 		return sb.toString();
 	}
 
-	// Depends only on account number
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 * 
+	 * truncate the double to 1e-10
+	 */
 	@Override
 	public int hashCode() {
-		Vector2d[] sorted = sortVectors(points);
-		double[] value = { sorted[0].x, sorted[0].y, sorted[1].x, sorted[1].y, sorted[2].x, sorted[2].y };
+		// Vector2d[] sorted = sortVectors(points);
+		// double[] value = { sorted[0].x, sorted[0].y, sorted[1].x, sorted[1].y, sorted[2].x, sorted[2].y };
+		// cut off at epsilon = 1e-10
+		// double[] value = { points[0].x, points[0].y, points[1].x, points[1].y, points[2].x, points[2].y };
+		double[] value = { DoubleTruncation.formatDouble(points[0].x), DoubleTruncation.formatDouble(points[0].y), DoubleTruncation.formatDouble(points[1].x),
+				DoubleTruncation.formatDouble(points[1].y), DoubleTruncation.formatDouble(points[2].x), DoubleTruncation.formatDouble(points[2].y) };
 		return Hash.hash(value);
+	}
+
+	/**
+	 * Compare with epsilon of the two triangles
+	 * 
+	 * @return false: not equal
+	 */
+	private boolean compare(Triangle other) {
+		for (int i = 0; i < 3; i++) {
+			if (Math.abs(points[i].x - other.points[i].x) > Mesh.epsilon) {
+				return false;
+			}
+			if (Math.abs(points[i].y - other.points[i].y) > Mesh.epsilon) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	// Compare only account numbers
@@ -177,8 +190,36 @@ public class Triangle {
 		if (getClass() != obj.getClass())
 			return false;
 		Triangle other = (Triangle) obj;
-		if (hashCode() != other.hashCode())
+		if (hashCode() != other.hashCode()) {
+			// if (!this.compare(other)) {
 			return false;
+			// }
+		}
 		return true;
+	}
+
+	/**
+	 * For testing
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
+
+		Triangle a = new Triangle(new Vector2d(0.0, 0.0), new Vector2d(0.0, 443.4348040045911), new Vector2d(97.08901588721434, 500.0));
+
+		Triangle b = new Triangle(new Vector2d(0.0, 0.0), new Vector2d(0.0, 443.43480400459106), new Vector2d(97.08901588721434, 500.0));
+
+		boolean flag = a.equals(b);
+		System.out.println(flag);
+
+		HashMap<Triangle, String> map = new HashMap<Triangle, String>();
+		map.put(a, "A");
+		String re = map.get(b);
+		if (re == null) {
+			System.out.println("null");
+		} else {
+			System.out.println("not null");
+		}
 	}
 }

@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import mo.umac.crawler.Strategy;
-
 import org.apache.log4j.Logger;
 import org.poly2tri.geometry.polygon.Polygon;
 import org.poly2tri.geometry.polygon.PolygonPoint;
@@ -23,7 +21,7 @@ public class Mesh {
 
 	public static final int INIT_VALUE = -1;
 
-	private double epsilon = 1e-10;
+	public static double epsilon = 1e-10;
 
 	/**
 	 * store all edges
@@ -214,6 +212,12 @@ public class Mesh {
 	 * @param x
 	 */
 	private void splitEdge(QuadEdge e, Vector2d x) {
+		// add at 2014-7-19 remove a triangle and add a new triangle
+		Triangle old1 = new Triangle(e.orig(), e.dest(), e.oPrev().dest());
+		Triangle old2 = new Triangle(e.orig(), e.dest(), e.sym().oPrev().dest());
+		removeTriangle(old1);
+		removeTriangle(old2);
+		//
 		Vector2d dt;
 		if (e.isConstrained()) {
 			// snap the point to the edge before splitting:
@@ -574,11 +578,9 @@ public class Mesh {
 			if (!e.isConstrained() && inCircle(e.orig(), t.dest(), e.dest(), x)) {
 				swap(e);
 				e = e.oPrev();
-			}
-			else if (e.lPrev() == startingEdge) { // no more suspect edges
+			} else if (e.lPrev() == startingEdge) { // no more suspect edges
 				return startingEdge;
-			}
-			else {
+			} else {
 				// pop a suspect edge
 				e = e.oNext().lPrev();
 			}
@@ -622,7 +624,9 @@ public class Mesh {
 		}
 
 		if (aa.equals(bb, epsilon)) {
-			logger.error("InsertEdge: both ends map to same vertex");
+			logger.debug("InsertEdge: both ends map to same vertex");
+			logger.debug("aa: " + aa.toString());
+			logger.debug("bb: " + bb.toString());
 			return;
 		}
 
@@ -1031,11 +1035,17 @@ public class Mesh {
 			inside = GeoOperator.pointInsidePolygon(hole, outerPoint, p);
 		}
 		if (!inside) {
-			triangleMap.put(t.sortTriangle(), "A");
-			logger.debug("adding: " + t.toString());
-			if (Strategy.countNumQueries == 13) {
-				printATriangle(t, Color.GREEN);
-			}
+			Triangle sorted = t.sortTriangle();
+			// if (Strategy.countNumQueries == 12) {
+			// printATriangle(sorted, Color.GREEN);
+			// logger.info("trying to add: " + sorted.toString());
+			// if (triangleMap.get(sorted) == null) {
+			// logger.debug("adding for the first time");
+			// } else {
+			// logger.debug("This key exists in the map");
+			// }
+			// }
+			triangleMap.put(sorted, "");
 			// printTriangles();
 			// printEdges();
 		} else {
@@ -1044,16 +1054,22 @@ public class Mesh {
 		}
 	}
 
-	private void removeTriangle(Triangle t) {
-		String value = triangleMap.get(t.sortTriangle());
+	public void removeTriangle(Triangle t) {
+		Triangle sorted = t.sortTriangle();
+		String value = triangleMap.get(sorted);
 		if (value == null) {
-			logger.debug("removing nothing");
+			logger.debug("removing nothing: " + sorted.toString());
 		}
-		triangleMap.remove(t.sortTriangle());
-		logger.debug("removing: " + t.toString());
-		if (Strategy.countNumQueries == 13) {
-			printATriangle(t, Color.BLUE);
-		}
+		// if (Strategy.countNumQueries == 12) {
+		// printATriangle(sorted, Color.BLUE);
+		// logger.info("trying to remove: " + sorted.toString());
+		// if (triangleMap.get(sorted) == null) {
+		// logger.debug("remove nothing");
+		// } else {
+		// logger.debug("remove successfully");
+		// }
+		// }
+		triangleMap.remove(sorted.sortTriangle());
 		// printTriangles();
 	}
 
