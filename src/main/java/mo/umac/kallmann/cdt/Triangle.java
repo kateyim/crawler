@@ -1,10 +1,11 @@
 package mo.umac.kallmann.cdt;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
-import org.poly2tri.triangulation.point.TPoint;
+import org.poly2tri.geometry.polygon.Polygon;
+import org.poly2tri.triangulation.TriangulationPoint;
 
 import utils.DoubleTruncation;
 
@@ -222,4 +223,5 @@ public class Triangle {
 			System.out.println("not null");
 		}
 	}
+
 }

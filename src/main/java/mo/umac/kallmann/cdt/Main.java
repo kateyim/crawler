@@ -61,6 +61,10 @@ public class Main {
 		mesh.insertConstraint(constraint);
 
 	}
+	
+	public void testDelete(){
+		
+	}
 
 	/*********************** For Testing *******************************/
 

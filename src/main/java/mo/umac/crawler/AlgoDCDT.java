@@ -16,6 +16,7 @@ import mo.umac.metadata.ResultSetD2;
 import mo.umac.spatial.Circle;
 
 import org.apache.log4j.Logger;
+import org.junit.Ignore;
 import org.poly2tri.geometry.polygon.Polygon;
 import org.poly2tri.geometry.polygon.PolygonPoint;
 
@@ -33,9 +34,9 @@ import com.vividsolutions.jts.geom.LineSegment;
  * 
  */
 public class AlgoDCDT extends Strategy {
-	
+
 	protected static Logger logger = Logger.getLogger(AlgoDCDT.class.getName());
-	
+
 	// for synthetic dataset
 	public static Coordinate outerPoint = new Coordinate(-100, -100);
 
@@ -69,9 +70,9 @@ public class AlgoDCDT extends Strategy {
 		while (!finished) {
 			Triangle triangle = mesh.getBiggestTriangle();
 			if (cc % 10 == 0) {
-				System.out.println("remaining triangles =  " + mesh.getTriangles().size());
-				System.out.println("max triangle = " + triangle.toString());
-				System.out.println("max area = " + triangle.area());
+				logger.info("remaining triangles =  " + mesh.getTriangles().size());
+				logger.info("max triangle = " + triangle.toString());
+				logger.info("max area = " + triangle.area());
 			}
 			cc++;
 			if (triangle == null) {
@@ -88,27 +89,32 @@ public class AlgoDCDT extends Strategy {
 				logger.debug("inner polygon = " + GeoOperator.polygonToString(inner));
 			}
 			// debugging
-//			if (Strategy.countNumQueries == 55) {
-//				mesh.printTriangles();
-//			}
-//			if (Strategy.countNumQueries >= 56) {
-//				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-//				PaintShapes.paint.addPolygon(inner);
-//				PaintShapes.paint.myRepaint();
-//				PaintShapes.paint.color = Color.RED;
-//				PaintShapes.paint.addTriangle(triangle);
-//				PaintShapes.paint.myRepaint();
-//			}
-//			if (Strategy.countNumQueries == 58) {
-//				return;
-//			}
+			if (Strategy.countNumQueries == 60) {
+				mesh.printTriangles();
+			}
+			if (Strategy.countNumQueries >= 61) {
+				logger.debug("Strategy.countNumQueries = " + Strategy.countNumQueries);
+				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+				PaintShapes.paint.addCircle(aCircle);
+				PaintShapes.paint.myRepaint();
+				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+				PaintShapes.paint.addPolygon(inner);
+				PaintShapes.paint.myRepaint();
+				PaintShapes.paint.color = Color.RED;
+				PaintShapes.paint.addTriangle(triangle);
+				PaintShapes.paint.myRepaint();
+			}
+			if (Strategy.countNumQueries == 70) {
+				return;
+			}
 			constraint = new Constraints(inner.getPoints());
 			mesh.insertConstraint(constraint);
-			// if (inner == null) {
-			// // fully covered
-			// logger.info("fully covered");
-			// mesh.removeTriangle(triangle);
-			// }
+			if (mesh.same(triangle, inner)) {
+				mesh.removeTriangle(triangle);
+			}
+			if (Strategy.countNumQueries >=61) {
+				mesh.printTriangles();
+			}
 
 			// if (PaintShapes.painting) {
 			// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;

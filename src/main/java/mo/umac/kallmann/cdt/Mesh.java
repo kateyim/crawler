@@ -13,6 +13,7 @@ import mo.umac.crawler.Strategy;
 import org.apache.log4j.Logger;
 import org.poly2tri.geometry.polygon.Polygon;
 import org.poly2tri.geometry.polygon.PolygonPoint;
+import org.poly2tri.triangulation.TriangulationPoint;
 
 import paint.PaintShapes;
 import utils.GeoOperator;
@@ -152,6 +153,7 @@ public class Mesh {
 	 * 
 	 */
 	private void swap(QuadEdge e) {
+		logger.debug("swap: " + e.toString());
 		// add at 2014-7-11 remove a triangle and add a new triangle
 		Triangle old1 = new Triangle(e.orig(), e.dest(), e.oPrev().dest());
 		Triangle old2 = new Triangle(e.orig(), e.dest(), e.sym().oPrev().dest());
@@ -164,7 +166,18 @@ public class Mesh {
 		splice(e.sym(), b);
 		splice(e, a.lNext());
 		splice(e.sym(), b.lNext());
+		// add at 2014-7-21
+		if (e.p != null) {
+			edges.remove(edges.prev(e.p));
+		} else {
+			// why it is null
+//			printEdges();
+			logger.debug("e.p == null, remove nothing");
+		}
+		//
 		e.endPoints(a.dest(), b.dest());
+		// add at 2014-7-21
+		e.p = edges.insert(edges.first(), e);
 		// add new
 		Triangle t1 = new Triangle(e.orig(), e.dest(), e.oPrev().dest());
 		Triangle t2 = new Triangle(e.orig(), e.dest(), e.sym().oPrev().dest());
@@ -205,6 +218,7 @@ public class Mesh {
 	 * @param x
 	 */
 	private void splitEdge(QuadEdge e, Vector2d x) {
+		logger.debug("splitEdge: " + e.toString() + " at " + x.toString());
 		// add at 2014-7-19 remove a triangle and add a new triangle
 		Triangle old1 = new Triangle(e.orig(), e.dest(), e.oPrev().dest());
 		Triangle old2 = new Triangle(e.orig(), e.dest(), e.sym().oPrev().dest());
@@ -219,7 +233,18 @@ public class Mesh {
 			dt = new Vector2d(x);
 		QuadEdge t = e.lNext();
 		splice(e.sym(), t);
+		// add at 2014-7-21
+		if (e.p != null) {
+			edges.remove(edges.prev(e.p));
+		} else {
+			// why it is null
+//			printEdges();
+			logger.debug("e.p == null, remove nothing");
+		}
+		//
 		e.endPoints(e.orig(), dt);
+		// add at 2014-7-21
+		e.p = edges.insert(edges.first(), e);
 		QuadEdge ne = connect(e, t);
 		if (e.isConstrained()) {
 			ne.constrain();
@@ -587,9 +612,11 @@ public class Mesh {
 	 * @param b
 	 */
 	private void insertEdge(Vector2d a, Vector2d b) {
-		// logger.debug("inserting edge: " + a.toString() + "->" + b.toString());
+		logger.debug("inserting edge: " + a.toString() + "->" + b.toString());
 		// add at 2014-7-19
+		// to avoid aa.equals(bb, epsilon)
 		if (coincide(a, b)) {
+			logger.debug("coincide");
 			return;
 		}
 		Vector2d aa = null;
@@ -622,8 +649,6 @@ public class Mesh {
 
 		if (aa.equals(bb, epsilon)) {
 			logger.debug("InsertEdge: both ends map to same vertex");
-			logger.debug("aa: " + aa.toString());
-			logger.debug("bb: " + bb.toString());
 			return;
 		}
 
@@ -691,9 +716,14 @@ public class Mesh {
 					}
 				}
 				if (t.lNext().dest().smallerThan(ab, epsilon)) {
+					logger.debug("t: " + t.toString());
+					logger.debug("t.lNext(): " + t.lNext().toString());
+					logger.debug("ab: " + aa.toString() + "->" + bb.toString());
+
 					// edges cross
 					if (!t.lNext().isConstrained()) {
 						deleteEdge(t.lNext());
+						// TODO add at 2014-7-21
 					} else {
 						// the crossing edge is also constrained compute and insert the intersection
 						Vector2d x = Intersect(t.lNext(), ab);
@@ -910,14 +940,17 @@ public class Mesh {
 	// }
 
 	private QuadEdge makeEdge(Vector2d a, Vector2d b, boolean constrained) {
-		// logger.debug("MakeEdge: " + a.toString() + "->" + b.toString());
 		QuadEdge qe = QuadEdge.makeEdge(a, b);
+		if (Strategy.countNumQueries == 57) {
+			// printALine(a, b, Color.GREEN);
+			logger.debug("MakeEdge: " + a.toString() + "->" + b.toString());
+			logger.debug("");
+		}
 		if (constrained) {
 			qe.constrain();
 		}
 		qe.p = edges.insert(edges.first(), qe);
 		return qe;
-
 	}
 
 	/**
@@ -935,7 +968,12 @@ public class Mesh {
 	}
 
 	private void deleteEdge(QuadEdge e) {
-		logger.debug("deleteEdge");
+//		logger.debug("deleteEdge: " + e.toString());
+//		if (findAnEdge(e)) {
+//			logger.debug("find");
+//		} else {
+//			logger.debug("not find");
+//		}
 		// Make sure the starting edge does not get deleted:
 		if (startingEdge == e) {
 			logger.debug("Mesh::DeleteEdge: attempting to delete starting edge");
@@ -949,22 +987,18 @@ public class Mesh {
 
 		// remove edge from the edge list:
 		QuadEdge qe = e;
-		if (qe == null) {
-			logger.debug("qe == null");
-		}
-		// FIXME This is the first time "delete edge". But should I delete any edges?
-		if (qe.p == null) {
-			logger.debug("qe.p == null"); // this is null
-		}
 		edges.remove(edges.prev(qe.p));
-		// delete qe;
+		
 		// add at 2014-7-11 remove a triangle and add a new triangle
 		Triangle old1 = new Triangle(e.orig(), e.dest(), e.oPrev().dest());
 		Triangle old2 = new Triangle(e.orig(), e.dest(), e.sym().oPrev().dest());
 		removeTriangle(old1);
 		removeTriangle(old2);
-		//
 
+		// add at 2014-7-21
+		splice(e, e.oPrev());
+		splice(e.sym(), e.sym().oPrev());
+		e.delete();
 	}
 
 	/****************************************************************/
@@ -992,9 +1026,9 @@ public class Mesh {
 			logger.debug(e.toString());
 			Vector2d a = e.orig();
 			Vector2d b = e.sym().orig();
-			PaintShapes.paint.addLine(a, b);
+//			PaintShapes.paint.addLine(a, b);
 		}
-		PaintShapes.paint.myRepaint();
+//		PaintShapes.paint.myRepaint();
 		logger.debug("End of Printing Edges.");
 	}
 
@@ -1013,6 +1047,13 @@ public class Mesh {
 		logger.debug("End of Printing Triangles.");
 	}
 
+	private void printALine(Vector2d a, Vector2d b, java.awt.Color color) {
+		// paint the triangle
+		PaintShapes.paint.color = color;
+		PaintShapes.paint.addLine(a, b);
+		PaintShapes.paint.myRepaint();
+	}
+
 	private void printATriangle(Triangle t, java.awt.Color color) {
 		// paint the triangle
 		PaintShapes.paint.color = color;
@@ -1029,6 +1070,16 @@ public class Mesh {
 		logger.debug(sb.toString());
 	}
 
+	private boolean findAnEdge(QuadEdge target) {
+		for (LlistNode<Edge> p = edges.first(); !edges.isEnd(p); p = edges.next(p)) {
+			QuadEdge e = ((QuadEdge) edges.retrieve(p));
+			if (coincide(target.orig(), e.orig()) && coincide(target.dest(), e.dest())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/*************** Triangle operators *****************/
 	private void addTriangle(Triangle t) {
 		Vector2d center = t.centroid();
@@ -1041,15 +1092,15 @@ public class Mesh {
 		}
 		if (!inside) {
 			Triangle sorted = t.sortTriangle();
-			// if (Strategy.countNumQueries == 56) {
-			// printATriangle(sorted, Color.GREEN);
-			// logger.info("trying to add: " + sorted.toString());
-			// if (triangleMap.get(sorted) == null) {
-			// logger.debug("adding for the first time");
-			// } else {
-			// logger.debug("This key exists in the map");
-			// }
-			// }
+//			if (Strategy.countNumQueries == 57) {
+//				printATriangle(sorted, Color.GREEN);
+//				logger.info("trying to add: " + sorted.toString());
+//				if (triangleMap.get(sorted) == null) {
+//					logger.debug("adding for the first time");
+//				} else {
+//					logger.debug("This key exists in the map");
+//				}
+//			}
 			triangleMap.put(sorted, "");
 		} else {
 			logger.debug("inside: " + hole.toString());
@@ -1063,15 +1114,15 @@ public class Mesh {
 		if (value == null) {
 			logger.debug("removing nothing: " + sorted.toString());
 		}
-		// if (Strategy.countNumQueries == 56) {
-		// printATriangle(sorted, Color.BLUE);
-		// logger.info("trying to remove: " + sorted.toString());
-		// if (triangleMap.get(sorted) == null) {
-		// logger.debug("remove nothing");
-		// } else {
-		// logger.debug("remove successfully");
-		// }
-		// }
+//		if (Strategy.countNumQueries == 57) {
+//			printATriangle(sorted, Color.BLUE);
+//			logger.info("trying to remove: " + sorted.toString());
+//			if (triangleMap.get(sorted) == null) {
+//				logger.debug("remove nothing");
+//			} else {
+//				logger.debug("remove successfully");
+//			}
+//		}
 		triangleMap.remove(sorted.sortTriangle());
 	}
 
@@ -1122,6 +1173,22 @@ public class Mesh {
 		}
 
 		return null;
+	}
+	
+	public boolean same(Triangle triangle, Polygon inner) {
+		List<TriangulationPoint> list = inner.getPoints();
+		if(list.size() != 3) {
+			return false;
+		}
+		for (int i = 0; i < list.size(); i++) {
+			TriangulationPoint tp = list.get(i);
+			Vector2d tpV = new Vector2d(tp.getX(), tp.getY());
+			Vector2d v = triangle.points[i];
+			if(!coincide(tpV, v)){
+				return false;
+			}
+		}
+		return true;
 	}
 
 }
