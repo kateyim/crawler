@@ -1,9 +1,5 @@
 package mo.umac.crawler;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-
 import mo.umac.db.DBInMemory;
 import mo.umac.uscensus.USDensity;
 import mo.umac.uscensus.UScensusData;
@@ -13,6 +9,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
 import paint.PaintShapes;
@@ -33,18 +30,19 @@ public class MainYahoo {
 	// public final static String DB_NAME_CRAWL =
 	// "../crawler-data/yahoolocal-h2/crawl/datasets";
 
-	// public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun";
-	public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun-scale";
+	public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun";
+	// public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun-scale";
 	public final static String DB_NAME_TARGET = "../data-experiment/ny-prun-c-one";
 	public final static String DB_NAME_CRAWL = "../data-experiment/datasets";
 
-	private static int topK = 200;
+	private static int topK = 100;
 
-	
 	/******** NY ********/
 	// private static Envelope envelope = new Envelope(-79.76259, -71.777491, 40.477399, 45.015865);
-	public static double factor = 100;
-	private static Envelope envelope = new Envelope(-79.76259 * factor * (-1), -71.777491 * factor * (-1), 40.477399 * factor, 45.015865 * factor);
+	// public static double factor = 100;
+	// private static Envelope envelope = new Envelope(-79.76259 * factor * (-1), -71.777491 * factor * (-1), 40.477399 * factor, 45.015865 * factor);
+	private static Envelope envelope = new Envelope(-79.76259, -71.777491, 40.477399, 45.015865);
+	private static Coordinate outerPointNY = new Coordinate(-100, -100);
 	private static String category = "Restaurants";
 	private static String state = "NY";
 	private static int categoryID = 96926236;
@@ -96,6 +94,8 @@ public class MainYahoo {
 		// Strategy crawlerStrategy = new AlgoPartition();
 		// AlgoPartition.clusterRegionFile = USDensity.clusterRegionFile;
 		Strategy crawlerStrategy = new AlgoDCDT();
+		AlgoDCDT.outerPoint = outerPointNY;
+		//
 		Context crawlerContext = new Context(crawlerStrategy);
 		/**********************************************************************/
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;

@@ -38,7 +38,7 @@ public class AlgoDCDT extends Strategy {
 	protected static Logger logger = Logger.getLogger(AlgoDCDT.class.getName());
 
 	// for synthetic dataset
-	public static Coordinate outerPoint = new Coordinate(-100, -100);
+	public static Coordinate outerPoint;// = new Coordinate(-100, -100);
 
 	public AlgoDCDT() {
 		super();
@@ -85,36 +85,45 @@ public class AlgoDCDT extends Strategy {
 			if (logger.isDebugEnabled()) {
 				logger.debug("max triangle = " + triangle.toString());
 				logger.debug("max area = " + triangle.area());
+				logger.debug("remaining triangles =  " + mesh.getTriangles().size());
 				logger.debug("aCircle = " + aCircle.toString());
 				logger.debug("inner polygon = " + GeoOperator.polygonToString(inner));
 			}
 			// debugging
-			if (Strategy.countNumQueries == 60) {
-				mesh.printTriangles();
-			}
-			if (Strategy.countNumQueries >= 61) {
-				logger.debug("Strategy.countNumQueries = " + Strategy.countNumQueries);
-				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-				PaintShapes.paint.addCircle(aCircle);
-				PaintShapes.paint.myRepaint();
-				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-				PaintShapes.paint.addPolygon(inner);
-				PaintShapes.paint.myRepaint();
-				PaintShapes.paint.color = Color.RED;
-				PaintShapes.paint.addTriangle(triangle);
-				PaintShapes.paint.myRepaint();
-			}
-			if (Strategy.countNumQueries == 70) {
-				return;
-			}
-			constraint = new Constraints(inner.getPoints());
-			mesh.insertConstraint(constraint);
+			// if (Strategy.countNumQueries == 3180) {
+			// mesh.printTriangles();
+			// }
+			// if (Strategy.countNumQueries == 3181) {
+			// logger.debug("Strategy.countNumQueries = " + Strategy.countNumQueries);
+			// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+			// PaintShapes.paint.addCircle(aCircle);
+			// PaintShapes.paint.myRepaint();
+			// PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			// PaintShapes.paint.addPolygon(inner);
+			// PaintShapes.paint.myRepaint();
+			// PaintShapes.paint.color = Color.RED;
+			// PaintShapes.paint.addTriangle(triangle);
+			// PaintShapes.paint.myRepaint();
+			// }
+			// if (Strategy.countNumQueries == 70) {
+			// return;
+			// }
 			if (mesh.same(triangle, inner)) {
+				logger.debug("fully covered");
 				mesh.removeTriangle(triangle);
+				// TODO tag these edges as constrained
+				mesh.tagConstrained(triangle);
+			} else if (triangle.area() <= Mesh.epsilon * 10) {
+				logger.debug("triangle.area() <= Mesh.epsilon * 10");
+				break;
 			}
-			if (Strategy.countNumQueries >=61) {
-				mesh.printTriangles();
+			else {
+				constraint = new Constraints(inner.getPoints());
+				mesh.insertConstraint(constraint);
 			}
+			// if (Strategy.countNumQueries >=61) {
+			// mesh.printTriangles();
+			// }
 
 			// if (PaintShapes.painting) {
 			// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;

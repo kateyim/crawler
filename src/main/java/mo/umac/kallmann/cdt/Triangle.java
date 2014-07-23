@@ -3,6 +3,8 @@ package mo.umac.kallmann.cdt;
 import java.util.HashMap;
 import java.util.List;
 
+import mo.umac.crawler.Strategy;
+
 import org.apache.log4j.Logger;
 import org.poly2tri.geometry.polygon.Polygon;
 import org.poly2tri.triangulation.TriangulationPoint;
@@ -31,6 +33,13 @@ public class Triangle {
 
 	public Triangle sortTriangle() {
 		Vector2d[] after = sortVectors(points);
+		// if (Strategy.countNumQueries == 312) {
+		if (after == null) {
+			logger.debug("after == null");
+			logger.debug("points: " + points[0] + ", " + points[1] + ", " + points[2]);
+			return new Triangle(points[0], points[1], points[2]);
+		}
+		// }
 		return new Triangle(after[0], after[1], after[2]);
 	}
 
@@ -148,7 +157,9 @@ public class Triangle {
 		return sb.toString();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 * 
 	 * truncate the double to 1e-10

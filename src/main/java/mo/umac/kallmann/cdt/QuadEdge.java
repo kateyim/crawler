@@ -15,14 +15,67 @@ package mo.umac.kallmann.cdt;
  * @author David Skea
  * @author Martin Davis
  */
-public class QuadEdge extends Edge {
+public class QuadEdge {
 
 	// the dual of this edge, directed from right to left
 	private QuadEdge rot;
 	public QuadEdge next; // A reference to a connected edge
 	private Vector2d vertex = null;
+	private boolean constrained = false;
+	private LlistNode<QuadEdge> p;
 
 	// private int visitedKey = 0;
+
+	/**
+	 * add at 2014-7-22
+	 * Return the unique edge for the 2 symmetric edges.
+	 * 
+	 * @return a edge from small to large?
+	 */
+	public QuadEdge qEdge() {
+		if(smaller(vertex, sym().vertex)){
+			return this;
+		} else {
+			return sym();
+		}
+	}
+
+	/**
+	 * Give the order of 2 vectors. 
+	 * 
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	private boolean smaller(Vector2d a, Vector2d b) {
+		if ( Math.abs(a.x - b.x) < Mesh.epsilon ) {
+			if(a.y <= b.y || Math.abs(a.y - b.y) < Mesh.epsilon){
+				return true;
+			} else {
+				return false;
+			}
+		} else if( a.x < b.x) {
+			return true;
+		} 
+		return false;
+	}
+	
+	public boolean isConstrained() {
+		return qEdge().constrained;
+	}
+
+	public void constrain() {
+		this.qEdge().constrained = true;
+	}
+	
+
+	public LlistNode<QuadEdge> getP() {
+		return qEdge().p;
+	}
+
+	public void setP(LlistNode<QuadEdge> p) {
+		this.qEdge().p = p;
+	}
 
 	/**
 	 * Creates a new QuadEdge quartet from {@link Vector2d} o to {@link Vector2d} d.
