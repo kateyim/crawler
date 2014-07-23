@@ -30,11 +30,11 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class MainSynthetic extends Strategy {
 
-	 private static String source = "../data-experiment/synthetic/skew-1000-0.3";
-//	private static String source = "../data-experiment/synthetic/uniform-1000";
+	private static String source = "../data-experiment/synthetic/skew-500-0.3";
+	// private static String source = "../data-experiment/synthetic/uniform-2000";
 	private static String target = "../data-experiment/synthetic/target";
-	private static int n = 1000;
-	private int topK = 10;
+	private static int n = 500;
+	private int topK = 50;
 	// private static String source = "../data-experiment/synthetic/test";
 	// private static int n = 10;
 	// private int topK = 2;
@@ -159,10 +159,10 @@ public class MainSynthetic extends Strategy {
 		/************************* Change these lines *************************/
 		Strategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 		/** switch algorithms */
-		// AlgoSlice crawler = new AlgoSlice();
+		AlgoSlice crawler = new AlgoSlice();
 		// AlgoPartition crawler = new AlgoPartition();
-		AlgoDCDT crawler = new AlgoDCDT();
-		AlgoDCDT.outerPoint = new Coordinate(-100, -100);
+		// AlgoDCDT crawler = new AlgoDCDT();
+		// AlgoDCDT.outerPoint = new Coordinate(-100, -100);
 
 		// AlgoPartition.clusterRegionFile = clusterRegionFile;
 		//

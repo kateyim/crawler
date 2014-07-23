@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Map.Entry;
 
 import mo.umac.crawler.MainYahoo;
@@ -1184,4 +1185,79 @@ public class H2DB extends DBExternal {
 
 	}
 
+	/**
+	 * Sample from the database
+	 * 
+	 * @param factor
+	 */
+	public void sample(int factor) {
+		String sql = sqlSelectStar + ITEM;
+		try {
+			Connection conSrc = getConnection(dbNameSource);
+			Statement statSrc = conSrc.createStatement();
+
+			Connection conTarget = getConnection(dbNameTarget);
+			conTarget.setAutoCommit(false);
+			Statement statTarget = conTarget.createStatement();
+			// create tables
+			statTarget.execute(sqlCreateItemTableKey);
+
+			PreparedStatement prepItem = conTarget
+					.prepareStatement(sqlPrepInsertItem);
+
+			java.sql.ResultSet rs = statSrc.executeQuery(sql);
+			while (rs.next()) {
+
+				int itemID = rs.getInt(1);
+				String title = rs.getString(2);
+				String city = rs.getString(3);
+				String state = rs.getString(4);
+
+				double latitude = rs.getDouble(5);
+				double longitude = rs.getDouble(6);
+				double distance = rs.getDouble(7);
+
+				double averageRating = rs.getDouble(8);
+				double totalRating = rs.getDouble(9);
+				double totalReviews = rs.getDouble(10);
+				Rating rating = new Rating();
+				rating.setAverageRating(averageRating);
+				rating.setTotalRatings((int) totalRating);
+				rating.setTotalReviews((int) totalReviews);
+
+				int numCrawled = rs.getInt(11);
+
+				Random random = new Random(System.currentTimeMillis());
+				int r = random.nextInt();
+				if (r % factor == 0) {
+					// write
+					prepItem.setInt(1, itemID);
+					prepItem.setString(2, title);
+					prepItem.setString(3, city);
+					prepItem.setString(4, state);
+					prepItem.setDouble(5, latitude);
+					prepItem.setDouble(6, longitude);
+					prepItem.setDouble(7, distance);
+
+					prepItem.setDouble(8, Rating.noAverageRatingValue);
+					prepItem.setDouble(9, Rating.noAverageRatingValue);
+					prepItem.setDouble(10, Rating.noAverageRatingValue);
+
+					prepItem.setDouble(11, numCrawled);
+					prepItem.addBatch();
+				}
+
+			}
+			rs.close();
+			statSrc.close();
+
+			prepItem.executeBatch();
+			conTarget.commit();
+			conTarget.setAutoCommit(true);
+			statTarget.close();
+			prepItem.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 }

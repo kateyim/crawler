@@ -35,7 +35,7 @@ public class MainYahoo {
 	public final static String DB_NAME_TARGET = "../data-experiment/ny-prun-c-one";
 	public final static String DB_NAME_CRAWL = "../data-experiment/datasets";
 
-	private static int topK = 100;
+	private static int topK = 500;
 
 	/******** NY ********/
 	// private static Envelope envelope = new Envelope(-79.76259, -71.777491, 40.477399, 45.015865);
@@ -47,41 +47,6 @@ public class MainYahoo {
 	private static String state = "NY";
 	private static int categoryID = 96926236;
 
-	// public static void main(String[] args) {
-	// /************************* Change these lines *************************/
-	// debug = false;
-	// initForServer(false);
-	// DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
-	// shutdownLogs(MainYahoo.debug);
-	// /************************* Crawling Algorithm ***************************/
-	// // Strategy crawlerStrategy = new AlgoSlice();
-	// // Strategy crawlerStrategy = new AlgoPartition();
-	// // AlgoPartition.clusterRegionFile = USDensity.clusterRegionFile;
-	// Strategy crawlerStrategy = new AlgoDCDT();
-	// /**********************************************************************/
-	// Context crawlerContext = new Context(crawlerStrategy);
-	// // specify the states to be crawled
-	// LinkedList<String> listNameStates = new LinkedList<String>();
-	// // if the listNameStates is empty, then crawl all states.
-	// String city1 = "NY";
-	// listNameStates.add(city1);
-	// // String city2 = "UT";
-	// // listNameStates.add(city2);
-	// // String city3 = "OK";
-	// // listNameStates.add(city3);
-	// //
-	// List<String> listCategoryNames = new LinkedList<String>();
-	// // String category1 = "Hotels & Motels";
-	// // listCategoryNames.add(category1);
-	// String category2 = "Restaurants";
-	// listCategoryNames.add(category2);
-	// //
-	// PaintShapes.painting = true;
-	// // change top-k
-	// Strategy.MAX_TOTAL_RESULTS_RETURNED = 100;
-	// crawlerContext.callCrawling(listNameStates, listCategoryNames);
-	// }
-
 	public static void main(String[] args) {
 		/************************* Change these lines *************************/
 		debug = false;
@@ -90,11 +55,11 @@ public class MainYahoo {
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		shutdownLogs(MainYahoo.debug);
 		/************************* Crawling Algorithm ***************************/
-		// Strategy crawlerStrategy = new AlgoSlice();
+		Strategy crawlerStrategy = new AlgoSlice();
 		// Strategy crawlerStrategy = new AlgoPartition();
 		// AlgoPartition.clusterRegionFile = USDensity.clusterRegionFile;
-		Strategy crawlerStrategy = new AlgoDCDT();
-		AlgoDCDT.outerPoint = outerPointNY;
+		// Strategy crawlerStrategy = new AlgoDCDT();
+		// AlgoDCDT.outerPoint = outerPointNY;
 		//
 		Context crawlerContext = new Context(crawlerStrategy);
 		/**********************************************************************/

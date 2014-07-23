@@ -41,7 +41,7 @@ public class MainData {
 		// String dbNameSource = "../crawler-data/yahoolocal-h2/source/ok";
 		// String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ok-prun";
 		// step 1
-		String folderPath = DBExternal.FOLDER_NAME + "/96926236+Restaurants/" + stateQ + "/";
+		// String folderPath = DBExternal.FOLDER_NAME + "/96926236+Restaurants/" + stateQ + "/";
 		// m.convertFromQRFileToH2(dbNameSource, folderPath);
 		// m.examData(dbNameSource);
 		// step 2
@@ -51,12 +51,12 @@ public class MainData {
 		// step 3
 
 		// step 4
-		String dbName = "../crawler-data/yahoolocal-h2/target/ok-prun-c-one";
-		String fileName = "../data-map/ok-c-one.pois";
-		m.convertFromH2ToFile(dbName, fileName);
+		// String dbName = "../crawler-data/yahoolocal-h2/target/ok-prun-c-one";
+		// String fileName = "../data-map/ok-c-one.pois";
+		// m.convertFromH2ToFile(dbName, fileName);
 
 		// step 4
-		String logFile = "../crawlerlog/info.log";
+		// String logFile = "../crawlerlog/info.log";
 		// m.numVSCrawled(logFile);
 
 		// test remove duplicate
@@ -64,6 +64,13 @@ public class MainData {
 		// m.removeDuplicate(dbName);
 		// m.examData(dbName);
 
+		
+		// for sample: reduce the size of yahoo 
+		String dbNameFull = "../data-experiment/yahoo/ny-prun";
+		String dbNameSample = "../data-experiment/yahoo/ny-prun-4";
+		int factor = 4;
+		m.sample(dbNameFull, dbNameSample, factor);
+		
 		DBExternal.distroyConn();
 		// m.prunPoisFile();
 	}
@@ -293,4 +300,13 @@ public class MainData {
 		h2.removeDuplicate();
 	}
 
+	public void sample(String dbNameSource, String dbNameSample, int factor) {
+		H2DB h2 = new H2DB(dbNameSource, dbNameSample);
+		h2.sample(factor);
+
+		int c1 = h2.count(dbNameSource, "ITEM");
+		System.out.println("dbNameSource = " + c1);
+		int c2 = h2.count(dbNameSample, "ITEM");
+		System.out.println("dbNameSample = " + c2);
+	}
 }

@@ -65,16 +65,16 @@ public class AlgoDCDT extends Strategy {
 
 		boolean finished = false;
 
-		int cc = 0;
+		// int cc = 0;
 
 		while (!finished) {
 			Triangle triangle = mesh.getBiggestTriangle();
-			if (cc % 10 == 0) {
-				logger.info("remaining triangles =  " + mesh.getTriangles().size());
-				logger.info("max triangle = " + triangle.toString());
-				logger.info("max area = " + triangle.area());
-			}
-			cc++;
+			// if (cc % 10 == 0) {
+			// logger.info("remaining triangles =  " + mesh.getTriangles().size());
+			// logger.info("max triangle = " + triangle.toString());
+			// logger.info("max area = " + triangle.area());
+			// }
+			// cc++;
 			if (triangle == null) {
 				finished = true;
 				break;
@@ -93,7 +93,7 @@ public class AlgoDCDT extends Strategy {
 			// if (Strategy.countNumQueries == 3180) {
 			// mesh.printTriangles();
 			// }
-			// if (Strategy.countNumQueries == 3181) {
+			// if (Strategy.countNumQueries == 2225) {
 			// logger.debug("Strategy.countNumQueries = " + Strategy.countNumQueries);
 			// PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
 			// PaintShapes.paint.addCircle(aCircle);
@@ -108,6 +108,7 @@ public class AlgoDCDT extends Strategy {
 			// if (Strategy.countNumQueries == 70) {
 			// return;
 			// }
+			mesh.removeTriangle(triangle);
 			if (mesh.same(triangle, inner)) {
 				logger.debug("fully covered");
 				mesh.removeTriangle(triangle);
@@ -116,8 +117,7 @@ public class AlgoDCDT extends Strategy {
 			} else if (triangle.area() <= Mesh.epsilon * 10) {
 				logger.debug("triangle.area() <= Mesh.epsilon * 10");
 				break;
-			}
-			else {
+			} else {
 				constraint = new Constraints(inner.getPoints());
 				mesh.insertConstraint(constraint);
 			}
