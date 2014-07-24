@@ -93,7 +93,7 @@ public class Cluster {
 			logger.debug("numGridX = " + numGridX + ", numGridY = " + numGridY);
 		}
 		initTag();
-		double[][] densitiesForRectangle = rewriteDesity();
+		// double[][] densitiesForRectangle = rewriteDesity();
 		// cluster zeros: starting from the four corners of the envelope
 		ArrayList<Envelope> list0 = new ArrayList<Envelope>();
 		// 4 corner seeds
@@ -102,7 +102,7 @@ public class Cluster {
 				// for testing
 				Coordinate seed = new Coordinate(i, j);
 				// Envelope zeroGrid = expandFromCorner(numGridX, numGridY, seed, EPSILON_A);
-				Envelope zeroGrid = findMaxRectangleFromCorner(seed, densitiesForRectangle);
+				Envelope zeroGrid = findMaxRectangleFromCorner(seed);
 				if (logger.isDebugEnabled()) {
 					logger.debug("zeroGrid: " + zeroGrid.toString());
 				}
@@ -122,7 +122,6 @@ public class Cluster {
 		// Envelope denseRegion = converseEnvelope(denseGrid);
 		//
 		// listDense.add(denseRegion);
-		//
 		// }
 		// TODO find overlaps
 
@@ -326,7 +325,6 @@ public class Cluster {
 		return findLargestRectangle(numGridX, numGridY, borders);
 	}
 
-
 	/**
 	 * cut off to a part containing the seed grid.
 	 * 
@@ -334,26 +332,119 @@ public class Cluster {
 	 * @param densitiesForRectangle
 	 * @return
 	 */
-	private static Envelope findMaxRectangleFromCorner(Coordinate seed, double[][] densitiesForRectangle) {
-		// extract one part 
-		double[][] borders = null;
-		int numColumns = 0;
-		int numRows = 0;
-		// FIXME here
-		
-		
-		
-		// find the maximum rectangle in this part
-		MaximalRectangle mr = new MaximalRectangle();
-		try {
-			Envelope envelope = mr.rectangle(numColumns, numRows, borders);
-		} catch (Exception e) {
-			e.printStackTrace();
+	private static Envelope findMaxRectangleFromCorner(Coordinate seed) {
+		// extract one part
+
+		// reserve the the farthest point p, then the area from the seed to p containing all 0;
+		ArrayList<Coordinate> zeroAreaList = new ArrayList<Coordinate>();
+
+		// seed is 0,0
+		if ((int) seed.x == 0 && (int) seed.y == 0) {
+			for (int i = 0; i < numGridX; i++) {
+				for (int j = 0; j < numGridY; j++) {
+					Coordinate farthestPoint = new Coordinate(i, j);
+					boolean allZero = checkAllZero(seed, farthestPoint);
+					if (allZero) {
+						Coordinate c = new Coordinate(i, j);
+						zeroAreaList.add(c);
+					}
+				}
+			}
 		}
+
+		// seed is 0,numGridY-1
+		if ((int) seed.x == 0 && (int) seed.y == numGridY - 1) {
+			for (int i = 0; i < numGridX; i++) {
+				for (int j = 0; j < numGridY; j++) {
+					Coordinate farthestPoint = new Coordinate(i, j);
+					boolean allZero = checkAllZero(seed, farthestPoint);
+					if (allZero) {
+						Coordinate c = new Coordinate(i, j);
+						zeroAreaList.add(c);
+					}
+				}
+			}
+		}
+		// seed is numGridX-1,0
+		if ((int) seed.x == 0 && (int) seed.y == numGridY - 1) {
+			for (int i = numGridX - 1; i >= 0; i--) {
+				for (int j = numGridY - 1; j >= 0; j--) {
+					Coordinate farthestPoint = new Coordinate(i, j);
+					boolean allZero = checkAllZero(seed, farthestPoint);
+					if (allZero) {
+						Coordinate c = new Coordinate(i, j);
+						zeroAreaList.add(c);
+					}
+				}
+			}
+		}
+		// seed is numGridX-1,numGridY-1
+		if ((int) seed.x == 0 && (int) seed.y == numGridY - 1) {
+			for (int i = numGridX - 1; i >= 0; i--) {
+				for (int j = numGridY - 1; j >= 0; j--) {
+					Coordinate farthestPoint = new Coordinate(i, j);
+					boolean allZero = checkAllZero(seed, farthestPoint);
+					if (allZero) {
+						Coordinate c = new Coordinate(i, j);
+						zeroAreaList.add(c);
+					}
+				}
+			}
+		}
+
+		double maxArea = 0;
+		Coordinate maxCoordiante = new Coordinate();
+		// find the max area
+		for (int k = 0; k < zeroAreaList.size(); k++) {
+			Coordinate c = zeroAreaList.get(k);
+			double area = area(seed, c);
+			if (area >= maxArea) {
+				maxArea = area;
+				maxCoordiante = c;
+			}
+		}
+
+		// TODO why maxCoordiante not update
+		Envelope envelope = new Envelope(seed, maxCoordiante);
 		return envelope;
 	}
 
-	
+	private static double area(Coordinate seed, Coordinate c) {
+		double length = Math.abs(seed.x - c.x);
+		double width = Math.abs(seed.y - c.y);
+		return length * width;
+	}
+
+	private static boolean checkAllZero(Coordinate seed, Coordinate farthestPoint) {
+		int minX = numGridX;
+		int minY = numGridY;
+		int maxX = 0;
+		int maxY = 0;
+		if (seed.x <= farthestPoint.x) {
+			minX = (int) seed.x;
+			maxX = (int) farthestPoint.x;
+		} else {
+			minX = (int) farthestPoint.x;
+			maxX = (int) seed.x;
+		}
+		if (seed.y <= farthestPoint.y) {
+			minY = (int) seed.y;
+			maxY = (int) farthestPoint.y;
+		} else {
+			minY = (int) farthestPoint.y;
+			maxY = (int) seed.y;
+		}
+
+		for (int i = minX; i <= maxX; i++) {
+			for (int j = minY; j <= maxY; j++) {
+				if (density.get(i)[j] != 0) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	private static Envelope findLargestRectangle(int numGridX, int numGridY, double[][] borders) {
 		MaximalRectangle mr = new MaximalRectangle();
 		try {

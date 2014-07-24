@@ -159,10 +159,10 @@ public class MainSynthetic extends Strategy {
 		/************************* Change these lines *************************/
 		Strategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 		/** switch algorithms */
-		AlgoSlice crawler = new AlgoSlice();
-		// AlgoPartition crawler = new AlgoPartition();
-		// AlgoDCDT crawler = new AlgoDCDT();
-		// AlgoDCDT.outerPoint = new Coordinate(-100, -100);
+		// AlgoSlice crawler = new AlgoSlice();
+		AlgoPartition crawler = new AlgoPartition();
+//		AlgoDCDT crawler = new AlgoDCDT();
+//		AlgoDCDT.outerPoint = new Coordinate(-100, -100);
 
 		// AlgoPartition.clusterRegionFile = clusterRegionFile;
 		//

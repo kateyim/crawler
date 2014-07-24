@@ -83,9 +83,9 @@ public class USDensity {
 	private static String densityFile = "../data-experiment/partition/densityMap-ny-0.01";
 	// temple
 	private static String clusterRegionFilePre = "../data-experiment/partition/combinedDensity-ny-";
-	// private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.8-11.mbr";
+	private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.8-10.mbr";
 	// 2014-5-19 why this file?
-	private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.8-2.mbr";
+	// private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.8-2.mbr";
 	public static String clusterRegionFile = "../data-experiment/partition/combinedDensity-ny.mbr";
 
 	/**
@@ -97,7 +97,7 @@ public class USDensity {
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		// computeDensityInEachGrids();
 		findClusteredRegions();
-		// partition();
+//		partition();
 	}
 
 	/** compute the density on the map, run only once for a state folder */
@@ -120,7 +120,7 @@ public class USDensity {
 		for (loop = 2; loop <= 2; loop++) {
 			for (a = 0.8; a < 1; a = a + 0.2) {
 				ArrayList<Envelope> clusteredRegion = Cluster.clusterDenseAndZero(granularityX, granularityY, envelope, density, a, loop);
-				USDensity.writePartition(clusterRegionFilePre + a + "-" + loop + ".mbr", clusteredRegion);
+				USDensity.writePartition(clusterRegionFilePre + "-0-" + a + "-" + loop + ".mbr", clusteredRegion);
 			}
 		}
 	}

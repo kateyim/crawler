@@ -55,9 +55,9 @@ public class MainYahoo {
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		shutdownLogs(MainYahoo.debug);
 		/************************* Crawling Algorithm ***************************/
-		Strategy crawlerStrategy = new AlgoSlice();
-		// Strategy crawlerStrategy = new AlgoPartition();
-		// AlgoPartition.clusterRegionFile = USDensity.clusterRegionFile;
+		// Strategy crawlerStrategy = new AlgoSlice();
+		Strategy crawlerStrategy = new AlgoPartition();
+		AlgoPartition.clusterRegionFile = USDensity.clusterRegionFile;
 		// Strategy crawlerStrategy = new AlgoDCDT();
 		// AlgoDCDT.outerPoint = outerPointNY;
 		//
