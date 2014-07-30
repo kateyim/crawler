@@ -355,19 +355,6 @@ public class Cluster {
 		// seed is 0,numGridY-1
 		if ((int) seed.x == 0 && (int) seed.y == numGridY - 1) {
 			for (int i = 0; i < numGridX; i++) {
-				for (int j = 0; j < numGridY; j++) {
-					Coordinate farthestPoint = new Coordinate(i, j);
-					boolean allZero = checkAllZero(seed, farthestPoint);
-					if (allZero) {
-						Coordinate c = new Coordinate(i, j);
-						zeroAreaList.add(c);
-					}
-				}
-			}
-		}
-		// seed is numGridX-1,0
-		if ((int) seed.x == 0 && (int) seed.y == numGridY - 1) {
-			for (int i = numGridX - 1; i >= 0; i--) {
 				for (int j = numGridY - 1; j >= 0; j--) {
 					Coordinate farthestPoint = new Coordinate(i, j);
 					boolean allZero = checkAllZero(seed, farthestPoint);
@@ -378,8 +365,21 @@ public class Cluster {
 				}
 			}
 		}
+		// seed is numGridX-1,0
+		if ((int) seed.x == numGridX - 1 && (int) seed.y == 0) {
+			for (int i = numGridX - 1; i >= 0; i--) {
+				for (int j = 0; j < numGridY; j++) {
+					Coordinate farthestPoint = new Coordinate(i, j);
+					boolean allZero = checkAllZero(seed, farthestPoint);
+					if (allZero) {
+						Coordinate c = new Coordinate(i, j);
+						zeroAreaList.add(c);
+					}
+				}
+			}
+		}
 		// seed is numGridX-1,numGridY-1
-		if ((int) seed.x == 0 && (int) seed.y == numGridY - 1) {
+		if ((int) seed.x == numGridX - 1 && (int) seed.y == numGridY - 1) {
 			for (int i = numGridX - 1; i >= 0; i--) {
 				for (int j = numGridY - 1; j >= 0; j--) {
 					Coordinate farthestPoint = new Coordinate(i, j);
