@@ -30,11 +30,11 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class MainSynthetic extends Strategy {
 
-	private static String source = "../data-experiment/synthetic/skew-500-0.3";
+	private static String source = "../data-experiment/synthetic/skew-1000-0.3";
 	// private static String source = "../data-experiment/synthetic/uniform-2000";
 	private static String target = "../data-experiment/synthetic/target";
-	private static int n = 500;
-	private int topK = 50;
+	private static int n = 1000;
+	private int topK = 10;
 	// private static String source = "../data-experiment/synthetic/test";
 	// private static int n = 10;
 	// private int topK = 2;
@@ -46,14 +46,14 @@ public class MainSynthetic extends Strategy {
 	private static double granularityX = 10;
 	private static double granularityY = 10;
 	private static String densityFile = "../data-experiment/densityfile.txt";
-	private static String clusterRegionFile = "../data-experiment/combinedDensity.mbr";
+	private static String clusterRegionFile = "../data-experiment/partition/synthetic-0.3.mbr";
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		boolean debug = true;
-		PaintShapes.painting = false;
+		PaintShapes.painting = true;
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		MainSynthetic test = new MainSynthetic();
@@ -159,12 +159,11 @@ public class MainSynthetic extends Strategy {
 		/************************* Change these lines *************************/
 		Strategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 		/** switch algorithms */
-		// AlgoSlice crawler = new AlgoSlice();
+//		 AlgoSlice crawler = new AlgoSlice();
 		AlgoPartition crawler = new AlgoPartition();
-//		AlgoDCDT crawler = new AlgoDCDT();
-//		AlgoDCDT.outerPoint = new Coordinate(-100, -100);
-
-		// AlgoPartition.clusterRegionFile = clusterRegionFile;
+		AlgoPartition.clusterRegionFile = clusterRegionFile;
+		// AlgoDCDT crawler = new AlgoDCDT();
+		// AlgoDCDT.outerPoint = new Coordinate(-100, -100);
 		//
 		/** end switching algorithms */
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;

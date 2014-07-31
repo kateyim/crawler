@@ -3,12 +3,15 @@
  */
 package mo.umac.crawler;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
 import mo.umac.uscensus.USDensity;
 
 import org.apache.log4j.Logger;
+
+import paint.PaintShapes;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -31,6 +34,15 @@ public class AlgoPartition extends Strategy {
 	public void crawl(String state, int category, String query, Envelope envelopeState) {
 		// ArrayList<Envelope> list = AlgoPartition.getOKEnvelopes();
 		ArrayList<Envelope> list = readPartitionedEnvelopes(clusterRegionFile);
+		// painting
+		if (PaintShapes.painting) {
+			PaintShapes.paint.color = Color.RED;
+			for (int i = 0; i < list.size(); i++) {
+				Envelope envelope = list.get(i);
+				PaintShapes.addRectangleLine(envelope);
+			}
+			PaintShapes.paint.myRepaint();
+		}
 		for (int i = 0; i < list.size(); i++) {
 			Envelope envelope = list.get(i);
 			AlgoSlice sc = new AlgoSlice();

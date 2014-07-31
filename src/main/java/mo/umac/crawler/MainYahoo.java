@@ -30,7 +30,7 @@ public class MainYahoo {
 	// public final static String DB_NAME_CRAWL =
 	// "../crawler-data/yahoolocal-h2/crawl/datasets";
 
-	public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun";
+	public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun-4";
 	// public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun-scale";
 	public final static String DB_NAME_TARGET = "../data-experiment/ny-prun-c-one";
 	public final static String DB_NAME_CRAWL = "../data-experiment/datasets";

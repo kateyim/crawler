@@ -83,8 +83,9 @@ public class USDensity {
 	private static String densityFile = "../data-experiment/partition/densityMap-ny-0.01";
 	// temple
 	private static String clusterRegionFilePre = "../data-experiment/partition/combinedDensity-ny-";
-//	private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.8-10.mbr";
-	private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny--0-1-0.8-10.mbr";
+	// private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.8-10.mbr";
+	// private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny--0-1-0.8-10.mbr";
+	private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.mbr";
 
 	// 2014-5-19 why this file?
 	// private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.8-2.mbr";

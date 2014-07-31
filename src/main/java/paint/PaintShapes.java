@@ -97,6 +97,10 @@ public class PaintShapes extends JPanel {
 	public static void addRectangle(Envelope envelope) {
 		arrFill.add(getRectangle(envelope));
 	}
+	
+	public static void addRectangleLine(Envelope envelope) {
+		arrDraw.add(getRectangle(envelope));
+	}
 
 	public static void addPoint(Coordinate p) {
 		arrFill.add(getPoint(p));

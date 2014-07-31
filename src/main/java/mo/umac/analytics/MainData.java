@@ -41,9 +41,9 @@ public class MainData {
 		// String dbNameSource = "../crawler-data/yahoolocal-h2/source/ok";
 		// String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ok-prun";
 		// step 1
-		// String folderPath = DBExternal.FOLDER_NAME + "/96926236+Restaurants/" + stateQ + "/";
-		// m.convertFromQRFileToH2(dbNameSource, folderPath);
-		// m.examData(dbNameSource);
+//		 String folderPath = DBExternal.FOLDER_NAME + "/96926236+Restaurants/" + stateQ + "/";
+//		 m.convertFromQRFileToH2(dbNameSource, folderPath);
+//		 m.examData(dbNameSource);
 		// step 2
 		// m.prunH2(dbNameSource, dbNameTarget, categoryQ, stateQ);
 		// m.examData(dbNameTarget);
@@ -51,9 +51,9 @@ public class MainData {
 		// step 3
 
 		// step 4
-		// String dbName = "../crawler-data/yahoolocal-h2/target/ok-prun-c-one";
-		// String fileName = "../data-map/ok-c-one.pois";
-		// m.convertFromH2ToFile(dbName, fileName);
+		String dbName = "../data-experiment/synthetic/skew-1000-0.3";
+		String fileName = "../data-experiment/partition/skew-1000-0.3.pois";
+		m.convertFromH2ToFile(dbName, fileName);
 
 		// step 4
 		// String logFile = "../crawlerlog/info.log";
@@ -66,10 +66,10 @@ public class MainData {
 
 		
 		// for sample: reduce the size of yahoo 
-		String dbNameFull = "../data-experiment/yahoo/ny-prun";
-		String dbNameSample = "../data-experiment/yahoo/ny-prun-4";
-		int factor = 4;
-		m.sample(dbNameFull, dbNameSample, factor);
+//		String dbNameFull = "../data-experiment/yahoo/ny-prun";
+//		String dbNameSample = "../data-experiment/yahoo/ny-prun-4";
+//		int factor = 4;
+//		m.sample(dbNameFull, dbNameSample, factor);
 		
 		DBExternal.distroyConn();
 		// m.prunPoisFile();
