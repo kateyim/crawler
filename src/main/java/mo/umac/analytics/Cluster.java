@@ -80,7 +80,7 @@ public class Cluster {
 		return list;
 	}
 
-	public static ArrayList<Envelope> clusterDenseAndZero(double gX, double gY, Envelope e, ArrayList<double[]> d, double a, int loop) {
+	public static ArrayList<Envelope> clusterZero(double gX, double gY, Envelope e, ArrayList<double[]> d, double a, int loop) {
 		logger.info("clustering...");
 		density = d;
 		envelope = e;
@@ -111,24 +111,38 @@ public class Cluster {
 			}
 		}
 
-		// cluster densities
-		// ArrayList<Envelope> listDense = new ArrayList<Envelope>();
-		// for (int i = 0; i < loop; i++) {
-		// Coordinate seed = getTheDensest();
-		// if (logger.isDebugEnabled()) {
-		// logger.debug("seed = " + seed.toString() + ", density = " + getDensity(seed));
-		// }
-		// Envelope denseGrid = expandFromMiddle(seed, a);
-		// Envelope denseRegion = converseEnvelope(denseGrid);
-		//
-		// listDense.add(denseRegion);
-		// }
-		// TODO find overlaps
-
-		//
 		ArrayList<Envelope> list = new ArrayList<Envelope>();
 		list.addAll(list0);
-		// list.addAll(listDense);
+		return list;
+	}
+
+	public static ArrayList<Envelope> clusterDensest(double gX, double gY, Envelope e, ArrayList<double[]> d, double a, int loop) {
+		logger.info("clustering...");
+		density = d;
+		envelope = e;
+		granularityX = gX;
+		granularityY = gY;
+
+		numGridX = (int) Math.ceil(envelope.getWidth() / granularityX);
+		numGridY = (int) Math.ceil(envelope.getHeight() / granularityY);
+		if (logger.isDebugEnabled()) {
+			logger.debug("numGridX = " + numGridX + ", numGridY = " + numGridY);
+		}
+		initTag();
+		// cluster densities
+		ArrayList<Envelope> listDense = new ArrayList<Envelope>();
+		for (int i = 0; i < loop; i++) {
+			Coordinate seed = getTheDensest();
+			if (logger.isDebugEnabled()) {
+				logger.debug("seed = " + seed.toString() + ", density = " + getDensity(seed));
+			}
+			Envelope denseGrid = expandFromMiddle(seed, a);
+//			listDense.add(denseGrid);
+			Envelope denseRegion = converseEnvelope(denseGrid);
+			listDense.add(denseRegion);
+		}
+		ArrayList<Envelope> list = new ArrayList<Envelope>();
+		list.addAll(listDense);
 		return list;
 	}
 
