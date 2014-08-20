@@ -40,20 +40,11 @@ public class USDensity {
 
 	public static Logger logger = Logger.getLogger(USDensity.class.getName());
 
-	// yanhui
 	// NY: Env[-79.76259 : -71.777491, 40.477399 : 45.015865]
 	private static final double NYLatitudeMin = 40.477399;
 	private static final double NYLatitudeMax = 45.015865;
 	private static final double NYLongitudeMin = -79.76259;
 	private static final double NYLongitudeMax = -71.777491;
-
-	// OK: // FIXME change these values
-	private static final double OKLatitudeMin = 40.477399;
-	private static final double OKLatitudeMax = 45.015865;
-	private static final double OKLongitudeMin = -79.76259;
-	private static final double OKLongitudeMax = -71.777491;
-
-	// TODO state OT
 
 	/**
 	 * The name index in the .dbf file
@@ -82,16 +73,11 @@ public class USDensity {
 
 	private static String densityFile = "../data-experiment/partition/densityMap-ny-0.01";
 	ArrayList<double[]> density;
-	// temple
+	/**************NY*****************/
 	private static String clusterRegionFilePre = "../data-experiment/partition/combinedDensity-ny-";
-	// private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.8-10.mbr";
-	// private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny--0-1-0.8-10.mbr";
 	private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.mbr";
-
-	// 2014-5-19 why this file?
-	// private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.8-2.mbr";
 	public static String clusterRegionFile = "../data-experiment/partition/combinedDensity-ny.mbr";
-
+	
 	/**
 	 * @param args
 	 */
@@ -100,11 +86,11 @@ public class USDensity {
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		// computeDensityInEachGrids();
-		forYahoo();
+		forYahooNY();
 		// forSkewedDB();
 	}
 
-	public static void forYahoo() {
+	public static void forYahooNY() {
 		ArrayList<double[]> densityAll = USDensity.readDensityFromFile(densityFile);
 		ArrayList<Envelope> envelopeList = addEnvelopeList();
 		ArrayList<Envelope> results = new ArrayList<Envelope>();
@@ -125,7 +111,7 @@ public class USDensity {
 
 	}
 
-	private static ArrayList<double[]> readPartOfDensity(ArrayList<double[]> densityAll, Envelope partEnvelope) {
+	public static ArrayList<double[]> readPartOfDensity(ArrayList<double[]> densityAll, Envelope partEnvelope) {
 		ArrayList<double[]> densityPart = new ArrayList<double[]>();
 		int xBegin = (int) ((partEnvelope.getMinX() - envelope.getMinX()) / granularityX);
 		int xEnd = (int) Math.ceil((partEnvelope.getMaxX() - envelope.getMinX()) / granularityX) - 1;
@@ -153,9 +139,9 @@ public class USDensity {
 	 * 40.477399;-73.24259;41.297399;-71.77259000000001
 	 */
 	public static ArrayList<Envelope> addEnvelopeList() {
-//		Envelope e1 = new Envelope(40.477399, -79.76259, 41.997399, -75.35259);
-//		Envelope e2 = new Envelope(43.377399, -79.76259, 45.017399, -76.66259000000001);
-//		Envelope e3 = new Envelope(41.297399, -73.24259, 45.017399, -71.77259000000001);
+		// Envelope e1 = new Envelope(40.477399, -79.76259, 41.997399, -75.35259);
+		// Envelope e2 = new Envelope(43.377399, -79.76259, 45.017399, -76.66259000000001);
+		// Envelope e3 = new Envelope(41.297399, -73.24259, 45.017399, -71.77259000000001);
 		Envelope e4 = new Envelope(-79.76259, -76.66259000000001, 41.997399, 43.377399);
 		Envelope e5 = new Envelope(-76.66259000000001, -73.24259, 41.997399, 45.017399);
 		Envelope e6 = new Envelope(-75.35259, -73.24259, 40.477399, 41.997399);

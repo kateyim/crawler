@@ -20,32 +20,38 @@ public class MainYahoo {
 	public static Logger logger = Logger.getLogger(MainYahoo.class.getName());
 
 	public static String LOG_PROPERTY_PATH = "./log4j.xml";
-	public static boolean debug = false;
 
-	// used in offline algorithm
-	// public final static String DB_NAME_SOURCE =
-	// "../crawler-data/yahoolocal-h2/source/ny-prun";
-	// public final static String DB_NAME_TARGET =
-	// "../crawler-data/yahoolocal-h2/target/ny-prun-c-one";
-	// public final static String DB_NAME_CRAWL =
-	// "../crawler-data/yahoolocal-h2/crawl/datasets";
-
-	public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun-4";
-	// public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun-scale";
-	public final static String DB_NAME_TARGET = "../data-experiment/ny-prun-c-one";
+	public final static String DB_NAME_TARGET = "../data-experiment/target";
 	public final static String DB_NAME_CRAWL = "../data-experiment/datasets";
 
-	private static int topK = 500;
+	public static boolean debug = false;
+	private static int topK = 100;
 
+	/******** synthetic dataset ********/
+	// public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ny-prun";
 	/******** NY ********/
 	// private static Envelope envelope = new Envelope(-79.76259, -71.777491, 40.477399, 45.015865);
-	// public static double factor = 100;
-	// private static Envelope envelope = new Envelope(-79.76259 * factor * (-1), -71.777491 * factor * (-1), 40.477399 * factor, 45.015865 * factor);
-	private static Envelope envelope = new Envelope(-79.76259, -71.777491, 40.477399, 45.015865);
-	private static Coordinate outerPointNY = new Coordinate(-100, -100);
+	// private static Coordinate outerPointNY = new Coordinate(-100, -100);
+	// private static String category = "Restaurants";
+	// private static String state = "NY";
+	// private static int categoryID = 96926236;
+	// public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun-4";
+
+	/******** UT ********/
+	private static Envelope envelope = new Envelope(-114.052998, -109.04105799999999, 36.997949, 42.001618);
+	private static Coordinate outerPoint = new Coordinate(-100, -100);
 	private static String category = "Restaurants";
-	private static String state = "NY";
+	private static String state = "UT";
 	private static int categoryID = 96926236;
+	public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ut-prun-4";
+
+	/******** OK ********/
+	// private static Envelope envelope = new Envelope(-103.002455, -94.430662, 33.615787 , 37.002311999999996);
+	// private static Coordinate outerPoint = new Coordinate(-100, -100);
+	// private static String category = "Restaurants";
+	// private static String state = "OK";
+	// private static int categoryID = 96926236;
+	// public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ok-prun-4";
 
 	public static void main(String[] args) {
 		/************************* Change these lines *************************/
@@ -88,7 +94,7 @@ public class MainYahoo {
 			// Main.LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
 			MainYahoo.LOG_PROPERTY_PATH = "./log4j.xml";
 			UScensusData.STATE_SHP_FILE_NAME = "./src/main/resources/UScensus/tl_2012_us_state/tl_2012_us_state.shp";
-			UScensusData.STATE_SHP_FILE_NAME = "./src/main/resources/UScensus/tl_2012_us_state/tl_2012_us_state.shp";
+			UScensusData.STATE_DBF_FILE_NAME = "./src/main/resources/UScensus/tl_2012_us_state/tl_2012_us_state.dbf";
 		}
 	}
 

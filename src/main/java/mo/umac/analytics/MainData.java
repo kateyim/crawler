@@ -26,24 +26,24 @@ public class MainData {
 	public static void main(String[] args) {
 		MainData m = new MainData();
 		// ny
-		String stateQ = "NY";
-		String categoryQ = "Restaurants";
-		String dbNameSource = "../crawler-data/yahoolocal-h2/source/ny";
-		String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ny-prun";
-		// ut
-		// String stateQ = "UT";
+		// String stateQ = "NY";
 		// String categoryQ = "Restaurants";
-		// String dbNameSource = "../crawler-data/yahoolocal-h2/source/ut";
-		// String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ut-prun";
+		// String dbNameSource = "../crawler-data/yahoolocal-h2/source/ny";
+		// String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ny-prun";
+		// ut
+		String stateQ = "UT";
+		String categoryQ = "Restaurants";
+		String dbNameSource = "../data-experiment/yahoo/ut";
+		String dbNameTarget = "../crawler-data/yahoolocal-h2/ut-prun";
 		// ok
 		// String stateQ = "OK";
 		// String categoryQ = "Restaurants";
 		// String dbNameSource = "../crawler-data/yahoolocal-h2/source/ok";
 		// String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ok-prun";
 		// step 1
-//		 String folderPath = DBExternal.FOLDER_NAME + "/96926236+Restaurants/" + stateQ + "/";
-//		 m.convertFromQRFileToH2(dbNameSource, folderPath);
-//		 m.examData(dbNameSource);
+		// String folderPath = DBExternal.FOLDER_NAME + "/96926236+Restaurants/" + stateQ + "/";
+		// m.convertFromQRFileToH2(dbNameSource, folderPath);
+		// m.examData(dbNameSource);
 		// step 2
 		// m.prunH2(dbNameSource, dbNameTarget, categoryQ, stateQ);
 		// m.examData(dbNameTarget);
@@ -51,9 +51,9 @@ public class MainData {
 		// step 3
 
 		// step 4
-		String dbName = "../data-experiment/synthetic/skew-1000-0.3";
-		String fileName = "../data-experiment/partition/skew-1000-0.3.pois";
-		m.convertFromH2ToFile(dbName, fileName);
+		// String dbName = "../data-experiment/synthetic/skew-1000-0.3";
+		// String fileName = "../data-experiment/partition/skew-1000-0.3.pois";
+		// m.convertFromH2ToFile(dbName, fileName);
 
 		// step 4
 		// String logFile = "../crawlerlog/info.log";
@@ -64,13 +64,12 @@ public class MainData {
 		// m.removeDuplicate(dbName);
 		// m.examData(dbName);
 
-		
-		// for sample: reduce the size of yahoo 
-//		String dbNameFull = "../data-experiment/yahoo/ny-prun";
-//		String dbNameSample = "../data-experiment/yahoo/ny-prun-4";
-//		int factor = 4;
-//		m.sample(dbNameFull, dbNameSample, factor);
-		
+		// for sample: reduce the size of yahoo/ut/ok
+		String dbNameFull = "../data-experiment/yahoo/ut-prun";
+		String dbNameSample = "../data-experiment/yahoo/ut-prun-2";
+		int factor = 2;
+		m.sample(dbNameFull, dbNameSample, factor);
+
 		DBExternal.distroyConn();
 		// m.prunPoisFile();
 	}
