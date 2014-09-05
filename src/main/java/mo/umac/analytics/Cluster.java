@@ -739,6 +739,8 @@ public class Cluster {
 	// }
 
 	/**
+	 * TODO When partition, do not add the original denseRegion.
+	 * 
 	 * @param entireRegion
 	 * @param denseRegion
 	 * @return

@@ -14,12 +14,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import mo.umac.analytics.Cluster;
-import mo.umac.crawler.MainYahoo;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 import org.geotools.data.shapefile.ShpFiles;
 import org.geotools.data.shapefile.shp.ShapefileException;
 import org.geotools.data.shapefile.shp.ShapefileReader;
@@ -73,24 +73,15 @@ public class USDensity {
 
 	private static String densityFile = "../data-experiment/partition/densityMap-ny-0.01";
 	ArrayList<double[]> density;
-	/**************NY*****************/
+	/************** NY *****************/
 	private static String clusterRegionFilePre = "../data-experiment/partition/combinedDensity-ny-";
 	private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.mbr";
 	public static String clusterRegionFile = "../data-experiment/partition/combinedDensity-ny.mbr";
-	
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		boolean debug = false;
-		MainYahoo.shutdownLogs(debug);
-		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
-		// computeDensityInEachGrids();
-		forYahooNY();
-		// forSkewedDB();
-	}
 
-	public static void forYahooNY() {
+	/**
+	 * The partition method I used before
+	 */
+	public void forYahooNY2() {
 		ArrayList<double[]> densityAll = USDensity.readDensityFromFile(densityFile);
 		ArrayList<Envelope> envelopeList = addEnvelopeList();
 		ArrayList<Envelope> results = new ArrayList<Envelope>();
@@ -102,6 +93,49 @@ public class USDensity {
 			ArrayList<Envelope> denseEnvelopList = Cluster.clusterDensest(granularityX, granularityY, e, density, a, numDense);
 			ArrayList<Envelope> partitionedRegions = Cluster.partition(e, denseEnvelopList);
 			results.addAll(partitionedRegions);
+		}
+		// before writing, has changed to latitude & longitude
+		USDensity.writePartition(clusterRegionFile, results);
+	}
+
+	/**
+	 * The new partition method. The object is to get the uniformed partitioned grids
+	 * 
+	 * Still Testing
+	 */
+	public void forYahooNY() {
+		ArrayList<double[]> densityAll = USDensity.readDensityFromFile(densityFile);
+//		Queue queue = new LinkedList();
+		ArrayList<Envelope> envelopeList = addEnvelopeList();
+		ArrayList<Envelope> resultsZero = new ArrayList<Envelope>();
+		ArrayList<Envelope> results = new ArrayList<Envelope>();
+		// only find the top densest in a region
+		int numDense = 1;
+		double a = 0.8;
+
+		// the number of iteration
+		int iteration = 3;
+		for (int j = 0; j < iteration; j++) {
+			// first cluster from the 4 corner
+			for (int i = 0; i < envelopeList.size(); i++) {
+				Envelope e = envelopeList.get(i);
+				envelopeList.remove(i);
+				ArrayList<double[]> density = readPartOfDensity(densityAll, e);
+				ArrayList<Envelope> zeroEnvelopList = Cluster.clusterZero(granularityX, granularityY, e, density, a, numDense);
+				resultsZero.addAll(zeroEnvelopList);
+				// TODO change
+				ArrayList<Envelope> partitionedRegions = Cluster.partition(e, zeroEnvelopList);
+				envelopeList.addAll(partitionedRegions);
+			}
+//			resultsZero.add()
+			// second cluster from the densest grid
+			for (int i = 0; i < envelopeList.size(); i++) {
+				Envelope e = envelopeList.get(i);
+				ArrayList<double[]> density = readPartOfDensity(densityAll, e);
+				ArrayList<Envelope> denseEnvelopList = Cluster.clusterDensest(granularityX, granularityY, e, density, a, numDense);
+				ArrayList<Envelope> partitionedRegions = Cluster.partition(e, denseEnvelopList);
+				results.addAll(partitionedRegions);
+			}
 		}
 		// before writing, has changed to latitude & longitude
 		USDensity.writePartition(clusterRegionFile, results);
