@@ -16,7 +16,7 @@ public class ParitionTest {
 		Envelope wholeEnvelope;
 		Envelope partEnvelope;
 		ArrayList<double[]> densityAll;
-		USDensity.readPartOfDensity(densityAll, wholeEnvelope, partEnvelope);
+//		USDensity.readPartOfDensity(densityAll, wholeEnvelope, partEnvelope);
 		
 		
 	}

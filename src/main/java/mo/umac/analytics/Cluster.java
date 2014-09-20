@@ -24,7 +24,7 @@ public class Cluster {
 	public static boolean[][] tag;
 	public static double EPSILON_A = 0.000001;
 
-	public static ArrayList<Envelope> cluster(double gX, double gY, Envelope e, ArrayList<double[]> d, double a) {
+	public static Envelope cluster(double gX, double gY, Envelope e, ArrayList<double[]> d, double a) {
 		logger.info("clustering...");
 		density = d;
 		envelope = e;
@@ -37,18 +37,16 @@ public class Cluster {
 			logger.debug("numGridX = " + numGridX + ", numGridY = " + numGridY);
 		}
 		initTag();
-		//
+		// seed : grid number
 		Coordinate seed = getTheDensest();
 		if (logger.isDebugEnabled()) {
-			logger.debug("seed = " + seed.toString() + ", density = " + getDensity(seed));
+			logger.debug("seed = " + seed.toString());
+			logger.debug("density = " + getDensity(seed));
 		}
 		Envelope denseGrid = expandFromMiddle(seed, a);
 		Envelope denseRegion = converseEnvelope(denseGrid);
 		//
-		ArrayList<Envelope> list = partition(envelope, denseRegion);
-		// ArrayList<Envelope> list = new ArrayList<Envelope>();
-		list.add(denseRegion);
-		return list;
+		return denseRegion;
 	}
 
 	public static ArrayList<Envelope> cluster(double gX, double gY, Envelope e, ArrayList<double[]> d, double a, int loop) {
@@ -73,7 +71,6 @@ public class Cluster {
 			}
 			Envelope denseGrid = expandFromMiddle(seed, a);
 			Envelope denseRegion = converseEnvelope(denseGrid);
-
 			list.add(denseRegion);
 
 		}
@@ -478,6 +475,12 @@ public class Cluster {
 		return envelope;
 	}
 
+	/**
+	 * Transform from grid number to long&latitude
+	 * 
+	 * @param denseGrid
+	 * @return
+	 */
 	private static Envelope converseEnvelope(Envelope denseGrid) {
 		double x1 = envelope.getMinX() + denseGrid.getMinX() * granularityX;
 		double x2 = envelope.getMinX() + (denseGrid.getMaxX() + 1) * granularityX;
@@ -522,7 +525,7 @@ public class Cluster {
 	 * @param oneRegion
 	 * @return
 	 */
-	private static ArrayList<Envelope> partition(Envelope entireRegion, Envelope oneRegion) {
+	public static ArrayList<Envelope> partition(Envelope entireRegion, Envelope oneRegion) {
 		ArrayList<Envelope> resultRegions = new ArrayList<Envelope>();
 		Envelope e1 = new Envelope(entireRegion.getMinX(), oneRegion.getMinX(), oneRegion.getMinY(), entireRegion.getMaxY());
 		Envelope e2 = new Envelope(oneRegion.getMinX(), entireRegion.getMaxX(), oneRegion.getMaxY(), entireRegion.getMaxY());

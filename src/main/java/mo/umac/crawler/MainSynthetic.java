@@ -121,8 +121,9 @@ public class MainSynthetic extends Strategy {
 		double a = 0.9;
 		ArrayList<Envelope> testRegions = new ArrayList<Envelope>();
 		// for (a = 0.5; a < 1; a = a + 0.1) {
-		ArrayList<Envelope> clusteredRegion = Cluster.cluster(granularityX, granularityY, envelope, density, a);
-		testRegions.addAll(clusteredRegion);
+		Envelope denseRegion = Cluster.cluster(granularityX, granularityY, envelope, density, a);
+		ArrayList<Envelope> list = Cluster.partition(envelope, denseRegion);
+		testRegions.addAll(list);
 		// }
 		logger.info("finished");
 		USDensity.writePartition(clusterRegionFile, testRegions);

@@ -76,12 +76,12 @@ public class USDensity {
 	/************** NY *****************/
 	private static String clusterRegionFilePre = "../data-experiment/partition/combinedDensity-ny-";
 	private static String dentiestRegionFile = "../data-experiment/partition/combinedDensity-ny-0.mbr";
-	public static String clusterRegionFile = "../data-experiment/partition/combinedDensity-ny.mbr";
+	public static String clusterRegionFile = "../data-experiment/partition/combinedDensity-ny-testing.mbr";
 
 	/**
 	 * The partition method I used before
 	 */
-	public void forYahooNY2() {
+	public void forYahooNYBefore() {
 		ArrayList<double[]> densityAll = USDensity.readDensityFromFile(densityFile);
 		ArrayList<Envelope> envelopeList = addEnvelopeList();
 		ArrayList<Envelope> results = new ArrayList<Envelope>();
@@ -99,42 +99,86 @@ public class USDensity {
 	}
 
 	/**
-	 * The new partition method. The object is to get the uniformed partitioned grids
+	 * The object is to get the uniformed partitioned grids
 	 * 
-	 * Still Testing
+	 * Begin from the densest region, then partition, iteration for twice
+	 * 
+	 * The results is bad. Still need to partition the empty first, see forYahooNYEmptyAndDenses
+	 * 
 	 */
-	public void forYahooNY() {
+	public void forYahooNYOnlyDenses() {
 		ArrayList<double[]> densityAll = USDensity.readDensityFromFile(densityFile);
-		// envelopeList: the real longitude & latitude (dividing by the gridsX and Y), not the number of grids 
-		ArrayList<Envelope> envelopeList = new ArrayList<Envelope>();
-		// add the whole envelope
-		envelopeList.add(envelope);
+		// envelopeList: the real longitude & latitude (dividing by the gridsX and Y), not the number of grids
+		Queue<Envelope> queue = new LinkedList<Envelope>();
+		queue.add(envelope);
 		ArrayList<Envelope> results = new ArrayList<Envelope>();
 		// only find the top densest in a region
-		int numDense = 1;
 		double a = 0.8;
 		// the number of iteration
-		int iteration = 3;
-		for (int j = 0; j < iteration; j++) {
-			for (int i = 0; i < envelopeList.size(); i++) {
-				Envelope partEnvelope = envelopeList.get(i);
-				ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope);
-				ArrayList<Envelope> denseEnvelopList = Cluster.clusterDensest(granularityX, granularityY, partEnvelope, density, a, numDense);
-				results.addAll(denseEnvelopList);
-				ArrayList<Envelope> partitionedRegions = Cluster.partition(partEnvelope, denseEnvelopList);
-				envelopeList.addAll(partitionedRegions);
-			}
+		int iteration = 2;
+		int totalNum = 1;
+		for (int i = 0; i < iteration; i++) {
+			totalNum *= 4;
 		}
+		while (!queue.isEmpty() && queue.size() < totalNum) {
+			logger.debug("totalNum = " + totalNum);
+			Envelope partEnvelope = queue.poll();
+			ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope);
+			// denseEnvelope: long&lat
+			Envelope denseEnvelope = Cluster.cluster(granularityX, granularityY, partEnvelope, density, a);
+			results.add(denseEnvelope);
+			ArrayList<Envelope> partitionedRegions = Cluster.partition(partEnvelope, denseEnvelope);
+
+			queue.addAll(partitionedRegions);
+		}
+		results.addAll(queue);
 		// before writing, has changed to latitude & longitude
 		USDensity.writePartition(clusterRegionFile, results);
 	}
 
+	/**
+	 * First get rid the empty regions, then cluster from the densest region
+	 * 
+	 * TODO
+	 * 
+	 */
+	public void forYahooNYEmptyAndDenses() {
+		ArrayList<double[]> densityAll = USDensity.readDensityFromFile(densityFile);
+		// envelopeList: the real longitude & latitude (dividing by the gridsX and Y), not the number of grids
+		Queue<Envelope> queue = new LinkedList<Envelope>();
+		queue.add(envelope);
+		ArrayList<Envelope> results = new ArrayList<Envelope>();
+		// only find the top densest in a region
+		double a = 0.8;
+		// the number of iteration
+		int iteration = 2;
+		int totalNum = 1;
+		for (int i = 0; i < iteration; i++) {
+			totalNum *= 4;
+		}
+		while (!queue.isEmpty() && queue.size() < totalNum) {
+			logger.debug("totalNum = " + totalNum);
+			Envelope partEnvelope = queue.poll();
+			ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope);
+			// denseEnvelope: long&lat
+			Envelope denseEnvelope = Cluster.cluster(granularityX, granularityY, partEnvelope, density, a);
+			results.add(denseEnvelope);
+			ArrayList<Envelope> partitionedRegions = Cluster.partition(partEnvelope, denseEnvelope);
+
+			queue.addAll(partitionedRegions);
+		}
+		results.addAll(queue);
+		// before writing, has changed to latitude & longitude
+		USDensity.writePartition(clusterRegionFile, results);
+	}
+	
+	
 	public static void forSkewedDB() {
 
 	}
 
 	/**
-	 * Read parts of the densities from the density of the whole map  
+	 * Read parts of the densities from the density of the whole map
 	 * 
 	 * partEnvelope are real longitude and latitude
 	 * 
@@ -149,7 +193,10 @@ public class USDensity {
 		int xEnd = (int) Math.ceil((partEnvelope.getMaxX() - wholeEnvelope.getMinX()) / granularityX) - 1;
 		int yBegin = (int) ((partEnvelope.getMinY() - wholeEnvelope.getMinY()) / granularityX);
 		int yEnd = (int) Math.ceil((partEnvelope.getMaxY() - wholeEnvelope.getMinY()) / granularityX) - 1;
-		int length = (int) (xEnd - xBegin) + 1;
+		int length = (int) (yEnd - yBegin) + 1;
+//		logger.info("yBegin = " + yBegin);
+//		logger.info("yEnd = " + yEnd);
+//		logger.info("aRow.length = " + densityAll.get(0).length);
 		for (int i = xBegin; i <= xEnd; i++) {
 			double[] aRow = densityAll.get(i);
 			double[] newARow = new double[length];
@@ -162,7 +209,7 @@ public class USDensity {
 	}
 
 	/**
-	 * Add previous divided results. 
+	 * Add previous divided results.
 	 * 
 	 * 40.477399;-79.76259;41.997399;-75.35259
 	 * 43.377399;-79.76259;45.017399;-76.66259000000001

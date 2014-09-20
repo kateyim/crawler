@@ -12,19 +12,21 @@ public class PartitionMain {
 		boolean debug = false;
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
+		PartitionMain p = new PartitionMain();
+		p.partitionNY();
 
 	}
 	
 	public void partitionNY(){
 		USDensity usDensity = new USDensity();
 		// computeDensityInEachGrids();
-		usDensity.forYahooNY();
+		usDensity.forYahooNYOnlyDenses();
 	}
 	
 	public void partitionSynthetic(){
 		USDensity usDensity = new USDensity();
 		// computeDensityInEachGrids();
-		usDensity.forYahooNY();
+		usDensity.forYahooNYOnlyDenses();
 		// forSkewedDB();
 	}
 	

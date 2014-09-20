@@ -82,7 +82,7 @@ public class USDensityByPoints {
 		double a = 0.8;
 		for (int i = 0; i < envelopeList.size(); i++) {
 			Envelope e = envelopeList.get(i);
-			ArrayList<double[]> density = USDensity.readPartOfDensity(densityAll, e);
+			ArrayList<double[]> density = USDensity.readPartOfDensity(densityAll, envelope, e);
 			
 			ArrayList<Envelope> denseEnvelopList = Cluster.clusterZero(granularityX, granularityY, e, density, a, numDense);
 			ArrayList<Envelope> partitionedRegions = Cluster.partition(e, denseEnvelopList);
