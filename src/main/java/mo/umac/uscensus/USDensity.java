@@ -89,7 +89,7 @@ public class USDensity {
 		double a = 0.8;
 		for (int i = 0; i < envelopeList.size(); i++) {
 			Envelope e = envelopeList.get(i);
-			ArrayList<double[]> density = readPartOfDensity(densityAll, e);
+			ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, e);
 			ArrayList<Envelope> denseEnvelopList = Cluster.clusterDensest(granularityX, granularityY, e, density, a, numDense);
 			ArrayList<Envelope> partitionedRegions = Cluster.partition(e, denseEnvelopList);
 			results.addAll(partitionedRegions);
@@ -105,36 +105,24 @@ public class USDensity {
 	 */
 	public void forYahooNY() {
 		ArrayList<double[]> densityAll = USDensity.readDensityFromFile(densityFile);
-//		Queue queue = new LinkedList();
-		ArrayList<Envelope> envelopeList = addEnvelopeList();
-		ArrayList<Envelope> resultsZero = new ArrayList<Envelope>();
+		// envelopeList: the real longitude & latitude (dividing by the gridsX and Y), not the number of grids 
+		ArrayList<Envelope> envelopeList = new ArrayList<Envelope>();
+		// add the whole envelope
+		envelopeList.add(envelope);
 		ArrayList<Envelope> results = new ArrayList<Envelope>();
 		// only find the top densest in a region
 		int numDense = 1;
 		double a = 0.8;
-
 		// the number of iteration
 		int iteration = 3;
 		for (int j = 0; j < iteration; j++) {
-			// first cluster from the 4 corner
 			for (int i = 0; i < envelopeList.size(); i++) {
-				Envelope e = envelopeList.get(i);
-				envelopeList.remove(i);
-				ArrayList<double[]> density = readPartOfDensity(densityAll, e);
-				ArrayList<Envelope> zeroEnvelopList = Cluster.clusterZero(granularityX, granularityY, e, density, a, numDense);
-				resultsZero.addAll(zeroEnvelopList);
-				// TODO change
-				ArrayList<Envelope> partitionedRegions = Cluster.partition(e, zeroEnvelopList);
+				Envelope partEnvelope = envelopeList.get(i);
+				ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope);
+				ArrayList<Envelope> denseEnvelopList = Cluster.clusterDensest(granularityX, granularityY, partEnvelope, density, a, numDense);
+				results.addAll(denseEnvelopList);
+				ArrayList<Envelope> partitionedRegions = Cluster.partition(partEnvelope, denseEnvelopList);
 				envelopeList.addAll(partitionedRegions);
-			}
-//			resultsZero.add()
-			// second cluster from the densest grid
-			for (int i = 0; i < envelopeList.size(); i++) {
-				Envelope e = envelopeList.get(i);
-				ArrayList<double[]> density = readPartOfDensity(densityAll, e);
-				ArrayList<Envelope> denseEnvelopList = Cluster.clusterDensest(granularityX, granularityY, e, density, a, numDense);
-				ArrayList<Envelope> partitionedRegions = Cluster.partition(e, denseEnvelopList);
-				results.addAll(partitionedRegions);
 			}
 		}
 		// before writing, has changed to latitude & longitude
@@ -145,12 +133,22 @@ public class USDensity {
 
 	}
 
-	public static ArrayList<double[]> readPartOfDensity(ArrayList<double[]> densityAll, Envelope partEnvelope) {
+	/**
+	 * Read parts of the densities from the density of the whole map  
+	 * 
+	 * partEnvelope are real longitude and latitude
+	 * 
+	 * 
+	 * @param densityAll
+	 * @param partEnvelope
+	 * @return
+	 */
+	public static ArrayList<double[]> readPartOfDensity(ArrayList<double[]> densityAll, Envelope wholeEnvelope, Envelope partEnvelope) {
 		ArrayList<double[]> densityPart = new ArrayList<double[]>();
-		int xBegin = (int) ((partEnvelope.getMinX() - envelope.getMinX()) / granularityX);
-		int xEnd = (int) Math.ceil((partEnvelope.getMaxX() - envelope.getMinX()) / granularityX) - 1;
-		int yBegin = (int) ((partEnvelope.getMinY() - envelope.getMinY()) / granularityX);
-		int yEnd = (int) Math.ceil((partEnvelope.getMaxY() - envelope.getMinY()) / granularityX) - 1;
+		int xBegin = (int) ((partEnvelope.getMinX() - wholeEnvelope.getMinX()) / granularityX);
+		int xEnd = (int) Math.ceil((partEnvelope.getMaxX() - wholeEnvelope.getMinX()) / granularityX) - 1;
+		int yBegin = (int) ((partEnvelope.getMinY() - wholeEnvelope.getMinY()) / granularityX);
+		int yEnd = (int) Math.ceil((partEnvelope.getMaxY() - wholeEnvelope.getMinY()) / granularityX) - 1;
 		int length = (int) (xEnd - xBegin) + 1;
 		for (int i = xBegin; i <= xEnd; i++) {
 			double[] aRow = densityAll.get(i);
@@ -164,6 +162,8 @@ public class USDensity {
 	}
 
 	/**
+	 * Add previous divided results. 
+	 * 
 	 * 40.477399;-79.76259;41.997399;-75.35259
 	 * 43.377399;-79.76259;45.017399;-76.66259000000001
 	 * 41.297399;-73.24259;45.017399;-71.77259000000001
@@ -314,6 +314,12 @@ public class USDensity {
 		}
 	}
 
+	/**
+	 * The index begin from 0
+	 * 
+	 * @param densityFile
+	 * @return
+	 */
 	public static ArrayList<double[]> readDensityFromFile(String densityFile) {
 		logger.info("readDensityFromFile...");
 		ArrayList<double[]> density = new ArrayList<double[]>();

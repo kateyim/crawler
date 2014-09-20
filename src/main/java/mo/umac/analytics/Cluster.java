@@ -116,8 +116,17 @@ public class Cluster {
 		return list;
 	}
 
+	/**
+	 * @param gX
+	 * @param gY
+	 * @param e
+	 * @param d
+	 * @param a
+	 * @param loop
+	 * @return longitude and latitude
+	 */
 	public static ArrayList<Envelope> clusterDensest(double gX, double gY, Envelope e, ArrayList<double[]> d, double a, int loop) {
-		logger.info("clustering...");
+		logger.info("clustering densest...");
 		density = d;
 		envelope = e;
 		granularityX = gX;
@@ -137,7 +146,7 @@ public class Cluster {
 				logger.debug("seed = " + seed.toString() + ", density = " + getDensity(seed));
 			}
 			Envelope denseGrid = expandFromMiddle(seed, a);
-//			listDense.add(denseGrid);
+			// listDense.add(denseGrid);
 			Envelope denseRegion = converseEnvelope(denseGrid);
 			listDense.add(denseRegion);
 		}
@@ -506,17 +515,24 @@ public class Cluster {
 
 	}
 
-	private static ArrayList<Envelope> partition(Envelope entireRegion, Envelope denseRegion) {
-		ArrayList<Envelope> sparseRegion = new ArrayList<Envelope>();
-		Envelope e1 = new Envelope(entireRegion.getMinX(), denseRegion.getMinX(), denseRegion.getMinY(), entireRegion.getMaxY());
-		Envelope e2 = new Envelope(denseRegion.getMinX(), entireRegion.getMaxX(), denseRegion.getMaxY(), entireRegion.getMaxY());
-		Envelope e3 = new Envelope(denseRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMaxY());
-		Envelope e4 = new Envelope(entireRegion.getMinX(), denseRegion.getMaxX(), entireRegion.getMinY(), denseRegion.getMinY());
-		sparseRegion.add(e1);
-		sparseRegion.add(e2);
-		sparseRegion.add(e3);
-		sparseRegion.add(e4);
-		return sparseRegion;
+	/**
+	 * Do not add the oneDenseRegion to the final results.
+	 * 
+	 * @param entireRegion
+	 * @param oneRegion
+	 * @return
+	 */
+	private static ArrayList<Envelope> partition(Envelope entireRegion, Envelope oneRegion) {
+		ArrayList<Envelope> resultRegions = new ArrayList<Envelope>();
+		Envelope e1 = new Envelope(entireRegion.getMinX(), oneRegion.getMinX(), oneRegion.getMinY(), entireRegion.getMaxY());
+		Envelope e2 = new Envelope(oneRegion.getMinX(), entireRegion.getMaxX(), oneRegion.getMaxY(), entireRegion.getMaxY());
+		Envelope e3 = new Envelope(oneRegion.getMaxX(), entireRegion.getMaxX(), entireRegion.getMinY(), oneRegion.getMaxY());
+		Envelope e4 = new Envelope(entireRegion.getMinX(), oneRegion.getMaxX(), entireRegion.getMinY(), oneRegion.getMinY());
+		resultRegions.add(e1);
+		resultRegions.add(e2);
+		resultRegions.add(e3);
+		resultRegions.add(e4);
+		return resultRegions;
 	}
 
 	/**
@@ -739,8 +755,6 @@ public class Cluster {
 	// }
 
 	/**
-	 * TODO When partition, do not add the original denseRegion.
-	 * 
 	 * @param entireRegion
 	 * @param denseRegion
 	 * @return
