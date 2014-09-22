@@ -159,6 +159,10 @@ public class USDensity {
 		while (!queue.isEmpty() && queue.size() < totalNum) {
 			logger.debug("totalNum = " + totalNum);
 			Envelope partEnvelope = queue.poll();
+			
+			Cluster.clusterZero(gX, gY, e, d, iteration, loop)
+			
+			
 			ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope);
 			// denseEnvelope: long&lat
 			Envelope denseEnvelope = Cluster.cluster(granularityX, granularityY, partEnvelope, density, a);
