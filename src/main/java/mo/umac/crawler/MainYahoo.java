@@ -30,20 +30,20 @@ public class MainYahoo {
 	/******** synthetic dataset ********/
 	// public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ny-prun";
 	/******** NY ********/
-	// private static Envelope envelope = new Envelope(-79.76259, -71.777491, 40.477399, 45.015865);
-	// private static Coordinate outerPointNY = new Coordinate(-100, -100);
-	// private static String category = "Restaurants";
-	// private static String state = "NY";
-	// private static int categoryID = 96926236;
-	// public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun-4";
+	 private static Envelope envelope = new Envelope(-79.76259, -71.777491, 40.477399, 45.015865);
+	 private static Coordinate outerPointNY = new Coordinate(-100, -100);
+	 private static String category = "Restaurants";
+	 private static String state = "NY";
+	 private static int categoryID = 96926236;
+	 public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun";
 
 	/******** UT ********/
-	private static Envelope envelope = new Envelope(-114.052998, -109.04105799999999, 36.997949, 42.001618);
-	private static Coordinate outerPoint = new Coordinate(-100, -100);
-	private static String category = "Restaurants";
-	private static String state = "UT";
-	private static int categoryID = 96926236;
-	public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ut-prun-4";
+//	private static Envelope envelope = new Envelope(-114.052998, -109.04105799999999, 36.997949, 42.001618);
+//	private static Coordinate outerPoint = new Coordinate(-100, -100);
+//	private static String category = "Restaurants";
+//	private static String state = "UT";
+//	private static int categoryID = 96926236;
+//	public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ut-prun-4";
 
 	/******** OK ********/
 	// private static Envelope envelope = new Envelope(-103.002455, -94.430662, 33.615787 , 37.002311999999996);

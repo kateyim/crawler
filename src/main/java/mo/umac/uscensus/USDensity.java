@@ -139,44 +139,58 @@ public class USDensity {
 	/**
 	 * First get rid the empty regions, then cluster from the densest region
 	 * 
-	 * TODO
 	 * 
 	 */
 	public void forYahooNYEmptyAndDenses() {
 		ArrayList<double[]> densityAll = USDensity.readDensityFromFile(densityFile);
 		// envelopeList: the real longitude & latitude (dividing by the gridsX and Y), not the number of grids
-		Queue<Envelope> queue = new LinkedList<Envelope>();
-		queue.add(envelope);
 		ArrayList<Envelope> results = new ArrayList<Envelope>();
 		// only find the top densest in a region
 		double a = 0.8;
-		// the number of iteration
-		int iteration = 2;
-		int totalNum = 1;
-		for (int i = 0; i < iteration; i++) {
-			totalNum *= 4;
-		}
-		while (!queue.isEmpty() && queue.size() < totalNum) {
-			logger.debug("totalNum = " + totalNum);
-			Envelope partEnvelope = queue.poll();
-			
-			Cluster.clusterZero(gX, gY, e, d, iteration, loop)
-			
-			
-			ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope);
-			// denseEnvelope: long&lat
-			Envelope denseEnvelope = Cluster.cluster(granularityX, granularityY, partEnvelope, density, a);
-			results.add(denseEnvelope);
-			ArrayList<Envelope> partitionedRegions = Cluster.partition(partEnvelope, denseEnvelope);
+		// 1. from 0
+		// ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope);
+		// ArrayList<Envelope> zeroEnvelopeList = Cluster.clusterZero(granularityX, granularityY, partEnvelope, density, iteration, 1);
+		// partition these 0 from envelope
+		// ArrayList<Envelope> zeroFilteredEnvelopeList = addEnvelopeListForNY();
+		// ArrayList<Envelope> partitionedRegionsByZero = Cluster.partition(partEnvelope, zeroFilteredEnvelopeList);
 
-			queue.addAll(partitionedRegions);
-		}
-		results.addAll(queue);
+		// 2-1. these from 0
+		// 2-1. these from dense
+		// denseEnvelope: long&lat
+		// Envelope denseEnvelope = Cluster.cluster(granularityX, granularityY, partEnvelope, density, a);
+		// ArrayList<Envelope> partitionedRegions = Cluster.partition(partEnvelope, denseEnvelope);
+
+		// results.addAll(partitionedRegionsByZero);
+		ArrayList<Envelope> envelopeList = addEnvelopeListForNY();
+		// for 0
+		// Envelope partEnvelope = envelope;
+		Envelope partEnvelope = envelopeList.get(0);
+		logger.info("partEnvelope = " + partEnvelope);
+		ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope);
+		ArrayList<Envelope> zeroEnvelopeList = Cluster.clusterZero(granularityX, granularityY, partEnvelope, density, 1, 1);
+		results.addAll(zeroEnvelopeList);
+		// for dense
+//		 for (int i = 0; i < envelopeList.size(); i++) {
+//		 Envelope e = envelopeList.get(i);
+//		 ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, e);
+//		 Envelope denseEnvelope = Cluster.cluster(granularityX, granularityY, e, density, a);
+//		 ArrayList<Envelope> partitionedRegions = Cluster.partition(e, denseEnvelope);
+//		 results.add(denseEnvelope);
+//		 results.addAll(partitionedRegions);
+//		 }
+
 		// before writing, has changed to latitude & longitude
 		USDensity.writePartition(clusterRegionFile, results);
 	}
-	
-	
+
+	public static ArrayList<Envelope> addEnvelopeListForNY() {
+		//41.997399;-75.35259;40.477399;-73.24259
+		Envelope e4 = new Envelope(-75.35259, -73.24259, 40.477399, 41.997399);
+		ArrayList<Envelope> envelopeList = new ArrayList<Envelope>();
+		envelopeList.add(e4);
+		return envelopeList;
+	}
+
 	public static void forSkewedDB() {
 
 	}
@@ -198,9 +212,9 @@ public class USDensity {
 		int yBegin = (int) ((partEnvelope.getMinY() - wholeEnvelope.getMinY()) / granularityX);
 		int yEnd = (int) Math.ceil((partEnvelope.getMaxY() - wholeEnvelope.getMinY()) / granularityX) - 1;
 		int length = (int) (yEnd - yBegin) + 1;
-//		logger.info("yBegin = " + yBegin);
-//		logger.info("yEnd = " + yEnd);
-//		logger.info("aRow.length = " + densityAll.get(0).length);
+		// logger.info("yBegin = " + yBegin);
+		// logger.info("yEnd = " + yEnd);
+		// logger.info("aRow.length = " + densityAll.get(0).length);
 		for (int i = xBegin; i <= xEnd; i++) {
 			double[] aRow = densityAll.get(i);
 			double[] newARow = new double[length];

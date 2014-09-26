@@ -16,22 +16,23 @@ public class PartitionMain {
 		p.partitionNY();
 
 	}
-	
-	public void partitionNY(){
+
+	public void partitionNY() {
 		USDensity usDensity = new USDensity();
 		// computeDensityInEachGrids();
-		usDensity.forYahooNYOnlyDenses();
+		// usDensity.forYahooNYOnlyDenses();
+		usDensity.forYahooNYEmptyAndDenses();
 	}
-	
-	public void partitionSynthetic(){
+
+	public void partitionSynthetic() {
 		USDensity usDensity = new USDensity();
 		// computeDensityInEachGrids();
 		usDensity.forYahooNYOnlyDenses();
 		// forSkewedDB();
 	}
-	
-	public void partitionOKUT(){
-		// TODO 
+
+	public void partitionOKUT() {
+		// TODO
 	}
-	
+
 }
