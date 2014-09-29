@@ -69,7 +69,7 @@ public class USDensity {
 
 	private static boolean zipped = false;
 	private static final String ZIP_FOLDER_PATH = "../data-map/us-road/new-york/";
-	private static final String UN_ZIP_FOLDER_PATH = "../data-map/us-road/new-york-upzip/";
+	public static final String UN_ZIP_FOLDER_PATH = "../data-map/us-road/new-york-upzip/";
 
 	private static String densityFile = "../data-experiment/partition/densityMap-ny-0.01";
 	ArrayList<double[]> density;
