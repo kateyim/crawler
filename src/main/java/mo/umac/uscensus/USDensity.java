@@ -139,6 +139,7 @@ public class USDensity {
 	/**
 	 * First get rid the empty regions, then cluster from the densest region
 	 * 
+	 * By hand
 	 * 
 	 */
 	public void forYahooNYEmptyAndDenses() {
