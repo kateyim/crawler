@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import mo.umac.analytics.Cluster;
 import mo.umac.db.DBInMemory;
 import mo.umac.db.H2DB;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.Rating;
+import mo.umac.uscensus.Cluster;
 import mo.umac.uscensus.USDensity;
 
 import org.apache.log4j.xml.DOMConfigurator;

@@ -371,7 +371,7 @@ public class AlgoSlice extends Strategy {
 	 * @param middleLine
 	 * @param oneDimensionalResultSet
 	 * @param envelopeState
-	 * @param envelope
+	 * @param envelopeNY
 	 */
 	private void fillGaps(String state, int category, String query, LineSegment middleLine, LineSegment boardLine, ResultSetD1 oneDimensionalResultSet) {
 		if (logger.isDebugEnabled()) {

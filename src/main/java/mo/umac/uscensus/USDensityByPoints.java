@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import mo.umac.analytics.Cluster;
 import mo.umac.crawler.MainYahoo;
 import mo.umac.crawler.Strategy;
 import mo.umac.db.DBInMemory;

@@ -1,4 +1,4 @@
-package mo.umac.analytics;
+package mo.umac.uscensus;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -22,7 +22,7 @@ public class Cluster {
 	public static double granularityY;
 	public static ArrayList<double[]> density;
 	public static boolean[][] tag;
-	public static double EPSILON_A = 0.000001;
+//	public static double EPSILON_A = 0.000001;
 
 	public static Envelope cluster(double gX, double gY, Envelope e, ArrayList<double[]> d, double a) {
 		logger.info("clustering...");
@@ -522,7 +522,7 @@ public class Cluster {
 	 * Do not add the oneDenseRegion to the final results.
 	 * 
 	 * @param entireRegion
-	 * @param oneRegion
+	 * @param oneRegion: in the middle of the entireRegion, which means that it does not intersect with the boundaries
 	 * @return
 	 */
 	public static ArrayList<Envelope> partition(Envelope entireRegion, Envelope oneRegion) {
@@ -537,7 +537,8 @@ public class Cluster {
 		resultRegions.add(e4);
 		return resultRegions;
 	}
-
+	
+	
 	/**
 	 * @param entireRegion
 	 * @param denseRegionList

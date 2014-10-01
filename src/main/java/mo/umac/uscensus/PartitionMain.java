@@ -13,7 +13,7 @@ public class PartitionMain {
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		PartitionMain p = new PartitionMain();
-		p.partitionNY();
+		// p.partitionNY();
 
 	}
 
