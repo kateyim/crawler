@@ -23,17 +23,23 @@ import com.vividsolutions.jts.geom.Envelope;
 public class AlgoPartition extends Strategy {
 	public static Logger logger = Logger.getLogger(AlgoPartition.class.getName());
 
-	public static String clusterRegionFile;
+	public static String clusterRegionFile = null;
+	public static ArrayList<Envelope> mbrList = null;
 
 	public AlgoPartition() {
 		super();
-		logger.info("------------BlockCrawler------------");
+		logger.info("---------AlgoPartition------------");
 	}
 
 	@Override
 	public void crawl(String state, int category, String query, Envelope envelopeState) {
 		// ArrayList<Envelope> list = AlgoPartition.getOKEnvelopes();
-		ArrayList<Envelope> list = readPartitionedEnvelopes(clusterRegionFile);
+		ArrayList<Envelope> list;
+		if(clusterRegionFile != null && mbrList == null){
+			list = readPartitionedEnvelopes(clusterRegionFile);
+		} else {
+			list = mbrList; 
+		}
 		// painting
 		if (PaintShapes.painting) {
 			PaintShapes.paint.color = Color.RED;

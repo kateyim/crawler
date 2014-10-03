@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.geotools.data.shapefile.ShpFiles;
 import org.geotools.data.shapefile.shp.ShapefileException;
 import org.geotools.data.shapefile.shp.ShapefileReader;
+import org.openqa.selenium.net.EphemeralPortRangeDetector;
 
 import utils.FileOperator;
 
@@ -37,6 +38,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 public class USDensity {
 
 	public static Logger logger = Logger.getLogger(USDensity.class.getName());
+
+	private static double epsilon = 0.000001;
 
 	// NY: Env[-79.76259 : -71.777491, 40.477399 : 45.015865]
 	private static final double NYLatitudeMin = 40.477399;
@@ -93,7 +96,7 @@ public class USDensity {
 		USDensity.writeDensityToFile(density1, densityFile);
 		return density1;
 	}
-	
+
 	/**
 	 * Almost the same with computeDensityInEachGrids()
 	 * 
@@ -126,7 +129,7 @@ public class USDensity {
 	 * Read all roads in the .shp file.
 	 */
 	public static ArrayList<Coordinate[]> readRoad(String unzipFolderPath) {
-		logger.info("-----------read roads in " + unzipFolderPath);
+//		logger.info("-----------read roads in " + unzipFolderPath);
 		// //
 		// ArrayList<String> zipFileList = (ArrayList<String>) FileOperator
 		// .traverseFolder(zipFolderPath, ZIP_EXTENSION);
@@ -179,7 +182,7 @@ public class USDensity {
 	 * @return
 	 */
 	public static double[][] densityList(Envelope envelope, double granularityX, double granularityY, ArrayList<Coordinate[]> roadList) {
-		logger.info("-------------computing unit density-------------");
+//		logger.info("-------------computing unit density-------------");
 		double width = envelope.getWidth();
 		double height = envelope.getHeight();
 		double minX = envelope.getMinX();
@@ -188,8 +191,8 @@ public class USDensity {
 		// the number of grids, begin from 0;
 		int countX = (int) Math.ceil(width / granularityX);
 		int countY = (int) Math.ceil(height / granularityY);
-		logger.info("countX = " + countX);
-		logger.info("countY = " + countY);
+//		logger.info("countX = " + countX);
+//		logger.info("countY = " + countY);
 		// initialize to 0.0;
 		double[][] density = new double[countX][countY];
 		double totalLength = 0.0;
@@ -375,29 +378,33 @@ public class USDensity {
 	 * 
 	 * Begin from the densest region, then partition, iteration
 	 * 
+	 * 
 	 */
-	public static ArrayList<Envelope> partitionBasedOnDense(int numDense, double a, ArrayList<double[]> densityAll, Envelope envelope, double granularityX, double granularityY) {
+	public static ArrayList<Envelope> partitionBasedOnDense(int numDense, double a, double[][] densityAll, Envelope envelope, double granularityX,
+			double granularityY) {
 		// envelopeList: the real longitude & latitude (dividing by the gridsX and Y), not the number of grids
 		Queue<Envelope> queue = new LinkedList<Envelope>();
 		queue.add(envelopeNY);
 		ArrayList<Envelope> results = new ArrayList<Envelope>();
 		// only find the top densest in a region
-		// XXX
 		int findDense = 0;
-		while (!queue.isEmpty() && findDense < numDense) {
-			// TODO
+		while (!queue.isEmpty() && findDense <= numDense) {
 			Envelope partEnvelope = queue.poll();
-			ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope);
+			ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope, granularityX, granularityY);
+			boolean allZero = allZero(density);
+			if (allZero) {
+				results.add(partEnvelope);
+				continue;
+			}
 			// denseEnvelope: long&lat
 			Envelope denseEnvelope = Cluster.cluster(granularityX, granularityY, partEnvelope, density, a);
 			results.add(denseEnvelope);
+			findDense++;
 			ArrayList<Envelope> partitionedRegions = Cluster.partition(partEnvelope, denseEnvelope);
 
 			queue.addAll(partitionedRegions);
 		}
 		results.addAll(queue);
-		// before writing, has changed to latitude & longitude
-//		USDensity.writePartition(clusterRegionFile, results);
 		return results;
 	}
 
@@ -433,6 +440,37 @@ public class USDensity {
 	}
 
 	/**
+	 * Read parts of the densities from the density of the whole map
+	 * 
+	 * partEnvelope are real longitude and latitude
+	 * 
+	 * 
+	 * @param densityAll
+	 * @param partEnvelope
+	 * @return
+	 */
+	public static ArrayList<double[]> readPartOfDensity(double[][] densityAll, Envelope wholeEnvelope, Envelope partEnvelope, double granularityX, double granularityY) {
+		ArrayList<double[]> densityPart = new ArrayList<double[]>();
+		int xBegin = (int) ((partEnvelope.getMinX() - wholeEnvelope.getMinX()) / granularityX);
+		int xEnd = (int) Math.ceil((partEnvelope.getMaxX() - wholeEnvelope.getMinX()) / granularityX) - 1;
+		int yBegin = (int) ((partEnvelope.getMinY() - wholeEnvelope.getMinY()) / granularityX);
+		int yEnd = (int) Math.ceil((partEnvelope.getMaxY() - wholeEnvelope.getMinY()) / granularityX) - 1;
+		int length = (int) (yEnd - yBegin) + 1;
+//		logger.info("yBegin = " + yBegin);
+//		logger.info("yEnd = " + yEnd);
+//		logger.info("aRow.length = " + densityAll[0].length);
+		for (int i = xBegin; i <= xEnd; i++) {
+			double[] aRow = densityAll[i];
+			double[] newARow = new double[length];
+			for (int j = yBegin; j <= yEnd; j++) {
+				newARow[j - yBegin] = aRow[j];
+			}
+			densityPart.add(newARow);
+		}
+		return densityPart;
+	}
+
+	/**
 	 * cluster the regions, and then write to file
 	 * 
 	 * @param numDense
@@ -445,6 +483,25 @@ public class USDensity {
 		clusteredRegion = Cluster.clusterDensest(granularityX, granularityY, envelope, density, a, numDense);
 		// USDensity.writePartition(writingFileName, clusteredRegion);
 		return clusteredRegion;
+	}
+
+	/**
+	 * If the density of all grids are 0
+	 * 
+	 * @param density
+	 * @return
+	 */
+	private static boolean allZero(ArrayList<double[]> density) {
+		int length;
+		for (int i = 0; i < density.size(); i++) {
+			length = density.get(0).length;
+			for (int j = 0; j < length; j++) {
+				if (Math.abs(density.get(i)[j]) > epsilon) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	/**************************** End of CLusterings ********************************************/

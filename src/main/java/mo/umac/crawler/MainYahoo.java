@@ -1,5 +1,7 @@
 package mo.umac.crawler;
 
+import java.util.ArrayList;
+
 import mo.umac.db.DBInMemory;
 import mo.umac.uscensus.USDensity;
 import mo.umac.uscensus.UScensusData;
@@ -61,16 +63,77 @@ public class MainYahoo {
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		shutdownLogs(MainYahoo.debug);
 		/************************* Crawling Algorithm ***************************/
-		// Strategy crawlerStrategy = new AlgoSlice();
-		Strategy crawlerStrategy = new AlgoPartition();
-		AlgoPartition.clusterRegionFile = USDensity.clusterRegionFile;
-		// Strategy crawlerStrategy = new AlgoDCDT();
-		// AlgoDCDT.outerPoint = outerPointNY;
+		// // Strategy crawlerStrategy = new AlgoSlice();
+		// Strategy crawlerStrategy = new AlgoPartition();
+		// AlgoPartition.clusterRegionFile = USDensity.clusterRegionFile;
+		// // Strategy crawlerStrategy = new AlgoDCDT();
+		// // AlgoDCDT.outerPoint = outerPointNY;
+		// //
+		// Context crawlerContext = new Context(crawlerStrategy);
+		// /**********************************************************************/
+		// Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
+		// crawlerContext.callCrawlingSingle(state, categoryID, category, envelope);
+		/*************************Testing Parameters ***************************/
+		testingNY();
+		Strategy.endData();
+	}
+	
+	/**
+	 * Testing parameters for partitioning the NY
+	 * 
+	 * TODO record all results.
+	 * 
+	 */
+	public static void testingNY(){
+		logger.info("begin testing parameters in partition");
+		Envelope envelopeNY = USDensity.envelopeNY;
+		String unZipFolderPath = USDensity.UN_ZIP_FOLDER_PATH;
+		double granularityX = 0.01;
+		double granularityY = 0.01;
+		ArrayList<Envelope> mbrs; 
+		AlgoPartition.clusterRegionFile = null;
+		int currentCount = 0;
 		//
-		Context crawlerContext = new Context(crawlerStrategy);
-		/**********************************************************************/
-		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
-		crawlerContext.callCrawlingSingle(state, categoryID, category, envelope);
+		int minCount = Integer.MAX_VALUE;
+		double minGranularity = Double.MAX_VALUE;
+		double minAlpha = Double.MAX_VALUE;
+		int minNumDense = Integer.MAX_VALUE;
+		//
+		for (double granularity = 0.01; granularity <= 0.1; granularity = granularity + 0.01) {
+			logger.info("granularity = " + granularity);
+			granularityX = granularity;
+			granularityY = granularity;
+			// 1. grids
+			double[][] densityAll = USDensity.computeDensityInEachGrids(unZipFolderPath, envelope, granularityX, granularityY);
+			for (double alpha = 0.1; alpha <= 0.9; alpha = alpha + 0.1) {
+				logger.info("alpha = " + alpha);
+				for (int numDense = 1; numDense <= 100; numDense++) {
+					logger.info("numDense = " + numDense);
+					// 2. partitioned mbrs 
+					// FIXME 
+					mbrs = USDensity.partitionBasedOnDense(numDense, alpha, densityAll, envelopeNY, granularityX, granularityY);
+					// 3. calling the algorithm
+					// TODO loading data & clear data
+					Strategy crawlerStrategy = new AlgoPartition();
+					AlgoPartition.mbrList = mbrs;
+					//
+					Context crawlerContext = new Context(crawlerStrategy);
+					Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
+					currentCount = crawlerContext.callCrawlingSingle(state, categoryID, category, envelope);
+					if(currentCount < minCount){
+						minCount = currentCount;
+						minGranularity = granularity;
+						minAlpha = alpha;
+						minNumDense = numDense;
+					}
+				}
+			}
+		}
+		logger.info("-----------------------------");
+		logger.info("minCount = " + minCount);
+		logger.info("minGranularity = " + minGranularity);
+		logger.info("minAlpha = " + minAlpha);
+		logger.info("minNumDense = " + minNumDense);
 	}
 
 	/**
@@ -112,37 +175,7 @@ public class MainYahoo {
 		}
 	}
 	
-	/**
-	 * Testing parameters for partitioning the NY
-	 * 
-	 */
-	public void testingNY(){
-		Envelope envelopeNY = USDensity.envelopeNY;
-		String unZipFolderPath = USDensity.UN_ZIP_FOLDER_PATH;
-		double granularityX = 0.01;
-		double granularityY = 0.01;
-		for (double granularity = 0.01; granularity <= 0.1; granularity = granularity * 10) {
-			granularityX = granularity;
-			granularityY = granularity;
-			// 1. grids
-			double[][] density = USDensity.computeDensityInEachGrids(unZipFolderPath, envelope, granularityX, granularityY);
-			for (double alpha = 0.5; alpha <= 0.9; alpha = alpha + 0.1) {
-				USDensity.
-				for (int loop = 1; loop < 10; loop++) {
-					
-					
-				}
-				
-				
-			}
-			
-		}
-		
-		
-		
-		// 2. partition
-		// 3. run crawling algorithm with partitioned mbrs
-	}
+
 	
 
 }

@@ -236,20 +236,21 @@ public abstract class Strategy {
 
 	}
 
-	public void callCrawlingSingle(String state, int category, String query, Envelope envelope) {
+	public int callCrawlingSingle(String state, int category, String query, Envelope envelope) {
 		long before = System.currentTimeMillis();
-		logger.info("Start at : " + before);
+//		logger.info("Start at : " + before);
 		// load data from the external dataset
 		prepareData(query, state);
 		crawl(state, category, query, envelope);
-		endData();
+//		endData();
 		long after = System.currentTimeMillis();
-		logger.info("Stop at: " + after);
+//		logger.info("Stop at: " + after);
 		logger.info("time for crawling = " + (after - before) / 1000);
 		//
 		logger.info("countNumQueries = " + Strategy.countNumQueries);
 		logger.info("countCrawledPoints = " + Strategy.dbInMemory.poisIDs.size());
 		logger.info("Finished ! Oh ! Yeah! ");
+		return Strategy.countNumQueries;
 	}
 
 }

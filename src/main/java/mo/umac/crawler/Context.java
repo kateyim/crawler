@@ -23,7 +23,7 @@ public class Context {
 		this.crawlerStrategy.callCrawling(listNameStates, listCategoryNames);
 	}
 	
-	public void callCrawlingSingle(String state, int category, String query, Envelope envelope){
-		this.crawlerStrategy.callCrawlingSingle(state, category, query, envelope);
+	public int callCrawlingSingle(String state, int category, String query, Envelope envelope){
+		return this.crawlerStrategy.callCrawlingSingle(state, category, query, envelope);
 	}
 }
