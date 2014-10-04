@@ -99,15 +99,15 @@ public class MainYahoo {
 		double minAlpha = Double.MAX_VALUE;
 		int minNumDense = Integer.MAX_VALUE;
 		//
-		for (double granularity = 0.01; granularity <= 0.1; granularity = granularity + 0.01) {
+		for (double granularity = /*0.01*/0.09; granularity <= 0.1; granularity = granularity + 0.01) {
 			logger.info("granularity = " + granularity);
 			granularityX = granularity;
 			granularityY = granularity;
 			// 1. grids
 			double[][] densityAll = USDensity.computeDensityInEachGrids(unZipFolderPath, envelope, granularityX, granularityY);
-			for (double alpha = 0.1; alpha <= 0.9; alpha = alpha + 0.1) {
+			for (double alpha = /*0.1*/0.8; alpha <= 0.9; alpha = alpha + 0.1) {
 				logger.info("alpha = " + alpha);
-				for (int numDense = 1; numDense <= 100; numDense++) {
+				for (int numDense = /*1*/2; numDense <= /*100*/3; numDense++) {
 					logger.info("numDense = " + numDense);
 					// 2. partitioned mbrs 
 					// FIXME 

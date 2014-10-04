@@ -129,7 +129,7 @@ public class USDensity {
 	 * Read all roads in the .shp file.
 	 */
 	public static ArrayList<Coordinate[]> readRoad(String unzipFolderPath) {
-//		logger.info("-----------read roads in " + unzipFolderPath);
+		// logger.info("-----------read roads in " + unzipFolderPath);
 		// //
 		// ArrayList<String> zipFileList = (ArrayList<String>) FileOperator
 		// .traverseFolder(zipFolderPath, ZIP_EXTENSION);
@@ -182,7 +182,7 @@ public class USDensity {
 	 * @return
 	 */
 	public static double[][] densityList(Envelope envelope, double granularityX, double granularityY, ArrayList<Coordinate[]> roadList) {
-//		logger.info("-------------computing unit density-------------");
+		// logger.info("-------------computing unit density-------------");
 		double width = envelope.getWidth();
 		double height = envelope.getHeight();
 		double minX = envelope.getMinX();
@@ -191,8 +191,8 @@ public class USDensity {
 		// the number of grids, begin from 0;
 		int countX = (int) Math.ceil(width / granularityX);
 		int countY = (int) Math.ceil(height / granularityY);
-//		logger.info("countX = " + countX);
-//		logger.info("countY = " + countY);
+		// logger.info("countX = " + countX);
+		// logger.info("countY = " + countY);
 		// initialize to 0.0;
 		double[][] density = new double[countX][countY];
 		double totalLength = 0.0;
@@ -391,8 +391,10 @@ public class USDensity {
 		while (!queue.isEmpty() && findDense <= numDense) {
 			Envelope partEnvelope = queue.poll();
 			ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope, granularityX, granularityY);
-			boolean allZero = allZero(density);
+			int length = density.get(0).length;
+			boolean allZero = allZero(density, length);
 			if (allZero) {
+				logger.debug("allZero");
 				results.add(partEnvelope);
 				continue;
 			}
@@ -449,16 +451,17 @@ public class USDensity {
 	 * @param partEnvelope
 	 * @return
 	 */
-	public static ArrayList<double[]> readPartOfDensity(double[][] densityAll, Envelope wholeEnvelope, Envelope partEnvelope, double granularityX, double granularityY) {
+	public static ArrayList<double[]> readPartOfDensity(double[][] densityAll, Envelope wholeEnvelope, Envelope partEnvelope, double granularityX,
+			double granularityY) {
 		ArrayList<double[]> densityPart = new ArrayList<double[]>();
 		int xBegin = (int) ((partEnvelope.getMinX() - wholeEnvelope.getMinX()) / granularityX);
 		int xEnd = (int) Math.ceil((partEnvelope.getMaxX() - wholeEnvelope.getMinX()) / granularityX) - 1;
 		int yBegin = (int) ((partEnvelope.getMinY() - wholeEnvelope.getMinY()) / granularityX);
 		int yEnd = (int) Math.ceil((partEnvelope.getMaxY() - wholeEnvelope.getMinY()) / granularityX) - 1;
 		int length = (int) (yEnd - yBegin) + 1;
-//		logger.info("yBegin = " + yBegin);
-//		logger.info("yEnd = " + yEnd);
-//		logger.info("aRow.length = " + densityAll[0].length);
+		// logger.info("yBegin = " + yBegin);
+		// logger.info("yEnd = " + yEnd);
+		// logger.info("aRow.length = " + densityAll[0].length);
 		for (int i = xBegin; i <= xEnd; i++) {
 			double[] aRow = densityAll[i];
 			double[] newARow = new double[length];
@@ -491,12 +494,10 @@ public class USDensity {
 	 * @param density
 	 * @return
 	 */
-	private static boolean allZero(ArrayList<double[]> density) {
-		int length;
+	private static boolean allZero(ArrayList<double[]> density, int length) {
 		for (int i = 0; i < density.size(); i++) {
-			length = density.get(0).length;
 			for (int j = 0; j < length; j++) {
-				if (Math.abs(density.get(i)[j]) > epsilon) {
+				if (density.get(i)[j] != 0) {
 					return false;
 				}
 			}
