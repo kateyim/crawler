@@ -382,32 +382,60 @@ public class USDensity {
 	 */
 	public static ArrayList<Envelope> partitionBasedOnDense(int numDense, double a, double[][] densityAll, Envelope envelope, double granularityX,
 			double granularityY) {
+		logger.info(numDense + "; " + a + "; " + envelope.toString() + "; " + granularityX + "; " + granularityY);
 		// envelopeList: the real longitude & latitude (dividing by the gridsX and Y), not the number of grids
 		Queue<Envelope> queue = new LinkedList<Envelope>();
-		queue.add(envelopeNY);
+		queue.add(envelope);
 		ArrayList<Envelope> results = new ArrayList<Envelope>();
 		// only find the top densest in a region
 		int findDense = 0;
-		while (!queue.isEmpty() && findDense <= numDense) {
+		while (!queue.isEmpty() && findDense < numDense) {
 			Envelope partEnvelope = queue.poll();
+			logger.info("partEnvelope = " + partEnvelope.toString());
+
 			ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope, granularityX, granularityY);
-			int length = density.get(0).length;
-			boolean allZero = allZero(density, length);
+			boolean allZero = allZero(density);
+
 			if (allZero) {
-				logger.debug("allZero");
+				logger.info("allZero");
 				results.add(partEnvelope);
 				continue;
 			}
 			// denseEnvelope: long&lat
 			Envelope denseEnvelope = Cluster.cluster(granularityX, granularityY, partEnvelope, density, a);
+//			logger.info("dense envelope = " + denseEnvelope.toString());
 			results.add(denseEnvelope);
 			findDense++;
+			
+			
 			ArrayList<Envelope> partitionedRegions = Cluster.partition(partEnvelope, denseEnvelope);
+			// debug
+			for (int i = 0; i < partitionedRegions.size(); i++) {
+				Envelope e = partitionedRegions.get(i);
+//				logger.info(partitionToString(e));
+				boolean noArea = noArea(e);
+				if (!noArea) {
+					queue.add(e);
+				}
+			}
 
-			queue.addAll(partitionedRegions);
 		}
 		results.addAll(queue);
 		return results;
+	}
+
+	/**
+	 * 
+	 * whether the area of this envelope is 0. If yes, then there is no need to do further partition.
+	 * 
+	 * @param partEnvelope
+	 * @return
+	 */
+	private static boolean noArea(Envelope envelope) {
+		if (envelope.getArea() == 0) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -494,10 +522,31 @@ public class USDensity {
 	 * @param density
 	 * @return
 	 */
-	private static boolean allZero(ArrayList<double[]> density, int length) {
+	private static boolean allZero(ArrayList<double[]> density) {
+		int length = density.get(0).length;
+
 		for (int i = 0; i < density.size(); i++) {
 			for (int j = 0; j < length; j++) {
 				if (density.get(i)[j] != 0) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * If the density of all grids are 0
+	 * 
+	 * @param density
+	 * @return
+	 */
+	private static boolean allZero(double[][] density) {
+		int length = density[0].length;
+
+		for (int i = 0; i < density.length; i++) {
+			for (int j = 0; j < length; j++) {
+				if (density[i][j] != 0) {
 					return false;
 				}
 			}
@@ -614,6 +663,11 @@ public class USDensity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static String partitionToString(Envelope envelope) {
+		String s = envelope.getMinY() + ";" + envelope.getMinX() + ";" + envelope.getMaxY() + ";" + envelope.getMaxX();
+		return s;
 	}
 
 	public static ArrayList<Envelope> readPartition(String clusterRegionFile) {

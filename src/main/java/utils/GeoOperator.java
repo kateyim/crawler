@@ -112,7 +112,7 @@ public class GeoOperator {
 	 * @return
 	 */
 	public static List intersect(Circle circle, LineSegment lineSeg) {
-		logger.debug("--------------intersect------------");
+		//		logger.debug("--------------intersect------------");
 		List<Coordinate> list = new ArrayList<Coordinate>();
 		double a, b, c;
 		double bb4ac;
@@ -141,8 +141,8 @@ public class GeoOperator {
 		} else {
 			double mu1 = (-b - Math.sqrt(bb4ac)) / (2 * a);
 			double mu2 = (-b + Math.sqrt(bb4ac)) / (2 * a);
-			logger.debug("mu1 = " + mu1);
-			logger.debug("mu2 = " + mu2);
+//			logger.debug("mu1 = " + mu1);
+//			logger.debug("mu2 = " + mu2);
 			/**
 			 * Line segment doesn't intersect and on outside of sphere, in which case both values of u will either be less than 0 or greater than 1.
 			 **/
@@ -162,7 +162,7 @@ public class GeoOperator {
 				Coordinate p11 = new Coordinate();
 				p11.x = p1.x + mu1 * (p2.x - p1.x);
 				p11.y = p1.y + mu1 * (p2.y - p1.y);
-				logger.debug("p11 = " + p11);
+//				logger.debug("p11 = " + p11);
 				list.add(p11);
 			}
 			/**
@@ -173,10 +173,10 @@ public class GeoOperator {
 					Coordinate p12 = new Coordinate();
 					p12.x = p1.x + mu2 * (p2.x - p1.x);
 					p12.y = p1.y + mu2 * (p2.y - p1.y);
-					logger.debug("p12 = " + p12);
+//					logger.debug("p12 = " + p12);
 					list.add(p12);
 				} else {
-					logger.debug("mu2 == mu1");
+//					logger.debug("mu2 == mu1");
 				}
 			}
 			/**

@@ -1,6 +1,7 @@
 package mo.umac.crawler;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -48,9 +49,9 @@ public abstract class Strategy {
 
 	protected int zip = 0;
 
-	public static DBInMemory dbInMemory;
+	public static DBInMemory dbInMemory = null;
 
-	public static DBExternal dbExternal;
+	public static DBExternal dbExternal = null;
 
 	public static final double EPSILON = 0.00000001;
 
@@ -133,17 +134,30 @@ public abstract class Strategy {
 	public void prepareData(String category, String state) {
 		//
 		logger.info("preparing data...");
-		Strategy.categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);
-		// source database
-		Strategy.dbExternal = new H2DB(MainYahoo.DB_NAME_SOURCE, MainYahoo.DB_NAME_TARGET);
-		Strategy.dbInMemory = new DBInMemory();
-		// add at 2013-9-23
+		if (dbInMemory == null) {
+			Strategy.categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);
+			// source database
+			Strategy.dbExternal = new H2DB(MainYahoo.DB_NAME_SOURCE, MainYahoo.DB_NAME_TARGET);
+			Strategy.dbInMemory = new DBInMemory();
+			// add at 2013-9-23
+			Strategy.dbInMemory.poisCrawledTimes = new HashMap<Integer, Integer>();
+			Strategy.dbInMemory.readFromExtenalDB(category, state);
+			Strategy.dbInMemory.index();
+			logger.info("There are in total " + Strategy.dbInMemory.pois.size() + " points.");
+			// target database
+			Strategy.dbExternal.createTables(MainYahoo.DB_NAME_TARGET);
+		} else {
+			// data are already loaded into memory
+			clearData();
+			logger.info("There are in total " + Strategy.dbInMemory.pois.size() + " points.");
+		}
+	}
+	
+	private void clearData(){
+		Strategy.countNumQueries = 0;
 		Strategy.dbInMemory.poisCrawledTimes = new HashMap<Integer, Integer>();
-		Strategy.dbInMemory.readFromExtenalDB(category, state);
-		Strategy.dbInMemory.index();
-		logger.info("There are in total " + Strategy.dbInMemory.pois.size() + " points.");
-		// target database
-		Strategy.dbExternal.createTables(MainYahoo.DB_NAME_TARGET);
+		Strategy.dbInMemory.poisIDs = new HashSet<Integer>();
+
 	}
 
 	/*
@@ -238,13 +252,13 @@ public abstract class Strategy {
 
 	public int callCrawlingSingle(String state, int category, String query, Envelope envelope) {
 		long before = System.currentTimeMillis();
-//		logger.info("Start at : " + before);
+		// logger.info("Start at : " + before);
 		// load data from the external dataset
 		prepareData(query, state);
 		crawl(state, category, query, envelope);
-//		endData();
+		// endData();
 		long after = System.currentTimeMillis();
-//		logger.info("Stop at: " + after);
+		// logger.info("Stop at: " + after);
 		logger.info("time for crawling = " + (after - before) / 1000);
 		//
 		logger.info("countNumQueries = " + Strategy.countNumQueries);

@@ -28,7 +28,7 @@ public class AlgoSlice extends Strategy {
 
 	public AlgoSlice() {
 		super();
-		logger.info("------------SliceCrawler------------");
+//		logger.info("------------SliceCrawler------------");
 	}
 
 	/*
@@ -41,8 +41,7 @@ public class AlgoSlice extends Strategy {
 	@Override
 	public void crawl(String state, int category, String query, Envelope envelope) {
 		if (logger.isDebugEnabled()) {
-			logger.info("------------crawling---------");
-			logger.info(envelope.toString());
+			logger.info("------------crawling---------" + envelope.toString());
 		}
 		// finished crawling
 		if (envelope == null) {
