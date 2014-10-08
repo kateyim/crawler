@@ -355,7 +355,7 @@ public class CrawlerD1 extends Strategy {
 		}
 		//
 		addResults(center, middleLine, finalResultSet, resultSet);
-		if (radiusProject > middleLine.getLength() / 2) {
+		if (radiusProject >= middleLine.getLength() / 2) {
 			// finished crawling
 			return finalResultSet;
 		}

@@ -55,9 +55,9 @@ public class AlgoProjection extends Strategy {
 		sortingCircles(oneDimensionalResultSet);
 
 		double distanceX = distanceCovered(envelope, oneDimensionalResultSet);
-		if (distanceX > (envelope.getMaxX() - envelope.getMinX()) / 2) {
+		if (distanceX >= (envelope.getMaxX() - envelope.getMinX()) / 2) {
 			return;
-		} 
+		}
 		double middle = middleLine.p0.x;
 		if (logger.isDebugEnabled()) {
 			Envelope coveredE = new Envelope(middle - distanceX, middle + distanceX, envelope.getMinY(), envelope.getMaxY());
@@ -78,8 +78,7 @@ public class AlgoProjection extends Strategy {
 			crawl(state, category, query, rightRemainedEnvelope);
 		}
 	}
-	
-	
+
 	/**
 	 * sorting these circles according to the y-value
 	 * 
@@ -115,8 +114,6 @@ public class AlgoProjection extends Strategy {
 			return center1.compareTo(center2);
 		}
 	}
-
-
 
 	/**
 	 * Compute the farthest distance (in the x-axis) of the covered region of
@@ -189,6 +186,5 @@ public class AlgoProjection extends Strategy {
 		LineSegment middleLine = new LineSegment(x, y0, x, y1);
 		return middleLine;
 	}
-
 
 }

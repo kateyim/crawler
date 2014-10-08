@@ -156,7 +156,7 @@ public class Analyse {
 	public void readLogPartitionParameters(String fileName, String answerFile) {
 		ArrayList<String> answerList = new ArrayList<String>();
 		String granularity1 = "granularity = 0.02";
-		String granularity2 = "granularity = 0.03";
+		String granularity2 = "granularity = 0.00";
 		String alpha = "alpha";
 		String numDense = "numDense";
 		String countNumQueries = "countNumQueries";

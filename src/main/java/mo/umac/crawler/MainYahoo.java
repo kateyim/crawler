@@ -27,7 +27,7 @@ public class MainYahoo {
 	public final static String DB_NAME_CRAWL = "../data-experiment/datasets";
 
 	public static boolean debug = false;
-	private static int topK = 100;
+	private static int topK = 500;
 
 	/******** synthetic dataset ********/
 	// public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ny-prun";
@@ -37,7 +37,7 @@ public class MainYahoo {
 	private static String category = "Restaurants";
 	private static String state = "NY";
 	private static int categoryID = 96926236;
-	public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun";
+	public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun-4";
 
 	/******** UT ********/
 	// private static Envelope envelope = new Envelope(-114.052998, -109.04105799999999, 36.997949, 42.001618);
@@ -75,9 +75,48 @@ public class MainYahoo {
 		// Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
 		// crawlerContext.callCrawlingSingle(state, categoryID, category, envelope);
 		/************************* Testing Parameters ***************************/
-		testingNY();
+		// testingNY();
 		// debuggingTestNY();
+		nyPartition();
 		Strategy.endData();
+	}
+
+	public static void nyPartition() {
+		logger.info("begin testing parameters in partition");
+		Envelope envelopeNY = USDensity.envelopeNY;
+		String unZipFolderPath = USDensity.UN_ZIP_FOLDER_PATH;
+		double granularityX = 0;
+		double granularityY = 0;
+		ArrayList<Envelope> mbrs;
+		AlgoPartition.clusterRegionFile = null;
+		//
+		double granularity = 0.02;
+		double alpha = 0.3;
+		int numDense = 37;
+		//
+//		double granularity = 0.5;
+//		double alpha = 0.3;
+//		int numDense = 2;
+		//
+		granularityX = granularity;
+		granularityY = granularity;
+		// 1. grids
+		double[][] densityAll = USDensity.computeDensityInEachGrids(unZipFolderPath, envelopeNY, granularityX, granularityY);
+
+		// 2. partitioned mbrs
+		mbrs = USDensity.partitionBasedOnDense(numDense, alpha, densityAll, envelopeNY, granularityX, granularityY);
+		// debug
+		for (int j = 0; j < mbrs.size(); j++) {
+			Envelope e = mbrs.get(j);
+			System.out.println(USDensity.partitionToString(e));
+		}
+		//
+		// 3. calling the algorithm
+		Strategy crawlerStrategy = new AlgoPartition();
+		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
+		AlgoPartition.mbrList = mbrs;
+		Context crawlerContext = new Context(crawlerStrategy);
+		crawlerContext.callCrawlingSingle(state, categoryID, category, envelopeNY);
 	}
 
 	/**
@@ -101,23 +140,23 @@ public class MainYahoo {
 		double minAlpha = Double.MAX_VALUE;
 		int minNumDense = Integer.MAX_VALUE;
 		//
-		for (double granularity = 0.01; granularity <= 0.01; granularity = granularity + 0.01) {
+		for (double granularity = 0.01; granularity <= 0.1; granularity = granularity + 0.01) {
 			logger.info("granularity = " + granularity);
 			granularityX = granularity;
 			granularityY = granularity;
 			// 1. grids
 			double[][] densityAll = USDensity.computeDensityInEachGrids(unZipFolderPath, envelopeNY, granularityX, granularityY);
 
-			for (double alpha = 0.5; alpha <= 0.5; alpha = alpha + 0.1) {
+			for (double alpha = 0.3; alpha <= 0.3; alpha = alpha + 0.1) {
 				logger.info("alpha = " + alpha);
-				for (int numDense = 6; numDense <= 20; numDense++) {
+				for (int numDense = 37; numDense <= 37; numDense++) {
 					logger.info("numDense = " + numDense);
 					// 2. partitioned mbrs
 					mbrs = USDensity.partitionBasedOnDense(numDense, alpha, densityAll, envelopeNY, granularityX, granularityY);
 					// debug
 					// for (int j = 0; j < mbrs.size(); j++) {
 					// Envelope e = mbrs.get(j);
-					// logger.info(USDensity.partitionToString(e));
+					// System.out.println(USDensity.partitionToString(e));
 					// }
 					//
 					// 3. calling the algorithm
