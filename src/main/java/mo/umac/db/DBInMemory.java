@@ -119,6 +119,7 @@ public class DBInMemory {
 		ResultSetD2 resultSet = queryByID(resultsID);
 		resultSet.setTotalResultsReturned(resultsID.size());
 
+		// revised at 2014-10-08
 		writeToExternalDB(queryID, qc, resultSet);
 
 		if (logger.isDebugEnabled()) {

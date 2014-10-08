@@ -1,11 +1,11 @@
 package utils;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
 import mo.umac.crawler.AlgoDCDT;
-import mo.umac.crawler.AlgoDCDTTest;
 import mo.umac.crawler.Strategy;
 import mo.umac.kallmann.cdt.Vector2d;
 import mo.umac.spatial.Circle;

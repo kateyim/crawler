@@ -1260,4 +1260,22 @@ public class H2DB extends DBExternal {
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void clear(String dbName) {
+		try {
+			Connection conn = getConnection(dbName);
+			Statement stat = conn.createStatement();
+			
+			stat.execute(sqlDeleteQueryTable);
+			stat.execute(sqlDeleteItemTable);
+			stat.execute(sqlDeleteCategoryTable);
+			stat.execute(sqlDeleteRelationshipTable);
+			//
+			stat.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
 }

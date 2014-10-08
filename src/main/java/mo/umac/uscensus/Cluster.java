@@ -22,10 +22,11 @@ public class Cluster {
 	public static double granularityY;
 	public static ArrayList<double[]> density;
 	public static boolean[][] tag;
-//	public static double EPSILON_A = 0.000001;
+
+	// public static double EPSILON_A = 0.000001;
 
 	public static Envelope cluster(double gX, double gY, Envelope e, ArrayList<double[]> d, double a) {
-		logger.info("clustering...");
+//		logger.info("clustering...");
 		density = d;
 		envelope = e;
 		granularityX = gX;
@@ -44,7 +45,9 @@ public class Cluster {
 			logger.debug("density = " + getDensity(seed));
 		}
 		Envelope denseGrid = expandFromMiddle(seed, a);
+		logger.debug("denseGrid = " + denseGrid);
 		Envelope denseRegion = converseEnvelope(denseGrid);
+		logger.debug("denseRegion = " + denseRegion);
 		//
 		return denseRegion;
 	}
@@ -486,6 +489,19 @@ public class Cluster {
 		double x2 = envelope.getMinX() + (denseGrid.getMaxX() + 1) * granularityX;
 		double y1 = envelope.getMinY() + denseGrid.getMinY() * granularityY;
 		double y2 = envelope.getMinY() + (denseGrid.getMaxY() + 1) * granularityY;
+		// reach to the maximum grid
+		if (x1 > envelope.getMaxX()) {
+			x1 = envelope.getMaxX();
+		}
+		if (x2 > envelope.getMaxX()) {
+			x2 = envelope.getMaxX();
+		}
+		if (y1 > envelope.getMaxY()) {
+			y1 = envelope.getMaxY();
+		}
+		if (y2 > envelope.getMaxY()) {
+			y2 = envelope.getMaxY();
+		}
 		Envelope envelope = new Envelope(x1, x2, y1, y2);
 		return envelope;
 	}
@@ -522,7 +538,8 @@ public class Cluster {
 	 * Do not add the oneDenseRegion to the final results.
 	 * 
 	 * @param entireRegion
-	 * @param oneRegion: in the middle of the entireRegion, which means that it does not intersect with the boundaries
+	 * @param oneRegion
+	 *            : in the middle of the entireRegion, which means that it does not intersect with the boundaries
 	 * @return
 	 */
 	public static ArrayList<Envelope> partition(Envelope entireRegion, Envelope oneRegion) {
@@ -537,8 +554,7 @@ public class Cluster {
 		resultRegions.add(e4);
 		return resultRegions;
 	}
-	
-	
+
 	/**
 	 * @param entireRegion
 	 * @param denseRegionList

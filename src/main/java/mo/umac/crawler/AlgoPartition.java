@@ -40,6 +40,7 @@ public class AlgoPartition extends Strategy {
 			list = readPartitionedEnvelopes(clusterRegionFile);
 			
 		} else {
+//			logger.info("reading mbrList from a list");
 			list = mbrList; 
 		}
 		// painting
@@ -53,9 +54,10 @@ public class AlgoPartition extends Strategy {
 		}
 		for (int i = 0; i < list.size(); i++) {
 			Envelope envelope = list.get(i);
-			AlgoSlice sc = new AlgoSlice();
+//			AlgoSlice sc = new AlgoSlice();
+			AlgoProjection sc = new AlgoProjection();
 			sc.crawl(state, category, query, envelope);
-			logger.info("crawling " + envelope + ": " + Strategy.countNumQueries);
+//			logger.info("crawling " + envelope + ": " + Strategy.countNumQueries);
 		}
 
 	}

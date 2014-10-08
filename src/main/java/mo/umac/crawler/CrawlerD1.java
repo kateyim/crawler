@@ -28,7 +28,7 @@ import com.vividsolutions.jts.geomgraph.Position;
  */
 public class CrawlerD1 extends Strategy {
 
-//	public static Logger logger = Logger.getLogger(CrawlerD1.class.getName());
+	// public static Logger logger = Logger.getLogger(CrawlerD1.class.getName());
 
 	public static ResultSetD1 oneDimCrawl(String state, int category, String query, LineSegment middleLine) {
 		ResultSetD1 finalResultSet = new ResultSetD1();
@@ -332,6 +332,66 @@ public class CrawlerD1 extends Strategy {
 	public void crawl(String state, int category, String query, Envelope envelopeState) {
 		// TODO Auto-generated method stub
 
+	}
+
+	public static ResultSetD1 oneDimCrawlProject(String state, int category, String query, LineSegment middleLine) {
+		ResultSetD1 finalResultSet = new ResultSetD1();
+		Coordinate up = middleLine.p0;
+		Coordinate down = middleLine.p1;
+		Coordinate center = middleLine.midPoint();
+		AQuery aQuery = new AQuery(center, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
+		ResultSetD2 resultSet = query(aQuery);
+		//
+		Coordinate farthestCoordinate = farthest(resultSet);
+		double radius = center.distance(farthestCoordinate);
+		//
+		double radiusProject = farthestProject(resultSet, center);
+		Circle aCircle = new Circle(center, radius);
+		resultSet.addACircle(aCircle);
+		if (logger.isDebugEnabled() && PaintShapes.painting) {
+			PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+			PaintShapes.paint.addCircle(aCircle);
+			PaintShapes.paint.myRepaint();
+		}
+		//
+		addResults(center, middleLine, finalResultSet, resultSet);
+		if (radiusProject > middleLine.getLength() / 2) {
+			// finished crawling
+			return finalResultSet;
+		}
+
+		// recursively crawl
+		// upper
+		// Coordinate newRight = middleLine.pointAlongOffset(0.5, -radius);
+		Coordinate newDown = newDown(center, radiusProject);
+		LineSegment upperLine = new LineSegment(up, newDown);
+		ResultSetD1 newLeftResultSet = oneDimCrawlProject(state, category, query, upperLine);
+		addResults(finalResultSet, newLeftResultSet);
+		// lower
+		// Coordinate newLeft = middleLine.pointAlongOffset(0.5, radius);
+		Coordinate newUp = newUp(center, radiusProject);
+		LineSegment lowerLine = new LineSegment(newUp, down);
+		ResultSetD1 newRightResultSet = oneDimCrawlProject(state, category, query, lowerLine);
+		addResults(finalResultSet, newRightResultSet);
+
+		return finalResultSet;
+	}
+
+	private static double farthestProject(ResultSetD2 resultSet, Coordinate center) {
+		double maxRadius = 0;
+		int size = resultSet.getPOIs().size();
+		if (size == 0) {
+			return 0;
+		}
+		for (int i = 0; i < size; i++) {
+			APOI poi = resultSet.getPOIs().get(i);
+			double tempRadius = Math.abs(poi.getCoordinate().y - center.y);
+			if(tempRadius > maxRadius){
+				maxRadius = tempRadius;
+			}
+			
+		}
+		return maxRadius;
 	}
 
 }

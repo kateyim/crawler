@@ -382,7 +382,7 @@ public class USDensity {
 	 */
 	public static ArrayList<Envelope> partitionBasedOnDense(int numDense, double a, double[][] densityAll, Envelope envelope, double granularityX,
 			double granularityY) {
-		logger.info(numDense + "; " + a + "; " + envelope.toString() + "; " + granularityX + "; " + granularityY);
+		// logger.info(numDense + "; " + a + "; " + envelope.toString() + "; " + granularityX + "; " + granularityY);
 		// envelopeList: the real longitude & latitude (dividing by the gridsX and Y), not the number of grids
 		Queue<Envelope> queue = new LinkedList<Envelope>();
 		queue.add(envelope);
@@ -391,31 +391,32 @@ public class USDensity {
 		int findDense = 0;
 		while (!queue.isEmpty() && findDense < numDense) {
 			Envelope partEnvelope = queue.poll();
-			logger.info("partEnvelope = " + partEnvelope.toString());
+//			logger.info("partEnvelope = " + partEnvelope.toString());
 
 			ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope, granularityX, granularityY);
 			boolean allZero = allZero(density);
 
 			if (allZero) {
-				logger.info("allZero");
+//				logger.info("allZero");
 				results.add(partEnvelope);
 				continue;
 			}
 			// denseEnvelope: long&lat
 			Envelope denseEnvelope = Cluster.cluster(granularityX, granularityY, partEnvelope, density, a);
-//			logger.info("dense envelope = " + denseEnvelope.toString());
+			// logger.info("dense envelope = " + denseEnvelope.toString());
 			results.add(denseEnvelope);
 			findDense++;
-			
-			
+
 			ArrayList<Envelope> partitionedRegions = Cluster.partition(partEnvelope, denseEnvelope);
 			// debug
 			for (int i = 0; i < partitionedRegions.size(); i++) {
 				Envelope e = partitionedRegions.get(i);
-//				logger.info(partitionToString(e));
+				// logger.info(partitionToString(e));
 				boolean noArea = noArea(e);
 				if (!noArea) {
 					queue.add(e);
+				} else {
+					// logger.info("no area");
 				}
 			}
 

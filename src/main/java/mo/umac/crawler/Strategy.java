@@ -133,8 +133,9 @@ public abstract class Strategy {
 	 */
 	public void prepareData(String category, String state) {
 		//
-		logger.info("preparing data...");
+		// logger.info("preparing data...");
 		if (dbInMemory == null) {
+			// logger.info("dbInMemory == null");
 			Strategy.categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);
 			// source database
 			Strategy.dbExternal = new H2DB(MainYahoo.DB_NAME_SOURCE, MainYahoo.DB_NAME_TARGET);
@@ -148,15 +149,18 @@ public abstract class Strategy {
 			Strategy.dbExternal.createTables(MainYahoo.DB_NAME_TARGET);
 		} else {
 			// data are already loaded into memory
+			// logger.info("dbInMemory != null");
 			clearData();
-			logger.info("There are in total " + Strategy.dbInMemory.pois.size() + " points.");
+			// logger.info("There are in total " + Strategy.dbInMemory.pois.size() + " points.");
 		}
 	}
-	
-	private void clearData(){
+
+	private void clearData() {
 		Strategy.countNumQueries = 0;
 		Strategy.dbInMemory.poisCrawledTimes = new HashMap<Integer, Integer>();
 		Strategy.dbInMemory.poisIDs = new HashSet<Integer>();
+		Strategy.rtreeRectangles = new MyRTree();
+		Strategy.dbExternal.createTables(MainYahoo.DB_NAME_TARGET);
 
 	}
 
@@ -166,6 +170,8 @@ public abstract class Strategy {
 	 * @see mo.umac.crawler.YahooLocalCrawlerStrategy#endData() shut down the connection
 	 */
 	protected static void endData() {
+		// clear target db
+		dbExternal.clear(MainYahoo.DB_NAME_TARGET);
 		DBExternal.distroyConn();
 	}
 
@@ -259,7 +265,7 @@ public abstract class Strategy {
 		// endData();
 		long after = System.currentTimeMillis();
 		// logger.info("Stop at: " + after);
-		logger.info("time for crawling = " + (after - before) / 1000);
+		// logger.info("time for crawling = " + (after - before) / 1000);
 		//
 		logger.info("countNumQueries = " + Strategy.countNumQueries);
 		logger.info("countCrawledPoints = " + Strategy.dbInMemory.poisIDs.size());

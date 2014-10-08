@@ -75,4 +75,6 @@ public abstract class DBExternal {
 		}
 	}
 
+	public abstract void clear(String dbName);
+
 }

@@ -8,8 +8,6 @@ import mo.umac.metadata.APOI;
 import mo.umac.metadata.ResultSetD1;
 import mo.umac.spatial.Circle;
 
-import org.apache.log4j.Logger;
-
 import paint.PaintShapes;
 import utils.GeoOperator;
 
@@ -28,11 +26,12 @@ public class AlgoSlice extends Strategy {
 
 	public AlgoSlice() {
 		super();
-//		logger.info("------------SliceCrawler------------");
+		// logger.info("------------SliceCrawler------------");
 	}
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see
 	 * mo.umac.crawler.OfflineYahooLocalCrawlerStrategy#crawl(java.lang.String,
 	 * int, java.lang.String, com.vividsolutions.jts.geom.Envelope)
@@ -41,7 +40,7 @@ public class AlgoSlice extends Strategy {
 	@Override
 	public void crawl(String state, int category, String query, Envelope envelope) {
 		if (logger.isDebugEnabled()) {
-			logger.info("------------crawling---------" + envelope.toString());
+			logger.info("------------SliceCrawler---------" + envelope.toString());
 		}
 		// finished crawling
 		if (envelope == null) {
@@ -150,14 +149,14 @@ public class AlgoSlice extends Strategy {
 		if (envelopeStateECEF == null) {
 			return;
 		}
+		// revised at 2014-10-7
 		if (covered(envelopeStateECEF)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("This region has been covered");
 			}
 			return;
 		}
-		// first find the middle line, and then use the 1 dimensional method to
-		// issue queries on this line.
+		// first find the middle line, and then use the 1 dimensional method to issue queries on this line.
 		LineSegment middleLine = middleLine(envelopeStateECEF);
 		//
 		if (logger.isDebugEnabled()) {
@@ -187,7 +186,7 @@ public class AlgoSlice extends Strategy {
 			}
 			Strategy.rtreeRectangles.addRectangle(rectangleId++, envelopeStateECEF);
 			return;
-		} else {
+		} else { 
 			double middle = middleLine.p0.x;
 			Envelope envelopeDistanceX = new Envelope(middle - distanceX, middle + distanceX, envelopeStateECEF.getMinY(), envelopeStateECEF.getMaxY());
 			if (logger.isDebugEnabled()) {
@@ -400,7 +399,8 @@ public class AlgoSlice extends Strategy {
 			Circle circle = circles.get(i);
 			List<Coordinate> list = GeoOperator.intersect(circle, boardLine);
 			if (logger.isDebugEnabled()) {
-				logger.debug("intersection of circle: " + circle.getCenter().toString() + ", " + circle.getRadius() + " with line: " + boardLine.toString() + " is: ");
+				logger.debug("intersection of circle: " + circle.getCenter().toString() + ", " + circle.getRadius() + " with line: " + boardLine.toString()
+						+ " is: ");
 				if (list == null) {
 					logger.error("not intersect with a circle");
 				} else {

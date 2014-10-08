@@ -30,8 +30,8 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class MainSynthetic extends Strategy {
 
-	private static String source = "../data-experiment/synthetic/skew-1000-0.3";
-	// private static String source = "../data-experiment/synthetic/uniform-2000";
+	// private static String source = "../data-experiment/synthetic/skew-1000-0.3";
+	private static String source = "../data-experiment/synthetic/uniform-2000";
 	private static String target = "../data-experiment/synthetic/target";
 	private static int n = 1000;
 	private int topK = 10;
@@ -52,8 +52,8 @@ public class MainSynthetic extends Strategy {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		boolean debug = true;
-		PaintShapes.painting = true;
+		boolean debug = false;
+		PaintShapes.painting = false;
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		MainSynthetic test = new MainSynthetic();
@@ -160,9 +160,10 @@ public class MainSynthetic extends Strategy {
 		/************************* Change these lines *************************/
 		Strategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 		/** switch algorithms */
-//		 AlgoSlice crawler = new AlgoSlice();
-		AlgoPartition crawler = new AlgoPartition();
-		AlgoPartition.clusterRegionFile = clusterRegionFile;
+		// AlgoSlice crawler = new AlgoSlice();
+		AlgoProjection crawler = new AlgoProjection();
+		// AlgoPartition crawler = new AlgoPartition();
+		// AlgoPartition.clusterRegionFile = clusterRegionFile;
 		// AlgoDCDT crawler = new AlgoDCDT();
 		// AlgoDCDT.outerPoint = new Coordinate(-100, -100);
 		//
@@ -174,7 +175,7 @@ public class MainSynthetic extends Strategy {
 		Strategy.dbInMemory = new DBInMemory();
 		Strategy.dbInMemory.pois = readFromGeneratedDB(source);
 		Strategy.dbInMemory.index();
-		Strategy.dbExternal.createTables(target);
+//		Strategy.dbExternal.createTables(target);
 		crawler.crawl(state, categoryID, category, envelope);
 		//
 		logger.info("Finished ! Oh ! Yeah! ");
