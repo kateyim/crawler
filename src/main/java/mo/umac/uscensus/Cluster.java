@@ -40,14 +40,19 @@ public class Cluster {
 		initTag();
 		// seed : grid number
 		Coordinate seed = getTheDensest();
-		if (logger.isDebugEnabled()) {
-			logger.debug("seed = " + seed.toString());
-			logger.debug("density = " + getDensity(seed));
-		}
+		// debugging
+//		System.out.println("seed = " + seed.toString());
+//		System.out.println("density = " + getDensity(seed));
+//		Envelope seedEnvelopeGrid = new Envelope(seed.x-1, seed.x, seed.y-1, seed.y);
+//		Envelope seedEnvelope = converseEnvelope(seedEnvelopeGrid);
+//		System.out.println("seedEnvelope = " + USDensity.partitionToString(seedEnvelope));
+		
+		
 		Envelope denseGrid = expandFromMiddle(seed, a);
-		logger.debug("denseGrid = " + denseGrid);
 		Envelope denseRegion = converseEnvelope(denseGrid);
-		logger.debug("denseRegion = " + denseRegion);
+		
+		// System.out.println("denseGrid = " + denseGrid);
+		// System.out.println("denseRegion = " + USDensity.partitionToString(denseRegion));
 		//
 		return denseRegion;
 	}

@@ -32,7 +32,7 @@ public class PartitionMain {
 	}
 
 	public void partitionOKUT() {
-		// TODO
+		
 	}
 
 }

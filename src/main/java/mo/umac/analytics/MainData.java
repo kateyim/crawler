@@ -65,10 +65,15 @@ public class MainData {
 		// m.examData(dbName);
 
 		// for sample: reduce the size of yahoo/ut/ok
-		String dbNameFull = "../data-experiment/yahoo/ut-prun";
-		String dbNameSample = "../data-experiment/yahoo/ut-prun-2";
-		int factor = 2;
-		m.sample(dbNameFull, dbNameSample, factor);
+//		String dbNameFull = "../data-experiment/yahoo/ut-prun";
+//		String dbNameSample = "../data-experiment/yahoo/ut-prun-testing";
+		String dbNameFull = "../data-experiment/yahoo/ok-prun";
+		String dbNameSample = "../data-experiment/yahoo/ok-prun-testing";
+		// int factor = 2;
+		// m.sample(dbNameFull, dbNameSample, factor);
+		int divident = 4;
+		int divisor = 1;
+		m.sample(dbNameFull, dbNameSample, divisor, divident);
 
 		DBExternal.distroyConn();
 		// m.prunPoisFile();
@@ -302,6 +307,16 @@ public class MainData {
 	public void sample(String dbNameSource, String dbNameSample, int factor) {
 		H2DB h2 = new H2DB(dbNameSource, dbNameSample);
 		h2.sample(factor);
+
+		int c1 = h2.count(dbNameSource, "ITEM");
+		System.out.println("dbNameSource = " + c1);
+		int c2 = h2.count(dbNameSample, "ITEM");
+		System.out.println("dbNameSample = " + c2);
+	}
+
+	public void sample(String dbNameSource, String dbNameSample, int divisor, int divident) {
+		H2DB h2 = new H2DB(dbNameSource, dbNameSample);
+		h2.sample(divisor, divident);
 
 		int c1 = h2.count(dbNameSource, "ITEM");
 		System.out.println("dbNameSource = " + c1);

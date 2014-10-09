@@ -14,8 +14,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Map.Entry;
+
+import mo.umac.crawler.Strategy;
+import mo.umac.db.DBInMemory;
+import mo.umac.metadata.APOI;
 
 import org.apache.log4j.Logger;
 import org.geotools.data.shapefile.ShpFiles;
@@ -23,6 +30,7 @@ import org.geotools.data.shapefile.shp.ShapefileException;
 import org.geotools.data.shapefile.shp.ShapefileReader;
 import org.openqa.selenium.net.EphemeralPortRangeDetector;
 
+import paint.PaintShapes;
 import utils.FileOperator;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -87,7 +95,7 @@ public class USDensity {
 	 * 
 	 * 
 	 */
-	public static double[][] computeDensityInEachGrids() {
+	public static double[][] computeDensityInEachGridsByRoads() {
 		if (zipped) {
 			USDensity.unzip(ZIP_FOLDER_PATH, UN_ZIP_FOLDER_PATH);
 		}
@@ -98,7 +106,7 @@ public class USDensity {
 	}
 
 	/**
-	 * Almost the same with computeDensityInEachGrids()
+	 * Almost the same with computeDensityInEachGridsByRoads()
 	 * 
 	 * @param unZipFolderPath
 	 * @param envelope
@@ -106,9 +114,14 @@ public class USDensity {
 	 * @param granularityY
 	 * @return
 	 */
-	public static double[][] computeDensityInEachGrids(String unZipFolderPath, Envelope envelope, double granularityX, double granularityY) {
+	public static double[][] computeDensityInEachGridsByRoads(String unZipFolderPath, Envelope envelope, double granularityX, double granularityY) {
 		ArrayList<Coordinate[]> roadList = USDensity.readRoad(unZipFolderPath);
 		double[][] density = densityList(envelope, granularityX, granularityY, roadList);
+		return density;
+	}
+
+	public static double[][] computeDensityInEachGridsByPoints(HashMap<Integer, APOI> pois, Envelope envelope, double granularityX, double granularityY) {
+		double[][] density = densityList(envelope, granularityX, granularityY, pois);
 		return density;
 	}
 
@@ -369,6 +382,38 @@ public class USDensity {
 		return density;
 	}
 
+	private static double[][] densityList(Envelope envelope, double granularityX, double granularityY, HashMap<Integer, APOI> pois) {
+		// logger.info("-------------computing unit density-------------");
+		double width = envelope.getWidth();
+		double height = envelope.getHeight();
+		double minX = envelope.getMinX();
+		double minY = envelope.getMinY();
+
+		// the number of grids, begin from 0;
+		int countX = (int) Math.ceil(width / granularityX);
+		int countY = (int) Math.ceil(height / granularityY);
+		// logger.info("countX = " + countX);
+		// logger.info("countY = " + countY);
+		// initialize to 0.0;
+		double[][] density = new double[countX][countY];
+		double totalLength = 0.0;
+
+		Iterator it2 = DBInMemory.pois.entrySet().iterator();
+		while (it2.hasNext()) {
+			Entry entry = (Entry) it2.next();
+			APOI aPoint = (APOI) entry.getValue();
+			Coordinate p = aPoint.getCoordinate();
+			//
+			int pGridX = (int) Math.floor(Math.abs(p.x - minX) / granularityX);
+			int pGridY = (int) Math.floor(Math.abs(p.y - minY) / granularityY);
+
+			totalLength++;
+			density[pGridX][pGridY] = density[pGridX][pGridY] + 1;
+		}
+
+		return density;
+	}
+
 	/**************************** End of computing the density *********************************************/
 
 	/**************************** Begin Clusterings *********************************************/
@@ -391,13 +436,13 @@ public class USDensity {
 		int findDense = 0;
 		while (!queue.isEmpty() && findDense < numDense) {
 			Envelope partEnvelope = queue.poll();
-//			logger.info("partEnvelope = " + partEnvelope.toString());
+			// logger.info("partEnvelope = " + partEnvelope.toString());
 
 			ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope, granularityX, granularityY);
 			boolean allZero = allZero(density);
 
 			if (allZero) {
-//				logger.info("allZero");
+				// logger.info("allZero");
 				results.add(partEnvelope);
 				continue;
 			}
