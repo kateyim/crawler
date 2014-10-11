@@ -26,7 +26,7 @@ public class Cluster {
 	// public static double EPSILON_A = 0.000001;
 
 	public static Envelope cluster(double gX, double gY, Envelope e, ArrayList<double[]> d, double a) {
-//		logger.info("clustering...");
+		// logger.info("clustering...");
 		density = d;
 		envelope = e;
 		granularityX = gX;
@@ -34,55 +34,28 @@ public class Cluster {
 
 		numGridX = (int) Math.ceil(envelope.getWidth() / granularityX);
 		numGridY = (int) Math.ceil(envelope.getHeight() / granularityY);
-		if (logger.isDebugEnabled()) {
-			logger.debug("numGridX = " + numGridX + ", numGridY = " + numGridY);
-		}
+
+		// logger.info("granularityX = " + granularityX + ", granularityY = " + granularityY);
+		// logger.info("numGridX = " + numGridX + ", numGridY = " + numGridY);
+
 		initTag();
 		// seed : grid number
 		Coordinate seed = getTheDensest();
 		// debugging
-//		System.out.println("seed = " + seed.toString());
-//		System.out.println("density = " + getDensity(seed));
-//		Envelope seedEnvelopeGrid = new Envelope(seed.x-1, seed.x, seed.y-1, seed.y);
-//		Envelope seedEnvelope = converseEnvelope(seedEnvelopeGrid);
-//		System.out.println("seedEnvelope = " + USDensity.partitionToString(seedEnvelope));
-		
-		
+		// System.out.println("seed = " + seed.toString());
+		// System.out.println("density = " + getDensity(seed));
+		// Envelope seedEnvelopeGrid = new Envelope(seed.x - 1, seed.x, seed.y - 1, seed.y);
+		// Envelope seedEnvelope = converseEnvelope(seedEnvelopeGrid);
+		// System.out.println("seedEnvelope = " + USDensity.partitionToString(seedEnvelope));
+		//
 		Envelope denseGrid = expandFromMiddle(seed, a);
+
 		Envelope denseRegion = converseEnvelope(denseGrid);
-		
-		// System.out.println("denseGrid = " + denseGrid);
-		// System.out.println("denseRegion = " + USDensity.partitionToString(denseRegion));
+
+//		System.out.println("denseGrid = " + denseGrid);
+//		System.out.println("denseRegion = " + USDensity.partitionToString(denseRegion));
 		//
 		return denseRegion;
-	}
-
-	public static ArrayList<Envelope> cluster(double gX, double gY, Envelope e, ArrayList<double[]> d, double a, int loop) {
-		logger.info("clustering...");
-		density = d;
-		envelope = e;
-		granularityX = gX;
-		granularityY = gY;
-
-		numGridX = (int) Math.ceil(envelope.getWidth() / granularityX);
-		numGridY = (int) Math.ceil(envelope.getHeight() / granularityY);
-		if (logger.isDebugEnabled()) {
-			logger.debug("numGridX = " + numGridX + ", numGridY = " + numGridY);
-		}
-		initTag();
-		//
-		ArrayList<Envelope> list = new ArrayList<Envelope>();
-		for (int i = 0; i < loop; i++) {
-			Coordinate seed = getTheDensest();
-			if (logger.isDebugEnabled()) {
-				logger.debug("seed = " + seed.toString() + ", density = " + getDensity(seed));
-			}
-			Envelope denseGrid = expandFromMiddle(seed, a);
-			Envelope denseRegion = converseEnvelope(denseGrid);
-			list.add(denseRegion);
-
-		}
-		return list;
 	}
 
 	public static ArrayList<Envelope> clusterZero(double gX, double gY, Envelope e, ArrayList<double[]> d, double a, int loop) {
@@ -208,7 +181,8 @@ public class Cluster {
 		int yDen = 0;
 		for (int i = 0; i < density.size(); i++) {
 			double[] aRow = density.get(i);
-			// double length = aRow.length;
+			// logger.info("aRow.length = " + aRow.length);
+
 			for (int j = 0; j < numGridY; j++) {
 				if (max < aRow[j] && tag[i][j] == false) {
 					max = aRow[j];
@@ -490,10 +464,23 @@ public class Cluster {
 	 * @return
 	 */
 	private static Envelope converseEnvelope(Envelope denseGrid) {
+		logger.info("denseGrid");
+		logger.info(denseGrid.getMinX());
+		logger.info(denseGrid.getMaxX());
+		logger.info(denseGrid.getMinY());
+		logger.info(denseGrid.getMaxY());
+		
+		
 		double x1 = envelope.getMinX() + denseGrid.getMinX() * granularityX;
 		double x2 = envelope.getMinX() + (denseGrid.getMaxX() + 1) * granularityX;
 		double y1 = envelope.getMinY() + denseGrid.getMinY() * granularityY;
 		double y2 = envelope.getMinY() + (denseGrid.getMaxY() + 1) * granularityY;
+		logger.info("x12y12");
+		logger.info(x1);
+		logger.info(x2);
+		logger.info(y1);
+		logger.info(y2);
+		
 		// reach to the maximum grid
 		if (x1 > envelope.getMaxX()) {
 			x1 = envelope.getMaxX();

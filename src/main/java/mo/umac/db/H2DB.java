@@ -1260,7 +1260,7 @@ public class H2DB extends DBExternal {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Sample from the database
 	 * 
@@ -1268,6 +1268,7 @@ public class H2DB extends DBExternal {
 	 */
 	public void sample(int divisor, int divident) {
 		String sql = sqlSelectStar + ITEM;
+		int index = -1;
 		try {
 			Connection conSrc = getConnection(dbNameSource);
 			Statement statSrc = conSrc.createStatement();
@@ -1303,11 +1304,13 @@ public class H2DB extends DBExternal {
 
 				int numCrawled = rs.getInt(11);
 
-				Random random = new Random(System.currentTimeMillis());
-				int r = random.nextInt();
-				logger.info("r = " + r);
-				logger.info("r % divident = " + r % divident);
-				if (r % divident <= divisor) {
+				// Random random = new Random(System.currentTimeMillis());
+				// int r = random.nextInt();
+				// logger.info("r = " + r);
+				// logger.info("r % divident = " + r % divident);
+				// if (r % divident <= divisor) {
+				index++;
+				if (index % divisor < divident) {
 					// write
 					prepItem.setInt(1, itemID);
 					prepItem.setString(2, title);
@@ -1344,7 +1347,7 @@ public class H2DB extends DBExternal {
 		try {
 			Connection conn = getConnection(dbName);
 			Statement stat = conn.createStatement();
-			
+
 			stat.execute(sqlDeleteQueryTable);
 			stat.execute(sqlDeleteItemTable);
 			stat.execute(sqlDeleteCategoryTable);
@@ -1354,6 +1357,6 @@ public class H2DB extends DBExternal {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 }

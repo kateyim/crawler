@@ -26,20 +26,21 @@ public class MainData {
 	public static void main(String[] args) {
 		MainData m = new MainData();
 		// ny
-		// String stateQ = "NY";
-		// String categoryQ = "Restaurants";
-		// String dbNameSource = "../crawler-data/yahoolocal-h2/source/ny";
-		// String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ny-prun";
-		// ut
-		String stateQ = "UT";
+		String stateQ = "NY";
 		String categoryQ = "Restaurants";
-		String dbNameSource = "../data-experiment/yahoo/ut";
-		String dbNameTarget = "../crawler-data/yahoolocal-h2/ut-prun";
+		String dbNameSource = "../crawler-data/yahoolocal-h2/source/ny";
+		String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ny-prun";
+		// ut
+		// String stateQ = "UT";
+		// String categoryQ = "Restaurants";
+		// String dbNameSource = "../data-experiment/yahoo/ut";
+		// String dbNameTarget = "../crawler-data/yahoolocal-h2/ut-prun";
 		// ok
 		// String stateQ = "OK";
 		// String categoryQ = "Restaurants";
 		// String dbNameSource = "../crawler-data/yahoolocal-h2/source/ok";
 		// String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ok-prun";
+		//
 		// step 1
 		// String folderPath = DBExternal.FOLDER_NAME + "/96926236+Restaurants/" + stateQ + "/";
 		// m.convertFromQRFileToH2(dbNameSource, folderPath);
@@ -64,15 +65,17 @@ public class MainData {
 		// m.removeDuplicate(dbName);
 		// m.examData(dbName);
 
-		// for sample: reduce the size of yahoo/ut/ok
+		// for sample: reduce the size of ny/ut/ok
+//		String dbNameFull = "../data-experiment/yahoo/ny-prun";
+//		String dbNameSample = "../data-experiment/yahoo/ny-prun-reducing";
 //		String dbNameFull = "../data-experiment/yahoo/ut-prun";
 //		String dbNameSample = "../data-experiment/yahoo/ut-prun-testing";
-		String dbNameFull = "../data-experiment/yahoo/ok-prun";
-		String dbNameSample = "../data-experiment/yahoo/ok-prun-testing";
+		 String dbNameFull = "../data-experiment/yahoo/ok-prun";
+		 String dbNameSample = "../data-experiment/yahoo/ok-prun-testing";
 		// int factor = 2;
 		// m.sample(dbNameFull, dbNameSample, factor);
 		int divident = 4;
-		int divisor = 1;
+		int divisor = 5;
 		m.sample(dbNameFull, dbNameSample, divisor, divident);
 
 		DBExternal.distroyConn();

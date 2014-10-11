@@ -125,6 +125,31 @@ public class USDensity {
 		return density;
 	}
 
+	/**
+	 * @param unZipFolderPath
+	 * @param envelope
+	 * @param copies
+	 *            : 1/the number of grid on the x-axis/y-axis
+	 * @return
+	 */
+	public static double[][] computeDensityInEachGridsByRoads(String unZipFolderPath, Envelope envelope, double copies) {
+		ArrayList<Coordinate[]> roadList = USDensity.readRoad(unZipFolderPath);
+		double[][] density = densityList(envelope, copies, roadList);
+		return density;
+	}
+
+	/**
+	 * @param pois
+	 * @param envelope
+	 * @param copies
+	 *            : 1/the number of grid on the x-axis/y-axis
+	 * @return
+	 */
+	public static double[][] computeDensityInEachGridsByPoints(HashMap<Integer, APOI> pois, Envelope envelope, double copies) {
+		double[][] density = densityList(envelope, copies, pois);
+		return density;
+	}
+
 	public static void unzip(String zipFolderPath, String unZipfolderPath) {
 		logger.info("-----------unzip roads in " + zipFolderPath);
 		ArrayList<Coordinate[]> roadList = new ArrayList<Coordinate[]>();
@@ -181,6 +206,28 @@ public class USDensity {
 		return roadList;
 	}
 
+	public static double[][] densityList(Envelope envelope, double copies, ArrayList<Coordinate[]> roadList) {
+		// logger.info("-------------computing unit density-------------");
+		double width = envelope.getWidth();
+		double height = envelope.getHeight();
+
+		double granularityX = width * copies;
+		double granularityY = height * copies;
+
+		return densityList(envelope, granularityX, granularityY, roadList);
+	}
+
+	public static double[][] densityList(Envelope envelope, double copies, HashMap<Integer, APOI> pois) {
+		// logger.info("-------------computing unit density-------------");
+		double width = envelope.getWidth();
+		double height = envelope.getHeight();
+
+		double granularityX = width * copies;
+		double granularityY = height * copies;
+
+		return densityList(envelope, granularityX, granularityY, pois);
+	}
+
 	/**
 	 * Compute the density in the map rewrite 2014-3-29
 	 * 
@@ -196,6 +243,8 @@ public class USDensity {
 	 */
 	public static double[][] densityList(Envelope envelope, double granularityX, double granularityY, ArrayList<Coordinate[]> roadList) {
 		// logger.info("-------------computing unit density-------------");
+		// logger.info("granularityX = " + granularityX);
+		// logger.info("granularityY = " + granularityY);
 		double width = envelope.getWidth();
 		double height = envelope.getHeight();
 		double minX = envelope.getMinX();
@@ -418,6 +467,90 @@ public class USDensity {
 
 	/**************************** Begin Clusterings *********************************************/
 
+	public static ArrayList<Envelope> partitionBasedOnDense(double a, double[][] densityAll, Envelope envelope, double copies) {
+		double width = envelope.getWidth();
+		double height = envelope.getHeight();
+
+		double granularityX = width * copies;
+		double granularityY = height * copies;
+
+		// logger.info("partitionBasedOnDense");
+		logger.info("granularityX = " + granularityX);
+		logger.info("granularityY = " + granularityY);
+
+		return partitionBasedOnDense(a, densityAll, envelope, granularityX, granularityY);
+	}
+
+	public static ArrayList<Envelope> partitionBasedOnDense(double a, double[][] densityAll, Envelope envelope, double granularityX,
+			double granularityY) {
+		// System.out.println(a + "; " + envelope.toString() + "; " + granularityX + "; " + granularityY);
+		// envelopeList: the real longitude & latitude (dividing by the gridsX and Y), not the number of grids
+		Queue<Envelope> queue = new LinkedList<Envelope>();
+		queue.add(envelope);
+		ArrayList<Envelope> results = new ArrayList<Envelope>();
+		// only find the top densest in a region
+		int findDense = 0;
+		while (!queue.isEmpty()) {
+			Envelope partEnvelope = queue.poll();
+			// logger.info("partEnvelope = " + partEnvelope.toString());
+			ArrayList<double[]> density = readPartOfDensity(densityAll, envelope, partEnvelope, granularityX, granularityY);
+			boolean allZero = allZero(density);
+
+			if (allZero) {
+				// logger.info("allZero");
+				results.add(partEnvelope);
+				continue;
+			}
+			
+			logger.info("partEnvelope envelope = " + USDensity.partitionToString(partEnvelope));
+			
+			// denseEnvelope: long&lat
+			Envelope denseEnvelope = Cluster.cluster(granularityX, granularityY, partEnvelope, density, a);
+			//
+			System.out.println("denseRegion = " + USDensity.partitionToString(denseEnvelope));
+			logger.info("dense envelope = " + USDensity.partitionToString(denseEnvelope));
+			//
+			results.add(denseEnvelope);
+			if (equalEnvelope(denseEnvelope, partEnvelope)) {
+				continue;
+			}
+
+			findDense++;
+
+			logger.info("findDense = " + findDense);
+
+			ArrayList<Envelope> partitionedRegions = Cluster.partition(partEnvelope, denseEnvelope);
+			// debug
+			for (int i = 0; i < partitionedRegions.size(); i++) {
+				Envelope e = partitionedRegions.get(i);
+				//
+				System.out.println(partitionToString(e));
+				logger.info(partitionToString(e));
+				//
+				boolean noArea = noArea(e);
+				if (!noArea) {
+					queue.add(e);
+				} else {
+					logger.info("no area");
+				}
+			}
+
+		}
+		logger.info("findDense = " + findDense);
+		results.addAll(queue);
+		return results;
+	}
+
+	private static boolean equalEnvelope(Envelope e1, Envelope e2) {
+		if (Math.abs(e1.getMinX() - e2.getMinX()) < epsilon
+				&& Math.abs(e1.getMaxX() - e2.getMaxX()) < epsilon
+				&& Math.abs(e1.getMinY() - e2.getMinY()) < epsilon
+				&& Math.abs(e1.getMaxY() - e2.getMaxY()) < epsilon) {
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * The object is to get the uniformed partitioned grids
 	 * 
@@ -425,7 +558,7 @@ public class USDensity {
 	 * 
 	 * 
 	 */
-	public static ArrayList<Envelope> partitionBasedOnDense(int numDense, double a, double[][] densityAll, Envelope envelope, double granularityX,
+	public static ArrayList<Envelope> partitionBasedOnDenseBefore(int numDense, double a, double[][] densityAll, Envelope envelope, double granularityX,
 			double granularityY) {
 		// logger.info(numDense + "; " + a + "; " + envelope.toString() + "; " + granularityX + "; " + granularityY);
 		// envelopeList: the real longitude & latitude (dividing by the gridsX and Y), not the number of grids
@@ -527,15 +660,20 @@ public class USDensity {
 	 */
 	public static ArrayList<double[]> readPartOfDensity(double[][] densityAll, Envelope wholeEnvelope, Envelope partEnvelope, double granularityX,
 			double granularityY) {
+		// System.out.println("wholeEnvelope = " + wholeEnvelope);
+		// System.out.println("partEnvelope = " + partEnvelope);
+
 		ArrayList<double[]> densityPart = new ArrayList<double[]>();
 		int xBegin = (int) ((partEnvelope.getMinX() - wholeEnvelope.getMinX()) / granularityX);
 		int xEnd = (int) Math.ceil((partEnvelope.getMaxX() - wholeEnvelope.getMinX()) / granularityX) - 1;
-		int yBegin = (int) ((partEnvelope.getMinY() - wholeEnvelope.getMinY()) / granularityX);
-		int yEnd = (int) Math.ceil((partEnvelope.getMaxY() - wholeEnvelope.getMinY()) / granularityX) - 1;
+		int yBegin = (int) ((partEnvelope.getMinY() - wholeEnvelope.getMinY()) / granularityY);
+		int yEnd = (int) Math.ceil((partEnvelope.getMaxY() - wholeEnvelope.getMinY()) / granularityY) - 1;
 		int length = (int) (yEnd - yBegin) + 1;
+
 		// logger.info("yBegin = " + yBegin);
 		// logger.info("yEnd = " + yEnd);
 		// logger.info("aRow.length = " + densityAll[0].length);
+
 		for (int i = xBegin; i <= xEnd; i++) {
 			double[] aRow = densityAll[i];
 			double[] newARow = new double[length];
