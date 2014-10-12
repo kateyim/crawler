@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import mo.umac.db.DBInMemory;
 import mo.umac.metadata.APOI;
+import mo.umac.uscensus.Cluster;
 import mo.umac.uscensus.USDensity;
 import mo.umac.uscensus.UScensusData;
 import myrtree.MyRTree;
@@ -39,7 +40,7 @@ public class MainYahoo {
 	private static String category = "Restaurants";
 	private static String state = "NY";
 	private static int categoryID = 96926236;
-	public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun-4";
+	public final static String DB_NAME_SOURCE = "../data-experiment/yahoo/ny-prun";
 
 	/******** UT ********/
 	// private static Envelope envelope = new Envelope(-114.052998, -109.04105799999999, 36.997949, 42.001618);
@@ -128,7 +129,8 @@ public class MainYahoo {
 		logger.info("begin testing parameters in partition");
 		Envelope envelopeNY = USDensity.envelopeNY;
 		String unZipFolderPath = USDensity.UN_ZIP_FOLDER_PATH;
-		ArrayList<Envelope> mbrs;
+		ArrayList<Envelope> mbrsGrids;
+
 		AlgoPartition.clusterRegionFile = null;
 		int currentCount = 0;
 		//
@@ -137,38 +139,51 @@ public class MainYahoo {
 		double minAlpha = Double.MAX_VALUE;
 		int minNumDense = Integer.MAX_VALUE;
 		//
-		for (double copies = 0.1; copies <= 0.1; copies = copies + 0.01) {
+		for (int copies1 = 5; copies1 <= 95; copies1 = copies1 +10) {
+			double copies = (double) 1 / (double)copies1;
 			logger.info("copies = " + copies);
 			// 1. grids
 			double[][] densityAll = USDensity.computeDensityInEachGridsByRoads(unZipFolderPath, envelopeNY, copies);
+			//
+			double width = envelopeNY.getWidth();
+			double height = envelopeNY.getHeight();
+			double granularityX = width * copies;
+			double granularityY = height * copies;
+			int countX = (int) Math.ceil(width / granularityX);
+			int countY = (int) Math.ceil(height / granularityY);
+			Envelope envelopeNYGrids = new Envelope(0, countX, 0, countY);
+			//
 
-			for (double alpha = 0.3; alpha <= 0.3; alpha = alpha + 0.1) {
+			for (double alpha = 0.05; alpha <= 0.96; alpha = alpha + 0.05) {
 				logger.info("alpha = " + alpha);
-//				for (int numDense = 37; numDense <= 37; numDense++) { // later I should eliminate this parameter
-					// logger.info("numDense = " + numDense);
-					// 2. partitioned mbrs
-					mbrs = USDensity.partitionBasedOnDense(alpha, densityAll, envelopeNY, copies);
-					logger.info("mbrs.size() = " + mbrs.size());
-					// debug
-					// for (int j = 0; j < mbrs.size(); j++) {
-					// Envelope e = mbrs.get(j);
-					// System.out.println(USDensity.partitionToString(e));
-					// }
-					//
-					// 3. calling the algorithm
-//					Strategy crawlerStrategy = new AlgoPartition();
-//					AlgoPartition.mbrList = mbrs;
-//					//
-//					Context crawlerContext = new Context(crawlerStrategy);
-//					Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
-//					currentCount = crawlerContext.callCrawlingSingle(state, categoryID, category, envelopeNY);
-//					if (currentCount < minCount) {
-//						minCount = currentCount;
-//						minCopies = copies;
-//						minAlpha = alpha;
-//						minNumDense = mbrs.size();
-//					}
-//				}
+				// 2. partitioned mbrs
+				mbrsGrids = USDensity.partitionBasedOnDenseGrids(alpha, densityAll, envelopeNYGrids, envelopeNY, granularityX, granularityY);
+				// logger.info("mbrs.size() = " + mbrsGrids.size());
+				// debug
+				// for (int j = 0; j < mbrs.size(); j++) {
+				// Envelope e = mbrs.get(j);
+				// System.out.println(USDensity.partitionToString(Cluster.converseEnvelope(envelopeNY, e, granularityX, granularityY)));
+				// }
+				//
+				ArrayList<Envelope> mbrsEnvelopes = new ArrayList<Envelope>();
+				for (int i = 0; i < mbrsGrids.size(); i++) {
+					Envelope e = mbrsGrids.get(i);
+					mbrsEnvelopes.add(Cluster.converseEnvelope(envelopeNY, e, granularityX, granularityY));
+				}
+
+				// 3. calling the algorithm
+				Strategy crawlerStrategy = new AlgoPartition();
+				AlgoPartition.mbrList = mbrsEnvelopes;
+				//
+				Context crawlerContext = new Context(crawlerStrategy);
+				Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
+				currentCount = crawlerContext.callCrawlingSingle(state, categoryID, category, envelopeNY);
+				if (currentCount < minCount) {
+					minCount = currentCount;
+					minCopies = copies;
+					minAlpha = alpha;
+					minNumDense = mbrsGrids.size();
+				}
 			}
 		}
 		logger.info("-----------------------------");

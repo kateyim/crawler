@@ -467,6 +467,74 @@ public class USDensity {
 
 	/**************************** Begin Clusterings *********************************************/
 
+	/**
+	 * @param a
+	 * @param densityAll
+	 * @param envelopeGrids
+	 *            : this is the grids' numbers, not the latitude and the longitude
+	 * @param granularityY
+	 * @param granularityX
+	 * @param envelope
+	 * @param copies
+	 * @return: grids
+	 */
+	public static ArrayList<Envelope> partitionBasedOnDenseGrids(double a, double[][] densityAll, Envelope envelopeGrids, Envelope envelope,
+			double granularityX, double granularityY) {
+		Queue<Envelope> queue = new LinkedList<Envelope>();
+		// testing
+		// envelopeGrids = new Envelope(7, 8, 0, 1);
+		queue.add(envelopeGrids);
+		ArrayList<Envelope> results = new ArrayList<Envelope>();
+		// only find the top densest in a region
+		int findDense = 0;
+		while (!queue.isEmpty()) {
+			Envelope partEnvelope = queue.poll();
+			// logger.info("partEnvelope envelope = " + USDensity.partitionToString(Cluster.converseEnvelope(envelope, partEnvelope, granularityX,
+			// granularityY)));
+
+			ArrayList<double[]> partDensity = readPartOfDensityGrids(densityAll, partEnvelope);
+			boolean allZero = allZero(partDensity);
+
+			if (allZero) {
+				// logger.info("allZero");
+				results.add(partEnvelope);
+				continue;
+			}
+
+			// denseEnvelope: number of grids
+			Envelope denseEnvelope = Cluster.cluster(partEnvelope, partDensity, a);
+			//
+			//
+			results.add(denseEnvelope);
+			if (equalEnvelope(denseEnvelope, partEnvelope)) {
+				// logger.info("equal envelope");
+				continue;
+			}
+			// logger.info("dense envelope = " + USDensity.partitionToString(Cluster.converseEnvelope(envelope, denseEnvelope, granularityX, granularityY)));
+			// System.out.println(USDensity.partitionToString(Cluster.converseEnvelope(envelope, denseEnvelope, granularityX, granularityY)));
+			findDense++;
+
+			// logger.info("findDense = " + findDense);
+
+			ArrayList<Envelope> partitionedRegions = Cluster.partition(partEnvelope, denseEnvelope);
+			// debug
+			for (int i = 0; i < partitionedRegions.size(); i++) {
+				Envelope e = partitionedRegions.get(i);
+				boolean noArea = noArea(e);
+				if (!noArea) {
+					// logger.info(partitionToString(Cluster.converseEnvelope(envelope, e, granularityX, granularityY)));
+					queue.add(e);
+				} else {
+					// logger.info("no area");
+				}
+			}
+
+		}
+		logger.info("findDense = " + findDense);
+		// results.addAll(queue);
+		return results;
+	}
+
 	public static ArrayList<Envelope> partitionBasedOnDense(double a, double[][] densityAll, Envelope envelope, double copies) {
 		double width = envelope.getWidth();
 		double height = envelope.getHeight();
@@ -501,9 +569,9 @@ public class USDensity {
 				results.add(partEnvelope);
 				continue;
 			}
-			
+
 			logger.info("partEnvelope envelope = " + USDensity.partitionToString(partEnvelope));
-			
+
 			// denseEnvelope: long&lat
 			Envelope denseEnvelope = Cluster.cluster(granularityX, granularityY, partEnvelope, density, a);
 			//
@@ -542,10 +610,10 @@ public class USDensity {
 	}
 
 	private static boolean equalEnvelope(Envelope e1, Envelope e2) {
-		if (Math.abs(e1.getMinX() - e2.getMinX()) < epsilon
-				&& Math.abs(e1.getMaxX() - e2.getMaxX()) < epsilon
-				&& Math.abs(e1.getMinY() - e2.getMinY()) < epsilon
-				&& Math.abs(e1.getMaxY() - e2.getMaxY()) < epsilon) {
+		if (e1.getMinX() == e2.getMinX()
+				&& e1.getMaxX() == e2.getMaxX()
+				&& e1.getMinY() == e2.getMinY()
+				&& e1.getMaxY() == e2.getMaxY()) {
 			return true;
 		}
 		return false;
@@ -615,6 +683,39 @@ public class USDensity {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * @param densityAll
+	 * @param wholeEnvelope
+	 *            : grids
+	 * @param partEnvelope
+	 *            : grids
+	 * @param granularityX
+	 * @param granularityY
+	 * @return
+	 */
+	private static ArrayList<double[]> readPartOfDensityGrids(double[][] densityAll, Envelope partEnvelope) {
+		ArrayList<double[]> densityPart = new ArrayList<double[]>();
+		int xBegin = (int) partEnvelope.getMinX();
+		int xEnd = (int) partEnvelope.getMaxX() - 1;
+		int yBegin = (int) partEnvelope.getMinY();
+		int yEnd = (int) partEnvelope.getMaxY() - 1;
+		int length = (int) (yEnd - yBegin) + 1;
+
+		// logger.info("yBegin = " + yBegin);
+		// logger.info("yEnd = " + yEnd);
+		// logger.info("aRow.length = " + densityAll[0].length);
+
+		for (int i = xBegin; i <= xEnd; i++) {
+			double[] aRow = densityAll[i];
+			double[] newARow = new double[length];
+			for (int j = yBegin; j <= yEnd; j++) {
+				newARow[j - yBegin] = aRow[j];
+			}
+			densityPart.add(newARow);
+		}
+		return densityPart;
 	}
 
 	/**

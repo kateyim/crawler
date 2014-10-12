@@ -155,23 +155,21 @@ public class Analyse {
 	 */
 	public void readLogPartitionParameters(String fileName, String answerFile) {
 		ArrayList<String> answerList = new ArrayList<String>();
-		String granularity1 = "granularity = 0.02";
-		String granularity2 = "granularity = 0.00";
+		String copies = "copies";
 		String alpha = "alpha";
-		String numDense = "numDense";
 		String countNumQueries = "countNumQueries";
 		String countCrawledPoints = "countCrawledPoints";
 		//
 		String countValue = "";
 		int count = 0;
 		String alphaValue = "";
-		String numDenseValue = "";
+		String copiesValue = "";
 		String countCrawledPointsValue = "";
 		int crawled = 0;
 		//
 		int minCount = Integer.MAX_VALUE;
+		String minCopies = "";
 		String minAlpha = "";
-		String minNumDense = "";
 		String minCountCrawledPoints = "";
 		//
 		BufferedReader br = null;
@@ -181,38 +179,36 @@ public class Analyse {
 			String data = null;
 			while ((data = br.readLine()) != null) {
 				data = data.trim();
-				System.out.println(data);
-				if (data.contains(granularity1)) {
-					flag = true;
-				}
-				if (data.contains(granularity2)) {
-					flag = false;
-					break;
-				}
-				if (data.contains(alpha) && flag) {
-					alphaValue = data;
-					answerList.add(data);
-				}
-				if (data.contains(numDense) && flag) {
-					numDenseValue = data;
-				}
-				if (data.contains(countCrawledPoints) && flag) {
+//				System.out.println(data);
+				if (data.contains(copies)) {
 					int index = data.indexOf("=");
-					countCrawledPointsValue = data.substring(index + 2, data.length());
-					crawled = Integer.parseInt(countCrawledPointsValue);
-					if(count < minCount && crawled == 57584){
-						minCount = count;
-						minAlpha = alphaValue;
-						minNumDense = numDenseValue;
-					}
+					copiesValue = data.substring(index + 2, data.length());
+					answerList.add("---------------------");
+					answerList.add(copiesValue);
+					answerList.add("---------------------");
 				}
-				if (data.contains(countNumQueries) && flag) {
+				if (data.contains(alpha)) {
+					int index = data.indexOf("=");
+					alphaValue = data.substring(index + 2, data.length());
+				}
+				if (data.contains(countNumQueries)) {
 					int index = data.indexOf("=");
 					countValue = data.substring(index + 2, data.length());
 					count = Integer.parseInt(countValue);
 					
 					answerList.add(countValue);
 				}
+				if (data.contains(countCrawledPoints)) {
+					int index = data.indexOf("=");
+					countCrawledPointsValue = data.substring(index + 2, data.length());
+					crawled = Integer.parseInt(countCrawledPointsValue);
+					if(count < minCount && crawled == 57584){
+						minCount = count;
+						minAlpha = alphaValue;
+						minCopies = copiesValue;
+					}
+				}
+				
 			}
 			br.close();
 		} catch (FileNotFoundException e) {
@@ -224,7 +220,7 @@ public class Analyse {
 		System.out.println(answerList.size());
 		System.out.println("minCount = " + minCount);
 		System.out.println("minAlpha = " + minAlpha);
-		System.out.println("minNumDense = " + minNumDense);
+		System.out.println("copiesValue = " + minCopies);
 		// print query & points
 		BufferedWriter bw = null;
 		try {
