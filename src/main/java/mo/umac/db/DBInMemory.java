@@ -126,10 +126,10 @@ public class DBInMemory {
 			logger.debug("countNumQueries = " + Strategy.countNumQueries);
 		}
 
-		// if (queryID % 10 == 0) {
-		// logger.info("countNumQueries = " + Strategy.countNumQueries);
-		// logger.info("countCrawledPoints = " + numCrawlerPoints());
-		// }
+//		if (queryID % 10 == 0) {
+//			logger.info("countNumQueries = " + Strategy.countNumQueries);
+//			logger.info("countCrawledPoints = " + numCrawlerPoints());
+//		}
 
 		// another drawing method
 		// logger.info("countCrawledPoints2 = " + numCrawlerPoints());

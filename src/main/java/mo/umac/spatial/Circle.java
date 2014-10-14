@@ -58,7 +58,7 @@ public class Circle {
 		// FIXME yanhui check
 //		// for testing
 //		logger.info("circle: " + this.toString());
-//		logger.info("innerPoint1: " + interPoint.toString());
+//		logger.info("innerPoint: " + interPoint.toString());
 //		logger.info("outerPoint: " + outerPoint.toString());
 
 		ArrayList<Coordinate> list = GeoOperator.line_intersect_Circle(center, radius, interPoint, outerPoint);

@@ -7,6 +7,7 @@ import java.util.Vector;
 
 import mo.umac.crawler.AlgoDCDT;
 import mo.umac.crawler.Strategy;
+import mo.umac.kallmann.cdt.Mesh;
 import mo.umac.kallmann.cdt.Vector2d;
 import mo.umac.spatial.Circle;
 import mo.umac.spatial.ECEFLLA;
@@ -39,6 +40,8 @@ public class GeoOperator {
 	protected static Logger logger = Logger.getLogger(GeoOperator.class.getName());
 	public final static double EPSILON_EQUAL = 1e-10;// TriangulationUtil.EPSILON; // 1e-12 in Poly2Tri
 	public final static double EPSILON_LITTLE = 1;
+	// yanhui
+	public final static double IMPORTANT_THRESHOLD = 1e-4;
 
 	public final static double RADIUS = 6371007.2;// authalic earth radius of
 
@@ -275,7 +278,7 @@ public class GeoOperator {
 	 */
 	public static ArrayList<Coordinate> line_intersect_Circle(Coordinate point, double radius, Coordinate p1, Coordinate p2) {
 		ArrayList<Coordinate> intersect = new ArrayList<Coordinate>();
-		if (Math.abs(p2.x - p1.x) < 1e-6) {
+		if (Math.abs(p2.x - p1.x) < IMPORTANT_THRESHOLD) {
 			double x = p1.x;
 			double d = point.y * point.y + (x - point.x) * (x - point.x) - radius * radius;
 			double delt1 = 4 * point.y * point.y - 4 * d;

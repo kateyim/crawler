@@ -26,10 +26,10 @@ public class MainData {
 	public static void main(String[] args) {
 		MainData m = new MainData();
 		// ny
-		String stateQ = "NY";
-		String categoryQ = "Restaurants";
-		String dbNameSource = "../crawler-data/yahoolocal-h2/source/ny";
-		String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ny-prun";
+		// String stateQ = "NY";
+		// String categoryQ = "Restaurants";
+		// String dbNameSource = "../crawler-data/yahoolocal-h2/source/ny";
+		// String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ny-prun";
 		// ut
 		// String stateQ = "UT";
 		// String categoryQ = "Restaurants";
@@ -66,14 +66,12 @@ public class MainData {
 		// m.examData(dbName);
 
 		// for sample: reduce the size of ny/ut/ok
-//		String dbNameFull = "../data-experiment/yahoo/ny-prun";
-//		String dbNameSample = "../data-experiment/yahoo/ny-prun-reducing";
-//		String dbNameFull = "../data-experiment/yahoo/ut-prun";
-//		String dbNameSample = "../data-experiment/yahoo/ut-prun-testing";
-		 String dbNameFull = "../data-experiment/yahoo/ok-prun";
-		 String dbNameSample = "../data-experiment/yahoo/ok-prun-testing";
-		// int factor = 2;
-		// m.sample(dbNameFull, dbNameSample, factor);
+		// String dbNameFull = "../data-experiment/yahoo/ny-prun";
+		// String dbNameSample = "../data-experiment/yahoo/ny-prun-reducing";
+		// String dbNameFull = "../data-experiment/yahoo/ut-prun";
+		// String dbNameSample = "../data-experiment/yahoo/ut-prun-testing";
+		String dbNameFull = "../data-experiment/yahoo/ok-prun";
+		String dbNameSample = "../data-experiment/yahoo/ok-prun-testing";
 		int divident = 4;
 		int divisor = 5;
 		m.sample(dbNameFull, dbNameSample, divisor, divident);

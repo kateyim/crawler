@@ -202,7 +202,7 @@ public class Analyse {
 					int index = data.indexOf("=");
 					countCrawledPointsValue = data.substring(index + 2, data.length());
 					crawled = Integer.parseInt(countCrawledPointsValue);
-					if(count < minCount && crawled == 57584){
+					if(count < minCount ){
 						minCount = count;
 						minAlpha = alphaValue;
 						minCopies = copiesValue;
