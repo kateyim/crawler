@@ -31,8 +31,9 @@ import com.vividsolutions.jts.geom.Envelope;
 public class MainSynthetic extends Strategy {
 
 	// private static String source = "../data-experiment/synthetic/skew-2d-250-0.3";
-	private static String source = "../data-experiment/synthetic/2d-uniform/uniform-2d-400";
+	// private static String source = "../data-experiment/synthetic/2d-uniform/uniform-2d-400";
 	// private static String source = "../data-experiment/synthetic/uniform-2d-2000";
+	private static String source = "../data-experiment/synthetic/2d-skewed/skewed-2d-800";
 	private static String target = "../data-experiment/synthetic/target";
 	private static int n = 400;
 	private int topK = 10;
@@ -54,7 +55,7 @@ public class MainSynthetic extends Strategy {
 	 */
 	public static void main(String[] args) {
 		boolean debug = false;
-		PaintShapes.painting = false;
+		PaintShapes.painting = true;
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		MainSynthetic test = new MainSynthetic();
@@ -75,8 +76,8 @@ public class MainSynthetic extends Strategy {
 		// for testing
 		// WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 
-//		test.generateData();
-		 test.crawling();
+		// test.generateData();
+		// test.crawling();
 		Strategy.endData();
 
 	}
@@ -261,8 +262,8 @@ public class MainSynthetic extends Strategy {
 		List<Coordinate> list2 = new ArrayList<Coordinate>();
 		for (int i = 0; i < n; i++) {
 			Coordinate coordinate = list.get(i);
-			x = (500 + coordinate.x / maxX * 500) % 1000;
-			y = (500 + coordinate.y / maxY * 500) % 1000;
+			x = (500 + coordinate.x / (maxX - minX) * 500) % 1000;
+			y = (500 + coordinate.y / (maxY - minY) * 500) % 1000;
 			Coordinate coordinate2 = new Coordinate(x, y);
 			list2.add(coordinate2);
 		}

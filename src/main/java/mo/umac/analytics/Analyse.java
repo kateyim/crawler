@@ -173,19 +173,19 @@ public class Analyse {
 		String minCountCrawledPoints = "";
 		//
 		BufferedReader br = null;
-		boolean flag = false; 
+		boolean flag = false;
 		try {
 			br = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)));
 			String data = null;
 			while ((data = br.readLine()) != null) {
 				data = data.trim();
-//				System.out.println(data);
+				// System.out.println(data);
 				if (data.contains(copies)) {
 					int index = data.indexOf("=");
 					copiesValue = data.substring(index + 2, data.length());
-					answerList.add("---------------------");
-					answerList.add(copiesValue);
-					answerList.add("---------------------");
+					// answerList.add("---------------------");
+					// answerList.add(copiesValue);
+					// answerList.add("---------------------");
 				}
 				if (data.contains(alpha)) {
 					int index = data.indexOf("=");
@@ -195,20 +195,20 @@ public class Analyse {
 					int index = data.indexOf("=");
 					countValue = data.substring(index + 2, data.length());
 					count = Integer.parseInt(countValue);
-					
+
 					answerList.add(countValue);
 				}
 				if (data.contains(countCrawledPoints)) {
 					int index = data.indexOf("=");
 					countCrawledPointsValue = data.substring(index + 2, data.length());
 					crawled = Integer.parseInt(countCrawledPointsValue);
-					if(count < minCount ){
+					if (count < minCount) {
 						minCount = count;
 						minAlpha = alphaValue;
 						minCopies = copiesValue;
 					}
 				}
-				
+
 			}
 			br.close();
 		} catch (FileNotFoundException e) {
